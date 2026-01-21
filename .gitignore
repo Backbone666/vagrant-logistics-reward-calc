@@ -1,2 +1,5 @@
 implementation_plan.md
 rates.md
+
+.gemini/
+gha-creds-*.json

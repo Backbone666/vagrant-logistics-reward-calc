@@ -44,6 +44,7 @@ To create a "Gold Standard" calculator that reflects the prestigious and profess
 - **Contract Logic Expansion**: Added the Contract Details section and the 5B collateral threshold logic.
 - **Rate Analysis & Optimization (Jan 2026)**: Conducted comprehensive market research comparing PushX, Red Frog, and current logic. Established a new tiered rate structure documented in `rates.md`.
   - **Strategy Shift**: Aggressively priced **Deep Space Transport (DST)** services (1M Base/Jump) to undercut all major competitors and dominate this precise market segment.
+- **1080p Layout Optimization**: Optimized vertical spacing, padding, and margins to ensure the interface fits perfectly on standard high-definition displays without scrolling.
 - **Logic Alignment**: Updated the `calcReward` engine to a clean, table-based approach:
   - **HighSec**: Tiers for Blockade Runner, DST, and Freighter with specific base fees and per-jump rates.
   - **Dangerous Space**: Specialized tiers for Covert Ops, Deep Space Transport, and Jump Freighters.
