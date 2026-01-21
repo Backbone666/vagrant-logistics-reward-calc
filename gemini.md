@@ -45,7 +45,7 @@ To create a "Gold Standard" calculator that reflects the prestigious and profess
 - **Rate Analysis & Optimization (Jan 2026)**: Conducted comprehensive market research comparing PushX, Red Frog, and current logic. Established a new tiered rate structure documented in `rates.md`.
 - **Logic Alignment**: Updated the `calcReward` engine to a clean, table-based approach:
   - **HighSec**: Tiers for Blockade Runner, DST, and Freighter with specific base fees and per-jump rates.
-  - **Dangerous Space**: Specialized tiers for Covert Ops and Jump Freighters.
+  - **Dangerous Space**: Specialized tiers for Covert Ops, Deep Space Transport, and Jump Freighters.
   - **Risk Premiums**: Implemented a mandatory 1.5% collateral fee for high-value contracts (>1B ISK) to protect contractor profitability.
   - **Competitive Benchmarking**: Ensuring HighSec rates remain attractive for short hauls while properly pricing the massive time/risk investment of Freighter and JF logistics.
 

@@ -29,14 +29,15 @@ _Designed for standard logistics between trade hubs and mission centers._
 - **Collateral Surcharge:** 1% of Collateral value for contracts > 1 Billion ISK.
 - **Minimum Reward:** 3,000,000 ISK.
 
-### 2. Low/Null/Pochven Service (Dangerous)
+### 2. Low/Null Service (Dangerous)
 
 _Requires Jump Freighter or Blockade Runner blockade-running._
 
-| Service Type       | Volume Limit | Base Fee        | Rate per Jump (Ly) | Collateral Limit |
-| :----------------- | :----------- | :-------------- | :----------------- | :--------------- |
-| **Covert Ops**     | < 10,000 m³  | 10,000,000 ISK  | 2,500,000 ISK      | 2 Billion ISK    |
-| **Jump Freighter** | < 360,000 m³ | 100,000,000 ISK | 30,000,000 ISK     | 10 Billion ISK\* |
+| Service Type             | Volume Limit | Base Fee        | Rate per Jump (Ly) | Collateral Limit |
+| :----------------------- | :----------- | :-------------- | :----------------- | :--------------- |
+| **Covert Ops**           | < 12,500 m³  | 10,000,000 ISK  | 2,500,000 ISK      | 2 Billion ISK    |
+| **Deep Space Transport** | < 62,500 m³  | 40,000,000 ISK  | 15,000,000 ISK     | 5 Billion ISK    |
+| **Jump Freighter**       | < 360,000 m³ | 100,000,000 ISK | 30,000,000 ISK     | 10 Billion ISK\* |
 
 - _Contracts > 5 Billion Collateral require direct negotiation (see Risk Management)._
 

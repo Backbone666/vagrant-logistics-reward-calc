@@ -182,11 +182,16 @@
         let collateralLimit = 0;
 
         if (isDangerousSpace) {
-          if (volume <= 10_000) {
+          if (volume <= 12_500) {
             // Covert Ops
             baseFee = 10_000_000;
             ratePerJump = 2_500_000;
             collateralLimit = 2_000_000_000;
+          } else if (volume <= 62_500) {
+            // Dangerous Deep Space Transport
+            baseFee = 40_000_000;
+            ratePerJump = 15_000_000;
+            collateralLimit = 5_000_000_000;
           } else if (volume <= 360_000) {
             // Jump Freighter
             baseFee = 100_000_000;
