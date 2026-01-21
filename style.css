@@ -81,7 +81,7 @@ body::before {
 
 header {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
   animation: slideDown 1s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
@@ -120,7 +120,7 @@ h2 {
   -webkit-backdrop-filter: blur(25px);
   border: 1px solid var(--glass-border);
   border-radius: 16px;
-  padding: 2.5rem 3.5rem;
+  padding: 2rem 3rem;
   box-shadow:
     0 50px 100px rgba(0, 0, 0, 0.8),
     inset 0 0 50px hsla(45, 70%, 55%, 0.05);
@@ -151,37 +151,12 @@ h2 {
   filter: drop-shadow(0 0 5px var(--primary-gold-glow));
 }
 
-/* Ornate Accents - Improved */
-.calculator-card::before,
-.calculator-card::after {
-  content: "";
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  border: 2px solid var(--primary-gold);
-  pointer-events: none;
-}
-
-.calculator-card::before {
-  top: -5px;
-  left: -5px;
-  border-right: none;
-  border-bottom: none;
-  opacity: 0.6;
-}
-
-.calculator-card::after {
-  bottom: -5px;
-  right: -5px;
-  border-left: none;
-  border-top: none;
-  opacity: 0.6;
-}
+/* Ornate Accents removed */
 
 .grid {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
-  gap: 4rem;
+  gap: 2.5rem;
 }
 
 @media (max-width: 960px) {
@@ -209,7 +184,7 @@ h2 {
 .input-area {
   display: flex;
   flex-direction: column;
-  gap: 1.8rem;
+  gap: 1.4rem;
 }
 
 .input-group {
@@ -222,7 +197,7 @@ label {
   font-family: var(--font-display);
   font-size: 0.85rem;
   color: var(--primary-gold);
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 0.2em;
   font-weight: 400;
@@ -239,7 +214,7 @@ input[type="text"] {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(212, 175, 55, 0.2);
   border-radius: 8px;
-  padding: 1.2rem;
+  padding: 1rem;
   color: white;
   font-size: 1.1rem;
   font-family: var(--font-body);
@@ -496,6 +471,80 @@ input[type="text"]:focus {
   100% {
     transform: scale(1);
     text-shadow: 0 0 40px var(--primary-gold-glow);
+  }
+}
+
+/* Contract Requirements Section */
+.contract-requirements {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid hsla(45, 70%, 55%, 0.15);
+}
+
+.req-card {
+  background: hsla(255, 255%, 255%, 0.02);
+  border: 1px solid hsla(45, 70%, 55%, 0.1);
+  padding: 1.2rem;
+  border-radius: 12px;
+  text-align: center;
+  transition: var(--transition-smooth);
+}
+
+.req-label {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.6rem;
+}
+
+.req-value {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--primary-gold);
+  letter-spacing: 0.05em;
+}
+
+.req-value-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+}
+
+.btn-mini-copy {
+  background: hsla(45, 70%, 55%, 0.1);
+  border: 1px solid hsla(45, 70%, 55%, 0.2);
+  color: var(--primary-gold);
+  padding: 0.3rem 0.6rem;
+  font-size: 0.65rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.btn-mini-copy:hover {
+  background: var(--primary-gold);
+  color: var(--onyx);
+}
+
+.btn-mini-copy.copied {
+  background: #27ae60;
+  border-color: #27ae60;
+  color: white;
+}
+
+@media (max-width: 960px) {
+  .contract-requirements {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 2rem;
   }
 }
 
