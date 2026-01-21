@@ -237,14 +237,14 @@
         } else if (reward > 0) {
           const finalVal = Math.max(1_000_000, Math.ceil(reward));
           rewardOutput.textContent = formatNumber(finalVal) + " ISK";
-          rewardOutput.style.fontSize = "3rem";
+          rewardOutput.style.fontSize = "2.2rem";
 
           const ipj = finalVal / rawJumps;
           rewardIpjOutput.textContent =
             formatNumber(Math.ceil(ipj)) + " ISK/Jump";
         } else {
           rewardOutput.textContent = "0 ISK";
-          rewardOutput.style.fontSize = "3rem";
+          rewardOutput.style.fontSize = "2.2rem";
           rewardIpjOutput.textContent = "0 ISK/Jump";
         }
       }
