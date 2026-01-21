@@ -177,72 +177,64 @@
         if (collateral > 5_000_000_000) return "Risako Hirano";
         if (volume <= 0 || jumps <= 0 || collateral <= 0) return 0;
 
-        let baseReward = 1_000_000;
-        let finalJumps = Math.max(5, jumps); // Minimum 5 jumps for calculation base
-        let multiplier = 1;
-        let flatAddition = 0;
-
-        // Base scaling based on volume and collateral
-        let adjustedCollateral = collateral;
-        if (volume > 62500) {
-          // Freighter scale
-          adjustedCollateral = Math.max(
-            collateral,
-            (3_000_000_000 + collateral) / 4,
-          );
-        } else if (volume > 12000) {
-          // DST scale
-          adjustedCollateral = Math.max(
-            collateral,
-            (1_000_000_000 + collateral) / 2,
-          );
-        } else {
-          // BR / T1 scale
-          adjustedCollateral = Math.max(
-            collateral,
-            (100_000_000 + collateral) / 1.1,
-          );
-        }
-
-        // High Collateral Penalty
-        if (collateral > 3_000_000_000 && volume > 60_000) {
-          multiplier *= Math.max(
-            1.0,
-            Math.log(collateral / 150_000_000) / Math.log(15),
-          );
-        }
-
-        // Massive Volume Surcharges
-        if (volume > 1_050_000) flatAddition += 450_000;
-        else if (volume > 880_000) flatAddition += 300_000;
-        else if (volume > 750_000) flatAddition += 200_000;
-        else if (volume > 500_000) flatAddition += 100_000;
+        let baseFee = 0;
+        let ratePerJump = 0;
+        let collateralLimit = 0;
 
         if (isDangerousSpace) {
-          if (volume > 386_000)
+          if (volume <= 10_000) {
+            // Covert Ops
+            baseFee = 15_000_000;
+            ratePerJump = 5_000_000;
+            collateralLimit = 2_000_000_000;
+          } else if (volume <= 360_000) {
+            // Jump Freighter
+            baseFee = 150_000_000;
+            ratePerJump = 50_000_000;
+            collateralLimit = 10_000_000_000;
+          } else {
             return "Shipment too large for dangerous routes";
-
-          // Jump Freighter Mode
-          const jfBase = 60_000_000;
-          let jfMultiplier = 1;
-
-          if (volume < 100) jfMultiplier = 0.25;
-          else if (volume <= 12_000) jfMultiplier = 0.5;
-          else if (volume <= 60_000) jfMultiplier = 0.75;
-          else if (volume <= 340_000) jfMultiplier = 1;
-          else jfMultiplier = 4;
-
-          return (
-            jfMultiplier * jfBase * Math.max(1.0, jumps / 7) + collateral * 0.01
-          );
+          }
+        } else {
+          // High Security
+          if (volume <= 12_500) {
+            // Blockade Runner
+            baseFee = 1_000_000;
+            ratePerJump = 750_000;
+            collateralLimit = 3_000_000_000;
+          } else if (volume <= 62_500) {
+            // Deep Space Transport
+            baseFee = 3_000_000;
+            ratePerJump = 1_500_000;
+            collateralLimit = 5_000_000_000;
+          } else if (volume <= 900_000) {
+            // Freighter
+            baseFee = 10_000_000;
+            ratePerJump = 3_500_000;
+            collateralLimit = 3_000_000_000;
+          } else {
+            return "Shipment exceeds HighSec volume limits";
+          }
         }
 
-        // Standard Route
-        return (
-          ((multiplier * baseReward * adjustedCollateral) / 1_000_000_000 +
-            flatAddition) *
-          finalJumps
-        );
+        // Check collateral limits per tier
+        if (collateral > collateralLimit) {
+          return "Collateral exceeds tier limit";
+        }
+
+        let totalReward = baseFee + jumps * ratePerJump;
+
+        // Collateral Surcharge (1.5% for > 1B)
+        if (collateral > 1_000_000_000) {
+          totalReward += collateral * 0.015;
+        }
+
+        // Minimum Reward Enforce (HS only per rates.md)
+        if (!isDangerousSpace) {
+          totalReward = Math.max(3_000_000, totalReward);
+        }
+
+        return totalReward;
       }
 
       function updateAll() {
