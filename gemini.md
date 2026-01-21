@@ -43,6 +43,7 @@ To create a "Gold Standard" calculator that reflects the prestigious and profess
 - **Alliance Integration**: Added Charter alliance footer and branding.
 - **Contract Logic Expansion**: Added the Contract Details section and the 5B collateral threshold logic.
 - **Final Polish**: Removal of decorative corner accents for a cleaner look and optimization of the copy-to-clipboard functionality for contact names.
+- **Rate Analysis (Jan 2026)**: Conducted comprehensive market research comparing PushX, Red Frog, and current logic. Established a new tiered rate structure documented in `rates.md` to ensure competitiveness and sustainable contractor rewards.
 
 ---
 
