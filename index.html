@@ -1,258 +1,280 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vagrant Logistics - Base Rate Calculator</title>
-    <link rel="icon" type="image/png" href="https://images.evetech.net/corporations/98403600/logo">
-    <link rel="stylesheet" href="style.css">
-    <meta name="description" content="Official Vagrant Logistics Base Rate Calculator for EVE Online. Get precise quotes for your hauling needs using Amarr-themed interface.">
-</head>
-<body>
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://images.evetech.net/corporations/98403600/logo"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <meta
+      name="description"
+      content="Official Vagrant Logistics Base Rate Calculator for EVE Online. Get precise quotes for your hauling needs using Amarr-themed interface."
+    />
+  </head>
+  <body>
     <div class="container">
-        <header>
-            <img src="https://images.evetech.net/corporations/98403600/logo" alt="Vagrant Logistics Logo" class="logo">
-            <h1>Vagrant Logistics</h1>
-            <h2>Base Rate Calculator</h2>
-        </header>
+      <header>
+        <img
+          src="https://images.evetech.net/corporations/98403600/logo"
+          alt="Vagrant Logistics Logo"
+          class="logo"
+        />
+        <h1>Vagrant Logistics</h1>
+        <h2>Base Rate Calculator</h2>
+      </header>
 
-        <main class="calculator-card">
-            <div class="grid">
-                <section class="input-area">
-                    <div class="input-group">
-                        <label for="collateral">Collateral (ISK)</label>
-                        <input id="collateral" type="text" placeholder="0" class="to_format_number to_change">
-                    </div>
-                    
-                    <div class="input-group">
-                        <label for="jumps">Number of Jumps</label>
-                        <input id="jumps" type="text" placeholder="0" class="to_format_number to_change">
-                    </div>
-
-                    <div class="input-group">
-                        <label for="volume">Volume (m³)</label>
-                        <input id="volume" type="text" placeholder="0" class="to_format_number to_change">
-                        <div class="presets">
-                            <button type="button" class="preset-btn" data-val="1,125,000">Freighter</button>
-                            <button type="button" class="preset-btn" data-val="62,500">DST</button>
-                            <button type="button" class="preset-btn" data-val="12,000">BR</button>
-                        </div>
-                    </div>
-
-                    <div class="checkbox-group">
-                        <label class="checkbox-item">
-                            <input type="checkbox" id="type_ipj" class="to_change">
-                            <span class="checkbox-custom"></span>
-                            Low / Nullsec
-                        </label>
-                        
-                        <label class="checkbox-item">
-                            <input type="checkbox" id="rush" class="to_change">
-                            <span class="checkbox-custom"></span>
-                            Rush Delivery
-                        </label>
-                    </div>
-                </section>
-
-                <section class="result-area">
-                    <div class="reward-display">
-                        <div class="reward-label">Estimated Reward</div>
-                        <div id="reward_output" class="reward-value">0.00 ISK</div>
-                        <div id="reward_ipj_output" class="reward-ipj">0.00 ISK/Jump</div>
-                        <button type="button" id="copy_btn" class="btn-copy">Copy Reward</button>
-                    </div>
-                </section>
+      <main class="calculator-card">
+        <div class="grid">
+          <section class="input-area">
+            <div class="input-group">
+              <label for="collateral">Collateral (ISK)</label>
+              <input
+                id="collateral"
+                type="text"
+                placeholder="0"
+                class="to_format_number to_change"
+              />
             </div>
-        </main>
 
-        <footer>
-            <div class="disclaimer-box">
-                <span class="disclaimer-title">Disclaimer</span>
-                <p>The final price is entirely up to yourself. This calculator assumes the contract starts and ends near a hub. It is intended for people new to courier contracts; values below these may move slower or not at all.</p>
-                <p class="highlight" style="margin-top: 10px;">Note: The more you pay = the less you wait.</p>
+            <div class="input-group">
+              <label for="jumps">Number of Jumps</label>
+              <input
+                id="jumps"
+                type="text"
+                placeholder="0"
+                class="to_format_number to_change"
+              />
             </div>
-        </footer>
+
+            <div class="input-group">
+              <label for="volume">Volume (m³)</label>
+              <input
+                id="volume"
+                type="text"
+                placeholder="0"
+                class="to_format_number to_change"
+              />
+              <div class="presets">
+                <button type="button" class="preset-btn" data-val="1,125,000">
+                  Freighter
+                </button>
+                <button type="button" class="preset-btn" data-val="62,500">
+                  DST
+                </button>
+                <button type="button" class="preset-btn" data-val="12,000">
+                  BR
+                </button>
+              </div>
+            </div>
+
+            <div class="checkbox-group">
+              <label class="checkbox-item">
+                <input type="checkbox" id="type_ipj" class="to_change" />
+                <span class="checkbox-custom"></span>
+                Low / Nullsec
+              </label>
+            </div>
+          </section>
+
+          <section class="result-area">
+            <div class="reward-display">
+              <div class="reward-label">Estimated Reward</div>
+              <div id="reward_output" class="reward-value">0.00 ISK</div>
+              <div id="reward_ipj_output" class="reward-ipj">0.00 ISK/Jump</div>
+              <button type="button" id="copy_btn" class="btn-copy">
+                Copy Reward
+              </button>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <footer>
+        <div class="disclaimer-box">
+          <span class="disclaimer-title">Disclaimer</span>
+          <p>
+            The final price is entirely up to yourself. This calculator assumes
+            the contract starts and ends near a hub. It is intended for people
+            new to courier contracts; values below these may move slower or not
+            at all.
+          </p>
+          <p class="highlight" style="margin-top: 10px">
+            Note: The more you pay = the less you wait.
+          </p>
+        </div>
+      </footer>
     </div>
 
     <script src="utils.js"></script>
     <script>
-        // DOM Elements
-        const collateralInput = document.getElementById('collateral');
-        const jumpsInput = document.getElementById('jumps');
-        const volumeInput = document.getElementById('volume');
-        const typeIpjCheckbox = document.getElementById('type_ipj');
-        const rushCheckbox = document.getElementById('rush');
-        const rewardOutput = document.getElementById('reward_output');
-        const rewardIpjOutput = document.getElementById('reward_ipj_output');
-        const copyBtn = document.getElementById('copy_btn');
+      const collateralInput = document.getElementById("collateral");
+      const jumpsInput = document.getElementById("jumps");
+      const volumeInput = document.getElementById("volume");
+      const typeIpjCheckbox = document.getElementById("type_ipj");
+      const rewardOutput = document.getElementById("reward_output");
+      const rewardIpjOutput = document.getElementById("reward_ipj_output");
+      const copyBtn = document.getElementById("copy_btn");
 
-        let currentReward = 0;
+      let currentReward = 0;
 
-        function numberWithCommas(x) {
-            if (isNaN(x)) return x;
-            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      function numberWithCommas(x) {
+        if (isNaN(x)) return x;
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+
+      function numFormat(value) {
+        return value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      }
+
+      function parseNum(val) {
+        return parseFloat(val.replace(/[^\d\.\-\ ]/g, "")) || 0;
+      }
+
+      function calcReward() {
+        const volume = parseNum(volumeInput.value);
+        const jumps = Math.max(1, parseNum(jumpsInput.value)); // same system counts as 1 jump
+        const collateral = parseNum(collateralInput.value);
+        const isLowNull = typeIpjCheckbox.checked;
+
+        if (volume === 0 || jumps === 0) return 0;
+
+        let base = 1e6;
+        let add = 0;
+        let mult = 1;
+        let finalJumps = jumps;
+
+        // Adjusted collateral for reward scaling
+        let adjustedCollat = collateral;
+        if (volume > 62500 && collateral < 1e9) {
+          adjustedCollat = (3e9 + collateral) / 4; // low freighter collat pays more
+        } else if (volume <= 60000 && volume > 12000 && collateral < 1e9) {
+          adjustedCollat = (1e9 + collateral) / 2; // low DST collat pays more
+        } else if (volume <= 12000 && collateral < 1e9) {
+          adjustedCollat = (100e6 + collateral) / 1.1; // low BR/t1 collat pays more
         }
 
-        function numFormat(value) {
-            return value.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        // Low jumps pay more
+        if (finalJumps < 5) {
+          finalJumps = (5 + finalJumps) * 0.5;
         }
 
-        function parseNum(val) {
-            return parseFloat(val.replace(/[^\d\.\-\ ]/g, '')) || 0;
+        // High collateral scaling
+        if (collateral > 3e9 && volume > 60e3) {
+          mult *= Math.max(1.0, Math.log(collateral / 15e7) / Math.log(15));
         }
 
-        function calcReward() {
-            const volume = parseNum(volumeInput.value);
-            const jumps = Math.max(1, parseNum(jumpsInput.value)); // same system counts as 1 jump
-            const collateral = parseNum(collateralInput.value);
-            const isLowNull = typeIpjCheckbox.checked;
-            const isRush = rushCheckbox.checked;
-
-            if (volume === 0 || jumps === 0) return 0;
-
-            let base = 1e6;
-            let add = 0;
-            let mult = 1;
-            let finalJumps = jumps;
-
-            // Adjusted collateral for reward scaling
-            let adjustedCollat = collateral;
-            if (volume > 62500 && collateral < 1e9) {
-                adjustedCollat = (3e9 + collateral) / 4; // low freighter collat pays more
-            } else if (volume <= 60000 && volume > 12000 && collateral < 1e9) {
-                adjustedCollat = (1e9 + collateral) / 2; // low DST collat pays more
-            } else if (volume <= 12000 && collateral < 1e9) {
-                adjustedCollat = (100e6 + collateral) / 1.1; // low BR/t1 collat pays more
-            }
-
-            // Low jumps pay more
-            if (finalJumps < 5) {
-                finalJumps = (5 + finalJumps) * 0.5;
-            }
-
-            // High collateral scaling
-            if (collateral > 3e9 && volume > 60e3) {
-                mult *= Math.max(1.0, Math.log(collateral / 15e7) / Math.log(15));
-            }
-
-            // High volume/collateral surcharges
-            if (volume > 1050e3) {
-                add += 250e3;
-                if (collateral > 2e9) add += 200e3;
-            } else if (volume > 880e3) {
-                if (collateral > 1.5e9) add += 100e3;
-                if (collateral > 2.5e9) add += 100e3;
-                if (collateral > 3e9) add += 200e3;
-            } else if (volume > 750e3) {
-                if (collateral > 2.5e9) add += 100e3;
-                if (collateral > 3e9) add += 200e3;
-            } else if (volume > 500e3) {
-                if (collateral > 2.0e9) add += 100e3;
-                if (collateral > 3.5e9) add += 100e3;
-            }
-
-            // Rush multiplier
-            if (isRush) {
-                if (collateral > 2e9) {
-                    mult *= 2.0 * Math.max(1.0, Math.log(collateral / 1e8) / Math.log(20));
-                } else {
-                    mult *= 2.0;
-                }
-                if (isLowNull) mult *= 2;
-            }
-
-            if (isLowNull) {
-                mult *= 2; // Non JF lowsec pays double
-            }
-
-            // Final Calculation
-            if (!isLowNull || volume <= 62500) {
-                // Highsec or non JF lowsec
-                return ((mult * base * adjustedCollat / 1e9) + add) * finalJumps;
-            } else if (isLowNull && volume > 386e3) {
-                return "Does not fit";
-            } else {
-                // null, JF
-                base = 60e6;
-                if (volume < 100) mult = 0.25;
-                else if (volume <= 12e3) mult = 0.5;
-                else if (volume <= 60e3) mult = 0.75;
-                else if (volume <= 340e3) mult = 1;
-                else mult = 4;
-
-                if (isRush) mult *= 2;
-
-                return (mult * base * (Math.max(1.0, jumps / 7)) + collateral * 0.01);
-            }
+        // High volume/collateral surcharges
+        if (volume > 1050e3) {
+          add += 250e3;
+          if (collateral > 2e9) add += 200e3;
+        } else if (volume > 880e3) {
+          if (collateral > 1.5e9) add += 100e3;
+          if (collateral > 2.5e9) add += 100e3;
+          if (collateral > 3e9) add += 200e3;
+        } else if (volume > 750e3) {
+          if (collateral > 2.5e9) add += 100e3;
+          if (collateral > 3e9) add += 200e3;
+        } else if (volume > 500e3) {
+          if (collateral > 2.0e9) add += 100e3;
+          if (collateral > 3.5e9) add += 100e3;
         }
 
-        function updateAll() {
-            const reward = calcReward();
-            const rawJumps = parseNum(jumpsInput.value) || 1;
-            currentReward = reward;
-            
-            if (typeof reward === 'string') {
-                rewardOutput.textContent = reward;
-                rewardOutput.style.color = 'var(--amarr-burgundy)';
-                rewardIpjOutput.textContent = "N/A";
-            } else if (reward > 0) {
-                rewardOutput.textContent = numberWithCommas(reward.toFixed(2)) + " ISK";
-                rewardOutput.style.color = 'var(--amarr-gold)';
-                
-                const ipj = reward / rawJumps;
-                rewardIpjOutput.textContent = numberWithCommas(ipj.toFixed(2)) + " ISK/Jump";
-            } else {
-                rewardOutput.textContent = "0.00 ISK";
-                rewardOutput.style.color = 'var(--amarr-gold)';
-                rewardIpjOutput.textContent = "0.00 ISK/Jump";
-            }
-
-            // Visual feedback for collateral
-            const collateral = parseNum(collateralInput.value);
-            if (collateral > 2e9 && parseNum(volumeInput.value) > 60e3) {
-                collateralInput.style.color = '#ff4444';
-            } else {
-                collateralInput.style.color = 'white';
-            }
+        if (isLowNull) {
+          mult *= 2; // Non JF lowsec pays double
         }
 
-        // Event Listeners
-        document.querySelectorAll('.to_change').forEach(el => {
-            el.addEventListener('input', updateAll);
+        // Final Calculation
+        if (!isLowNull || volume <= 62500) {
+          // Highsec or non JF lowsec
+          return ((mult * base * adjustedCollat) / 1e9 + add) * finalJumps;
+        } else if (isLowNull && volume > 386e3) {
+          return "Does not fit";
+        } else {
+          // null, JF
+          base = 60e6;
+          if (volume < 100) mult = 0.25;
+          else if (volume <= 12e3) mult = 0.5;
+          else if (volume <= 60e3) mult = 0.75;
+          else if (volume <= 340e3) mult = 1;
+          else mult = 4;
+
+          return mult * base * Math.max(1.0, jumps / 7) + collateral * 0.01;
+        }
+      }
+
+      function updateAll() {
+        const reward = calcReward();
+        const rawJumps = parseNum(jumpsInput.value) || 1;
+        currentReward = reward;
+
+        if (typeof reward === "string") {
+          rewardOutput.textContent = reward;
+          rewardOutput.style.color = "#444"; // Dark grey for "Does not fit" or errors
+          rewardIpjOutput.textContent = "N/A";
+        } else if (reward > 0) {
+          rewardOutput.textContent =
+            numberWithCommas(reward.toFixed(2)) + " ISK";
+          rewardOutput.style.color = "var(--amarr-gold)";
+
+          const ipj = reward / rawJumps;
+          rewardIpjOutput.textContent =
+            numberWithCommas(ipj.toFixed(2)) + " ISK/Jump";
+        } else {
+          rewardOutput.textContent = "0.00 ISK";
+          rewardOutput.style.color = "var(--amarr-gold)";
+          rewardIpjOutput.textContent = "0.00 ISK/Jump";
+        }
+
+        // Visual feedback for collateral
+        const collateral = parseNum(collateralInput.value);
+        if (collateral > 2e9 && parseNum(volumeInput.value) > 60e3) {
+          collateralInput.style.color = "#555"; // Dark grey warning
+        } else {
+          collateralInput.style.color = "white";
+        }
+      }
+
+      // Event Listeners
+      document.querySelectorAll(".to_change").forEach((el) => {
+        el.addEventListener("input", updateAll);
+      });
+
+      document.querySelectorAll(".to_format_number").forEach((el) => {
+        el.addEventListener("blur", (e) => {
+          e.target.value = numFormat(e.target.value);
+          updateAll();
         });
+      });
 
-        document.querySelectorAll('.to_format_number').forEach(el => {
-            el.addEventListener('blur', (e) => {
-                e.target.value = numFormat(e.target.value);
-                updateAll();
-            });
+      document.querySelectorAll(".preset-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          volumeInput.value = btn.getAttribute("data-val");
+          updateAll();
         });
+      });
 
-        document.querySelectorAll('.preset-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                volumeInput.value = btn.getAttribute('data-val');
-                updateAll();
-            });
-        });
+      copyBtn.addEventListener("click", () => {
+        if (typeof currentReward === "number" && currentReward > 0) {
+          const text = Math.ceil(currentReward).toString();
+          copyTextToClipboard(text);
+          const originalText = copyBtn.textContent;
+          copyBtn.textContent = "Copied!";
+          copyBtn.style.background = "var(--amarr-gold)";
+          copyBtn.style.color = "black";
+          setTimeout(() => {
+            copyBtn.textContent = originalText;
+            copyBtn.style.background = "";
+            copyBtn.style.color = "";
+          }, 2000);
+        }
+      });
 
-        copyBtn.addEventListener('click', () => {
-            if (typeof currentReward === 'number' && currentReward > 0) {
-                const text = Math.ceil(currentReward).toString();
-                copyTextToClipboard(text);
-                const originalText = copyBtn.textContent;
-                copyBtn.textContent = 'Copied!';
-                copyBtn.style.background = 'var(--amarr-gold)';
-                copyBtn.style.color = 'black';
-                setTimeout(() => {
-                    copyBtn.textContent = originalText;
-                    copyBtn.style.background = '';
-                    copyBtn.style.color = '';
-                }, 2000);
-            }
-        });
-
-        // Initialize
-        updateAll();
+      // Initialize
+      updateAll();
     </script>
-</body>
+  </body>
 </html>
