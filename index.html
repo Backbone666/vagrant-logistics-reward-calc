@@ -324,12 +324,22 @@
       });
 
       copyBtn.addEventListener("click", async () => {
-        if (typeof currentReward === "number" && currentReward > 0) {
-          const val = Math.max(1_000_000, Math.ceil(currentReward)).toString();
+        let textToCopy = "";
+        let originalText = copyBtn.textContent;
+
+        if (currentReward === "Risako Hirano") {
+          textToCopy = "Risako Hirano";
+        } else if (typeof currentReward === "number" && currentReward > 0) {
+          textToCopy = Math.max(1_000_000, Math.ceil(currentReward)).toString();
+        }
+
+        if (textToCopy) {
           try {
-            await navigator.clipboard.writeText(val);
-            const originalText = copyBtn.textContent;
-            copyBtn.textContent = "Copied to Clipboard!";
+            await navigator.clipboard.writeText(textToCopy);
+            copyBtn.textContent =
+              textToCopy === "Risako Hirano"
+                ? "Name Copied!"
+                : "Reward Copied!";
             copyBtn.classList.add("copied");
             setTimeout(() => {
               copyBtn.textContent = originalText;

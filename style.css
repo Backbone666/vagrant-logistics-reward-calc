@@ -151,32 +151,7 @@ h2 {
   filter: drop-shadow(0 0 5px var(--primary-gold-glow));
 }
 
-/* Ornate Accents - Improved */
-.calculator-card::before,
-.calculator-card::after {
-  content: "";
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  border: 2px solid var(--primary-gold);
-  pointer-events: none;
-}
-
-.calculator-card::before {
-  top: -5px;
-  left: -5px;
-  border-right: none;
-  border-bottom: none;
-  opacity: 0.6;
-}
-
-.calculator-card::after {
-  bottom: -5px;
-  right: -5px;
-  border-left: none;
-  border-top: none;
-  opacity: 0.6;
-}
+/* Ornate Accents removed */
 
 .grid {
   display: grid;
