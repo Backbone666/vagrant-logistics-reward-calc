@@ -52,6 +52,19 @@
                 class="to_format_number to_change"
                 autocomplete="off"
               />
+              <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.7">
+                <a
+                  href="https://janice.e-351.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style="
+                    color: inherit;
+                    text-decoration: none;
+                    border-bottom: 1px dotted currentColor;
+                  "
+                  >Use SELL value as collateral.</a
+                >
+              </div>
             </div>
 
             <div class="input-group">
@@ -189,8 +202,8 @@
             collateralLimit = 2_000_000_000;
           } else if (volume <= 62_500) {
             // Dangerous Deep Space Transport
-            baseFee = 40_000_000;
-            ratePerJump = 15_000_000;
+            baseFee = 20_000_000;
+            ratePerJump = 10_000_000;
             collateralLimit = 5_000_000_000;
           } else if (volume <= 360_000) {
             // Jump Freighter
@@ -209,10 +222,10 @@
             collateralLimit = 3_000_000_000;
           } else if (volume <= 62_500) {
             // Deep Space Transport
-            baseFee = 3_000_000;
-            ratePerJump = 1_500_000;
+            baseFee = 1_000_000;
+            ratePerJump = 1_000_000;
             collateralLimit = 5_000_000_000;
-          } else if (volume <= 900_000) {
+          } else if (volume <= 1_125_000) {
             // Freighter
             baseFee = 10_000_000;
             ratePerJump = 3_500_000;
