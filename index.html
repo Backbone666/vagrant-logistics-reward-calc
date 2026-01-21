@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vagrant Logistics - High Fidelity Courier Calculator</title>
+    <title>Vagrant Logistics - Courier Calculator</title>
     <link
       rel="icon"
       type="image/png"
@@ -37,7 +37,7 @@
           class="logo"
         />
         <h1>Vagrant Logistics</h1>
-        <h2>High Fidelity Courier Calculator</h2>
+        <h2>Courier Calculator</h2>
       </header>
 
       <main class="calculator-card">
@@ -84,9 +84,6 @@
                 <button type="button" class="preset-btn" data-val="12,000">
                   Blockade Runner
                 </button>
-                <button type="button" class="preset-btn" data-val="5,000">
-                  Suniesis
-                </button>
               </div>
             </div>
 
@@ -119,12 +116,8 @@
                 <button
                   type="button"
                   id="clear_btn"
-                  class="btn-copy"
-                  style="
-                    flex: 1;
-                    background: transparent;
-                    border-color: rgba(212, 175, 55, 0.3);
-                  "
+                  class="btn-clear"
+                  style="flex: 1"
                 >
                   Clear
                 </button>
@@ -147,90 +140,88 @@
 
       let currentReward = 0;
 
-      // Optimized formatting logic
-      function formatNumber(val) {
+      const formatNumber = (val) => {
         let num = val.toString().replace(/[^0-9]/g, "");
         if (!num) return "";
         return new Intl.NumberFormat("en-US").format(num);
-      }
+      };
 
-      function parseNum(val) {
-        return parseFloat(val.replace(/,/g, "")) || 0;
-      }
+      const parseNum = (val) => parseFloat(val.replace(/,/g, "")) || 0;
 
       function calcReward() {
         const volume = parseNum(volumeInput.value);
-        const jumps = Math.max(1, parseNum(jumpsInput.value));
+        const jumps = parseNum(jumpsInput.value);
         const collateral = parseNum(collateralInput.value);
-        const isLowNull = typeIpjCheckbox.checked;
+        const isDangerousSpace = typeIpjCheckbox.checked;
 
-        if (volume === 0) return 0;
+        if (volume <= 0 || jumps <= 0 || collateral <= 0) return 0;
 
-        let base = 1_000_000;
-        let add = 0;
-        let mult = 1;
-        let finalJumps = jumps;
+        let baseReward = 1_000_000;
+        let finalJumps = Math.max(5, jumps); // Minimum 5 jumps for calculation base
+        let multiplier = 1;
+        let flatAddition = 0;
 
-        // Collateral-based scaling
-        let adjustedCollat = collateral;
-        if (volume > 62500 && collateral < 1e9) {
-          adjustedCollat = (3_000_000_000 + collateral) / 4;
-        } else if (volume <= 60000 && volume > 12000 && collateral < 1e9) {
-          adjustedCollat = (1_000_000_000 + collateral) / 2;
-        } else if (volume <= 12000 && collateral < 1e9) {
-          adjustedCollat = (100_000_000 + collateral) / 1.1;
+        // Base scaling based on volume and collateral
+        let adjustedCollateral = collateral;
+        if (volume > 62500) {
+          // Freighter scale
+          adjustedCollateral = Math.max(
+            collateral,
+            (3_000_000_000 + collateral) / 4,
+          );
+        } else if (volume > 12000) {
+          // DST scale
+          adjustedCollateral = Math.max(
+            collateral,
+            (1_000_000_000 + collateral) / 2,
+          );
+        } else {
+          // BR / T1 scale
+          adjustedCollateral = Math.max(
+            collateral,
+            (100_000_000 + collateral) / 1.1,
+          );
         }
 
-        // Short route premium
-        if (finalJumps < 5) {
-          finalJumps = (5 + finalJumps) * 0.5;
-        }
-
-        // High collateral scaling logic
+        // High Collateral Penalty
         if (collateral > 3_000_000_000 && volume > 60_000) {
-          mult *= Math.max(
+          multiplier *= Math.max(
             1.0,
             Math.log(collateral / 150_000_000) / Math.log(15),
           );
         }
 
-        // Surcharges for massive volume/collateral risk
-        if (volume > 1_050_000) {
-          add += 250_000;
-          if (collateral > 2e9) add += 200_000;
-        } else if (volume > 880_000) {
-          if (collateral > 1.5e9) add += 100_000;
-          if (collateral > 2.5e9) add += 100_000;
-          if (collateral > 3e9) add += 200_000;
-        } else if (volume > 750_000) {
-          if (collateral > 2.5e9) add += 100_000;
-          if (collateral > 3e9) add += 200_000;
-        } else if (volume > 500_000) {
-          if (collateral > 2e9) add += 100_000;
-          if (collateral > 3.5e9) add += 100_000;
-        }
+        // Massive Volume Surcharges
+        if (volume > 1_050_000) flatAddition += 450_000;
+        else if (volume > 880_000) flatAddition += 300_000;
+        else if (volume > 750_000) flatAddition += 200_000;
+        else if (volume > 500_000) flatAddition += 100_000;
 
-        if (isLowNull) {
-          mult *= 2;
-        }
+        if (isDangerousSpace) {
+          if (volume > 386_000)
+            return "Shipment too large for dangerous routes";
 
-        if (!isLowNull || volume <= 62_500) {
+          // Jump Freighter Mode
+          const jfBase = 60_000_000;
+          let jfMultiplier = 1;
+
+          if (volume < 100) jfMultiplier = 0.25;
+          else if (volume <= 12_000) jfMultiplier = 0.5;
+          else if (volume <= 60_000) jfMultiplier = 0.75;
+          else if (volume <= 340_000) jfMultiplier = 1;
+          else jfMultiplier = 4;
+
           return (
-            ((mult * base * adjustedCollat) / 1_000_000_000 + add) * finalJumps
+            jfMultiplier * jfBase * Math.max(1.0, jumps / 7) + collateral * 0.01
           );
-        } else if (isLowNull && volume > 386_000) {
-          return "Shipment too large for dangerous routes";
-        } else {
-          // Jump Freighter logic for Deep Space
-          base = 60_000_000;
-          if (volume < 100) mult = 0.25;
-          else if (volume <= 12_000) mult = 0.5;
-          else if (volume <= 60_000) mult = 0.75;
-          else if (volume <= 340_000) mult = 1;
-          else mult = 4;
-
-          return mult * base * Math.max(1.0, jumps / 7) + collateral * 0.01;
         }
+
+        // Standard Route
+        return (
+          ((multiplier * baseReward * adjustedCollateral) / 1_000_000_000 +
+            flatAddition) *
+          finalJumps
+        );
       }
 
       function updateAll() {
@@ -238,13 +229,18 @@
         currentReward = reward;
         const rawJumps = parseNum(jumpsInput.value) || 1;
 
+        // Trigger animation
+        rewardOutput.classList.remove("updated");
+        void rewardOutput.offsetWidth; // Force reflow
+        rewardOutput.classList.add("updated");
+
         if (typeof reward === "string") {
           rewardOutput.textContent = reward;
           rewardOutput.style.fontSize = "1.2rem";
           rewardIpjOutput.textContent = "N/A";
         } else if (reward > 0) {
-          const finalVal = Math.max(1_000_000, reward);
-          rewardOutput.textContent = formatNumber(Math.ceil(finalVal)) + " ISK";
+          const finalVal = Math.max(1_000_000, Math.ceil(reward));
+          rewardOutput.textContent = formatNumber(finalVal) + " ISK";
           rewardOutput.style.fontSize = "3rem";
 
           const ipj = finalVal / rawJumps;
@@ -260,14 +256,16 @@
       // Live formatting as user types
       document.querySelectorAll(".to_format_number").forEach((input) => {
         input.addEventListener("input", (e) => {
-          const cursorPosition = e.target.selectionStart;
-          const oldLength = e.target.value.length;
+          const start = e.target.selectionStart;
+          const end = e.target.selectionEnd;
+          const oldLen = e.target.value.length;
+
           e.target.value = formatNumber(e.target.value);
-          const newLength = e.target.value.length;
-          e.target.setSelectionRange(
-            cursorPosition + (newLength - oldLength),
-            cursorPosition + (newLength - oldLength),
-          );
+
+          const newLen = e.target.value.length;
+          const delta = newLen - oldLen;
+
+          e.target.setSelectionRange(start + delta, end + delta);
           updateAll();
         });
       });
@@ -278,23 +276,18 @@
 
       document.querySelectorAll(".preset-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-          volumeInput.value = btn.getAttribute("data-val");
-          volumeInput.value = formatNumber(volumeInput.value); // Ensure it's formatted
+          volumeInput.value = formatNumber(btn.getAttribute("data-val"));
           updateAll();
-
-          // Visual feedback
-          btn.style.transform = "scale(0.95)";
-          setTimeout(() => (btn.style.transform = ""), 100);
         });
       });
 
       copyBtn.addEventListener("click", async () => {
         if (typeof currentReward === "number" && currentReward > 0) {
-          const val = Math.ceil(Math.max(1_000_000, currentReward)).toString();
+          const val = Math.max(1_000_000, Math.ceil(currentReward)).toString();
           try {
             await navigator.clipboard.writeText(val);
             const originalText = copyBtn.textContent;
-            copyBtn.textContent = "Reward Copied!";
+            copyBtn.textContent = "Copied to Clipboard!";
             copyBtn.classList.add("copied");
             setTimeout(() => {
               copyBtn.textContent = originalText;
@@ -314,7 +307,7 @@
         updateAll();
       });
 
-      // Initialize display
+      // Initial Call
       updateAll();
     </script>
   </body>
