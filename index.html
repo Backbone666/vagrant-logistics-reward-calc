@@ -192,53 +192,47 @@
 
         let baseFee = 0;
         let ratePerJump = 0;
-        let collateralLimit = 0;
+
+        // Collateral Limit is now flattened to 5B global (handled by top check),
+        // but we ensure logic flows correctly.
 
         if (isDangerousSpace) {
           if (volume <= 12_500) {
             // Covert Ops
-            baseFee = 10_000_000;
-            ratePerJump = 2_500_000;
-            collateralLimit = 2_000_000_000;
+            baseFee = 15_000_000;
+            ratePerJump = 3_000_000;
           } else if (volume <= 62_500) {
-            // Dangerous Deep Space Transport
-            baseFee = 20_000_000;
-            ratePerJump = 10_000_000;
-            collateralLimit = 5_000_000_000;
+            // Dangerous Deep Space Transport (Optimized)
+            baseFee = 25_000_000;
+            ratePerJump = 7_000_000;
           } else if (volume <= 360_000) {
             // Jump Freighter
-            baseFee = 100_000_000;
-            ratePerJump = 30_000_000;
-            collateralLimit = 10_000_000_000;
+            baseFee = 150_000_000;
+            ratePerJump = 35_000_000;
           } else {
             return "Shipment too large for dangerous routes";
           }
         } else {
           // High Security
           if (volume <= 12_500) {
-            // Blockade Runner
-            baseFee = 1_000_000;
-            ratePerJump = 750_000;
-            collateralLimit = 3_000_000_000;
+            // Blockade Runner (Competitive but higher rate than DST)
+            baseFee = 1_500_000;
+            ratePerJump = 900_000;
           } else if (volume <= 62_500) {
-            // Deep Space Transport
-            baseFee = 1_000_000;
-            ratePerJump = 1_000_000;
-            collateralLimit = 5_000_000_000;
+            // Deep Space Transport (Incentivized)
+            baseFee = 1_500_000;
+            ratePerJump = 850_000;
           } else if (volume <= 1_125_000) {
             // Freighter
-            baseFee = 10_000_000;
-            ratePerJump = 3_500_000;
-            collateralLimit = 3_000_000_000;
+            baseFee = 20_000_000;
+            ratePerJump = 6_000_000;
           } else {
             return "Shipment exceeds HighSec volume limits";
           }
         }
 
-        // Check collateral limits per tier
-        if (collateral > collateralLimit) {
-          return "Collateral exceeds tier limit";
-        }
+        // Tier limits are now unified at 5B, which is handled at the start.
+        // We removed the per-tier collateralLimit variable since it's all 5B.
 
         let totalReward = baseFee + jumps * ratePerJump;
 
