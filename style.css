@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@300;400;600;700&display=swap");
-
 @font-face {
   font-family: "EveSansNeue";
   src: url("evesansneue-regular.otf") format("opentype");
@@ -23,8 +21,8 @@
   --text-secondary: #bfa88f;
   --accent-glow: 0 0 30px var(--primary-gold-glow);
   --transition-smooth: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-  --font-display: "Outfit", "EveSansNeue", sans-serif;
-  --font-body: "Inter", sans-serif;
+  --font-display: "EveSansNeue", sans-serif;
+  --font-body: "EveSansNeue", sans-serif;
 }
 
 * {
@@ -38,13 +36,13 @@ body {
   background: var(--onyx) url("arPbIoX.jpeg") no-repeat center center fixed;
   background-size: cover;
   color: var(--text-primary);
-  line-height: 1.6;
-  min-height: 100vh;
+  line-height: 1.4;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow-x: hidden;
+  overflow: hidden;
   position: relative;
 }
 
@@ -74,7 +72,7 @@ body::before {
 .container {
   width: 100%;
   max-width: 1100px;
-  padding: 2rem;
+  padding: 1rem 2rem;
   z-index: 1;
   display: flex;
   flex-direction: column;
@@ -83,14 +81,14 @@ body::before {
 
 header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 1.5rem;
   animation: slideDown 1s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .logo {
-  width: 100px;
-  height: 100px;
-  margin-bottom: 1rem;
+  width: 70px;
+  height: 70px;
+  margin-bottom: 0.5rem;
   filter: drop-shadow(0 0 25px var(--primary-gold-glow));
   transition: var(--transition-smooth);
 }
@@ -102,18 +100,18 @@ header {
 
 h1 {
   font-family: var(--font-display);
-  font-size: 3rem;
-  font-weight: 700;
+  font-size: 2.2rem;
+  font-weight: 400;
   color: white;
   text-transform: uppercase;
   letter-spacing: 0.3em;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.2rem;
   filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.8));
 }
 
 h2 {
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: 0.8rem;
   color: var(--primary-gold);
   letter-spacing: 0.5em;
   text-transform: uppercase;
@@ -127,13 +125,40 @@ h2 {
   -webkit-backdrop-filter: blur(25px);
   border: 1px solid var(--glass-border);
   border-radius: 16px;
-  padding: 3.5rem;
+  padding: 2.5rem 3.5rem;
   box-shadow:
     0 50px 100px rgba(0, 0, 0, 0.8),
     inset 0 0 50px hsla(45, 70%, 55%, 0.05);
   position: relative;
   overflow: visible;
   animation: cardFadeIn 1.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Footer Styles */
+.footer {
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  opacity: 0.8;
+  transition: var(--transition-smooth);
+}
+
+.footer:hover {
+  opacity: 1;
+  color: var(--primary-gold);
+}
+
+.footer-logo {
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 0 5px var(--primary-gold-glow));
 }
 
 /* Ornate Accents - Improved */
@@ -210,7 +235,7 @@ label {
   margin-bottom: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  font-weight: 600;
+  font-weight: 400;
   transition: var(--transition-smooth);
 }
 
@@ -260,7 +285,7 @@ input[type="text"]:focus {
   transition: var(--transition-smooth);
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .preset-btn:hover {
@@ -322,7 +347,7 @@ input[type="text"]:focus {
   left: 50%;
   transform: translate(-50%, -50%);
   color: var(--onyx);
-  font-weight: 900;
+  font-weight: 400;
   font-size: 1rem;
 }
 
@@ -363,7 +388,7 @@ input[type="text"]:focus {
 .reward-value {
   font-family: var(--font-display);
   font-size: 3rem;
-  font-weight: 700;
+  font-weight: 400;
   color: var(--primary-gold);
   line-height: 1.1;
   word-break: break-all;
@@ -397,7 +422,7 @@ input[type="text"]:focus {
   padding: 1.2rem;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  font-weight: 700;
+  font-weight: 400;
   font-family: var(--font-display);
   border-radius: 8px;
   cursor: pointer;
@@ -431,7 +456,7 @@ input[type="text"]:focus {
   padding: 1.2rem;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  font-weight: 700;
+  font-weight: 400;
   font-family: var(--font-display);
   border-radius: 8px;
   cursor: pointer;
