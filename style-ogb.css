@@ -6,8 +6,8 @@ i {
 	display: inline-block;
 }
 
-@font-face { font-family: aldhabi; src: url('aldhabi.otf'); }
+@font-face { font-family: evesansneue; src: url('evesansneue-regular.otf'); }
 
 .title {
-	font-family: aldhabi;
+	font-family: evesansneue;
 }
