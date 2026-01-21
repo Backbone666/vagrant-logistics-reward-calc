@@ -112,6 +112,30 @@
             </div>
           </section>
         </div>
+
+        <div class="contract-requirements">
+          <div class="req-card">
+            <div class="req-label">Contract To</div>
+            <div class="req-value-box">
+              <span class="req-value">Vagrant Logistics</span>
+              <button
+                type="button"
+                class="btn-mini-copy"
+                data-copy="Vagrant Logistics"
+              >
+                Copy
+              </button>
+            </div>
+          </div>
+          <div class="req-card">
+            <div class="req-label">Time to Accept</div>
+            <div class="req-value">3 Days</div>
+          </div>
+          <div class="req-card">
+            <div class="req-label">Time to Complete</div>
+            <div class="req-value">3 Days</div>
+          </div>
+        </div>
       </main>
 
       <footer class="footer">
@@ -150,6 +174,7 @@
         const collateral = parseNum(collateralInput.value);
         const isDangerousSpace = typeIpjCheckbox.checked;
 
+        if (collateral > 5_000_000_000) return "Risako Hirano";
         if (volume <= 0 || jumps <= 0 || collateral <= 0) return 0;
 
         let baseReward = 1_000_000;
@@ -232,8 +257,10 @@
 
         if (typeof reward === "string") {
           rewardOutput.textContent = reward;
-          rewardOutput.style.fontSize = "1.2rem";
-          rewardIpjOutput.textContent = "N/A";
+          rewardOutput.style.fontSize =
+            reward === "Risako Hirano" ? "2.2rem" : "1.2rem";
+          rewardIpjOutput.textContent =
+            reward === "Risako Hirano" ? "Contact in game" : "N/A";
         } else if (reward > 0) {
           const finalVal = Math.max(1_000_000, Math.ceil(reward));
           rewardOutput.textContent = formatNumber(finalVal) + " ISK";
@@ -248,6 +275,25 @@
           rewardIpjOutput.textContent = "0 ISK/Jump";
         }
       }
+
+      // Mini copy buttons
+      document.querySelectorAll(".btn-mini-copy").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const val = btn.getAttribute("data-copy");
+          try {
+            await navigator.clipboard.writeText(val);
+            const originalText = btn.textContent;
+            btn.textContent = "Copied!";
+            btn.classList.add("copied");
+            setTimeout(() => {
+              btn.textContent = originalText;
+              btn.classList.remove("copied");
+            }, 1500);
+          } catch (err) {
+            console.error("Failed to copy: ", err);
+          }
+        });
+      });
 
       // Live formatting as user types
       document.querySelectorAll(".to_format_number").forEach((input) => {

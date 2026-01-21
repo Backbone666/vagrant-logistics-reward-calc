@@ -499,6 +499,80 @@ input[type="text"]:focus {
   }
 }
 
+/* Contract Requirements Section */
+.contract-requirements {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid hsla(45, 70%, 55%, 0.15);
+}
+
+.req-card {
+  background: hsla(255, 255%, 255%, 0.02);
+  border: 1px solid hsla(45, 70%, 55%, 0.1);
+  padding: 1.2rem;
+  border-radius: 12px;
+  text-align: center;
+  transition: var(--transition-smooth);
+}
+
+.req-label {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  margin-bottom: 0.6rem;
+}
+
+.req-value {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--primary-gold);
+  letter-spacing: 0.05em;
+}
+
+.req-value-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+}
+
+.btn-mini-copy {
+  background: hsla(45, 70%, 55%, 0.1);
+  border: 1px solid hsla(45, 70%, 55%, 0.2);
+  color: var(--primary-gold);
+  padding: 0.3rem 0.6rem;
+  font-size: 0.65rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.btn-mini-copy:hover {
+  background: var(--primary-gold);
+  color: var(--onyx);
+}
+
+.btn-mini-copy.copied {
+  background: #27ae60;
+  border-color: #27ae60;
+  color: white;
+}
+
+@media (max-width: 960px) {
+  .contract-requirements {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
