@@ -20,13 +20,13 @@ Our pricing model is designed to be competitive with major logistics providers (
 
 _Designed for standard logistics between trade hubs and mission centers._
 
-| Hull Class               | Volume Limit | Base Fee       | Rate per Jump | Collateral Limit |
-| :----------------------- | :----------- | :------------- | :------------ | :--------------- |
-| **Blockade Runner**      | < 12,500 m³  | 1,000,000 ISK  | 750,000 ISK   | 3 Billion ISK    |
-| **Deep Space Transport** | < 62,500 m³  | 1,000,000 ISK  | 1,000,000 ISK | 5 Billion ISK    |
-| **Freighter**            | < 900,000 m³ | 10,000,000 ISK | 3,500,000 ISK | 3 Billion ISK    |
+| Hull Class               | Volume Limit   | Base Fee       | Rate per Jump | Collateral Limit |
+| :----------------------- | :------------- | :------------- | :------------ | :--------------- |
+| **Blockade Runner**      | < 12,500 m³    | 1,500,000 ISK  | 900,000 ISK   | 5 Billion ISK    |
+| **Deep Space Transport** | < 62,500 m³    | 1,500,000 ISK  | 850,000 ISK   | 5 Billion ISK    |
+| **Freighter**            | < 1,125,000 m³ | 20,000,000 ISK | 6,000,000 ISK | 5 Billion ISK    |
 
-- **Collateral Surcharge:** 1% of Collateral value for contracts > 1 Billion ISK.
+- **Collateral Surcharge:** 1.5% of Collateral value for contracts > 1 Billion ISK.
 - **Minimum Reward:** 3,000,000 ISK.
 
 ### 2. Low/Null/Pochven Service (Dangerous)
@@ -35,9 +35,9 @@ _Requires Jump Freighter or Blockade Runner blockade-running._
 
 | Service Type             | Volume Limit | Base Fee        | Rate per Jump (Ly) | Collateral Limit |
 | :----------------------- | :----------- | :-------------- | :----------------- | :--------------- |
-| **Covert Ops**           | < 12,500 m³  | 10,000,000 ISK  | 2,500,000 ISK      | 2 Billion ISK    |
-| **Deep Space Transport** | < 62,500 m³  | 20,000,000 ISK  | 10,000,000 ISK     | 5 Billion ISK    |
-| **Jump Freighter**       | < 360,000 m³ | 100,000,000 ISK | 30,000,000 ISK     | 10 Billion ISK\* |
+| **Covert Ops**           | < 12,500 m³  | 15,000,000 ISK  | 3,000,000 ISK      | 5 Billion ISK    |
+| **Deep Space Transport** | < 62,500 m³  | 25,000,000 ISK  | 7,000,000 ISK      | 5 Billion ISK    |
+| **Jump Freighter**       | < 360,000 m³ | 150,000,000 ISK | 35,000,000 ISK     | 5 Billion ISK\*  |
 
 - _Contracts > 5 Billion Collateral require direct negotiation (see Risk Management)._
 

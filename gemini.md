@@ -43,11 +43,12 @@ To create a "Gold Standard" calculator that reflects the prestigious and profess
 - **Alliance Integration**: Added Charter alliance footer and branding.
 - **Contract Logic Expansion**: Added the Contract Details section and the 5B collateral threshold logic.
 - **Rate Analysis & Optimization (Jan 2026)**: Conducted comprehensive market research comparing PushX, Red Frog, and current logic. Established a new tiered rate structure documented in `rates.md`.
-  - **Strategy Shift**: Aggressively priced **Deep Space Transport (DST)** services (1M Base/Jump) to undercut all major competitors and dominate this precise market segment.
+  - **Strategy Shift**: Aggressively priced **Deep Space Transport (DST)** services (1.5M Base / 850k Jump) to undercut all major competitors and dominate this precise market segment.
+  - **Collateral Standardization**: Unified collateral limit to **5 Billion ISK** across all service tiers (including Dangerous/HighSec) to simplify user experience.
 - **1080p Layout Optimization**: Optimized vertical spacing, padding, and margins to ensure the interface fits perfectly on standard high-definition displays without scrolling.
 - **Logic Alignment**: Updated the `calcReward` engine to a clean, table-based approach:
-  - **HighSec**: Tiers for Blockade Runner, DST, and Freighter with specific base fees and per-jump rates.
-  - **Dangerous Space**: Specialized tiers for Covert Ops, Deep Space Transport, and Jump Freighters.
+  - **HighSec**: Inverted pricing model where DST is cheaper than Blockade Runners per jump to incentivize bulk transport.
+  - **Dangerous Space**: Smoothed rate curves for Covert Ops (15M Base), DST (25M Base), and Jump Freighters (150M Base).
   - **Risk Premiums**: Implemented a mandatory 1.5% collateral fee for high-value contracts (>1B ISK) to protect contractor profitability.
   - **Competitive Benchmarking**: Ensuring HighSec rates remain attractive for short hauls while properly pricing the massive time/risk investment of Freighter and JF logistics.
 
