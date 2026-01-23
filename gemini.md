@@ -1,4 +1,4 @@
-# Vagrant Logistics Project Documentation
+  # Vagrant Logistics Project Documentation
 
 This document summarizes the development and features of the **Vagrant Logistics - Courier Calculator**, a premium web-based tool for EVE Online haulers.
 
@@ -51,7 +51,11 @@ To create a "Gold Standard" calculator that reflects the prestigious and profess
   - **Dangerous Space**: Smoothed rate curves for Covert Ops (15M Base), DST (25M Base), and Jump Freighters (150M Base).
   - **Risk Premiums**: Implemented a mandatory 1.5% collateral fee for high-value contracts (>1B ISK) to protect contractor profitability.
   - **Competitive Benchmarking**: Ensuring HighSec rates remain attractive for short hauls while properly pricing the massive time/risk investment of Freighter and JF logistics.
+- **Dangerous Space Optimization (Jan 23, 2026)**: Smoothed the pricing curve for Low/Nullsec routes to eliminate massive cost "cliffs" between ship classes.
+  - Reduced Jump Freighter base fee by 60% and per-jump rate by 65%.
+  - Adjusted DST and Covert Ops rates to create a more gradual progression.
+  - Maintained profitability through the 1.5% collateral surcharge on high-value contracts.
 
 ---
 
-_Documented by Gemini - 2026-01-21_
+_Documented by Gemini - 2026-01-23_
