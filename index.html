@@ -199,16 +199,16 @@
         if (isDangerousSpace) {
           if (volume <= 12_500) {
             // Covert Ops
-            baseFee = 15_000_000;
-            ratePerJump = 3_000_000;
+            baseFee = 10_000_000;
+            ratePerJump = 2_000_000;
           } else if (volume <= 62_500) {
-            // Dangerous Deep Space Transport (Optimized)
-            baseFee = 25_000_000;
-            ratePerJump = 7_000_000;
+            // Dangerous Deep Space Transport
+            baseFee = 20_000_000;
+            ratePerJump = 5_000_000;
           } else if (volume <= 360_000) {
             // Jump Freighter
-            baseFee = 150_000_000;
-            ratePerJump = 35_000_000;
+            baseFee = 60_000_000;
+            ratePerJump = 12_000_000;
           } else {
             return "Shipment too large for dangerous routes";
           }
