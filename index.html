@@ -187,63 +187,56 @@
         const collateral = parseNum(collateralInput.value);
         const isDangerousSpace = typeIpjCheckbox.checked;
 
+        // --- SHADOW CLASS PRICING STRATEGY ---
+        // 1. Collateral Cap: > 5B ISK -> Custom Quote (Risako Hirano)
         if (collateral > 5_000_000_000) return "Risako Hirano";
-        if (volume <= 0 || jumps <= 0 || collateral <= 0) return 0;
+
+        // 2. Validation
+        if (volume <= 0 || jumps <= 0 || collateral < 0) return 0;
+
+        // 3. Volume Cap: DST Focused Strategy (Max 62,500 m³)
+        // We strictly service DST loads. Larger loads refer to Freight/JF services.
+        if (volume > 62_500) {
+          return "Max Volume 62,500 m³ (DST)";
+        }
 
         let baseFee = 0;
         let ratePerJump = 0;
 
-        // Collateral Limit is now flattened to 5B global (handled by top check),
-        // but we ensure logic flows correctly.
-
+        // 4. Route Security Pricing
         if (isDangerousSpace) {
-          if (volume <= 12_500) {
-            // Covert Ops
-            baseFee = 10_000_000;
-            ratePerJump = 2_000_000;
-          } else if (volume <= 62_500) {
-            // Dangerous Deep Space Transport
-            baseFee = 20_000_000;
-            ratePerJump = 5_000_000;
-          } else if (volume <= 360_000) {
-            // Jump Freighter
-            baseFee = 60_000_000;
-            ratePerJump = 12_000_000;
-          } else {
-            return "Shipment too large for dangerous routes";
-          }
+          // SHADOW TIER (Lowsec/Nullsec)
+          // Competitor: Black Frog (High Base) vs PushX (Small Vol)
+          // Our Edge: High Volume DST at agile rates.
+          // Base: 20M (Undock Risk)
+          // Rate: 12M per system (Shadow Class Rate)
+          baseFee = 20_000_000;
+          ratePerJump = 12_000_000;
         } else {
-          // High Security
-          if (volume <= 12_500) {
-            // Blockade Runner (Competitive but higher rate than DST)
-            baseFee = 1_500_000;
-            ratePerJump = 900_000;
-          } else if (volume <= 62_500) {
-            // Deep Space Transport (Incentivized)
-            baseFee = 1_500_000;
-            ratePerJump = 850_000;
-          } else if (volume <= 1_125_000) {
-            // Freighter
-            baseFee = 20_000_000;
-            ratePerJump = 6_000_000;
-          } else {
-            return "Shipment exceeds HighSec volume limits";
-          }
+          // STANDARD TIER (Highsec)
+          // Competitor: PushX/Red Frog Baseline
+          // Base: 10M
+          // Rate: 1.5M per system
+          baseFee = 10_000_000;
+          ratePerJump = 1_500_000;
         }
 
-        // Tier limits are now unified at 5B, which is handled at the start.
-        // We removed the per-tier collateralLimit variable since it's all 5B.
+        // 5. Calculate Transport Cost
+        let totalReward = baseFee + (jumps * ratePerJump);
 
-        let totalReward = baseFee + jumps * ratePerJump;
-
-        // Collateral Surcharge (1.5% for > 1B)
+        // 6. Collateral Fee Schedule
+        // Strategy: Undercut BF (high fees) and PushX (multipliers)
+        // 0 - 1B: FREE
+        // 1B - 5B: 2% of Total Value
         if (collateral > 1_000_000_000) {
-          totalReward += collateral * 0.015;
+          totalReward += (collateral * 0.02);
         }
 
-        // Minimum Reward Enforce (HS only per rates.md)
-        if (!isDangerousSpace) {
-          totalReward = Math.max(3_000_000, totalReward);
+        // 7. Minimum Reward (Safety Floor)
+        // Ensure short high-risk trips are worth the undock
+        // (Base fee usually covers this, but we ensure positive flow)
+        if (totalReward < baseFee) {
+           totalReward = baseFee;
         }
 
         return totalReward;
