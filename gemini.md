@@ -64,7 +64,20 @@ To create a "Gold Standard" calculator that reflects the prestigious and profess
   - **New DST Rate**: 25M Base + 6M/Jump. This extremely aggressive pricing aims to capture 100% of sub-freighter volume in our operational regions.
   - **New BR Rate**: 15M Base + 2M/Jump.
   - **Removed Branding**: Dropped "Shadow Class" naming for clarity.
+- **Fork Source Analysis (Jan 26, 2026 - CRITICAL)**: Analyzed original Haulers Channel calculator that this project was forked from.
+  - **Fork Source**: https://kujara.github.io/haulers-channel-reward-calc/ogb.html
+  - **Key Finding**: Original uses complex dynamic formula: `((mult * 1M * collateral/1B) + add) * jumps`
+  - **Our Improvements**: Removed artificial collateral inflation, removed jump minimum penalty, added distinct BR tier, transparent fixed pricing
+  - **CRITICAL ISSUE IDENTIFIED**: JF pricing is severely overpriced compared to both fork source AND market competitors
+    - Original JF formula: `(mult * 60M * max(1, jumps/7)) + (collateral * 0.01)`
+    - Original 10-jump JF: ~105M ISK
+    - Our current 10-jump JF: 675M ISK ❌ **6.4x too expensive**
+    - PushX 10-jump JF: 1.2B ISK
+    - Black Frog estimate: 300-400M ISK
+  - **Recommended Fix**: Reduce JF to 150M Base + 35M/Jump (10 jumps = 500M, competitive with market)
+  - **Collateral Adjustment**: Implement graduated tiers (0.3% for 1-3B, 0.5% for 3-5B) for better competitiveness
 
 ---
 
 _Documented by Gemini - 2026-01-26_
+_URGENT: JF rates require immediate correction - currently 6x higher than fork source_
