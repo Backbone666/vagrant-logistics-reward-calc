@@ -1,126 +1,88 @@
-# Strategic Pricing Model: "Shadow Class" Logistics
+# Competitive Analysis & Rate Strategy
 
-## Executive Summary
-This strategy positions our corporation as the "Middleweight Champion" of low-security logistics. We exploit the massive price gap between **PushX's small Blockade Runners** and **Black Frog's massive Jump Freighters**.
+## 1. Current State Analysis
 
-By utilizing the DST's 62,500 m³ capacity and +2 warp core strength, we offer a service that is **4x cheaper than a Jump Freighter** for medium-sized loads, while offering **5x the volume of a Blockade Runner** for a comparable price per m³.
+**Status**: _Legacy System_
+The previous implementation used a high "Danger Premium" for Low/Nullsec routes. With verified safe routing corridors, we can significantly reduce these premiums to undercut the market.
 
----
+- **Market Opportunity**:
+  - Competitors (PushX/Black Frog) price Low/Nullsec as "High Risk", forcing users into expensive Jump Freighters or limited Blockade Runners.
+  - **Our Edge**: Utilizing reduced-risk routing to offer **DST** services in dangerous space at a price point that makes Jump Freighters obsolete for medium-sized loads.
 
-## A. Base Rate Structure Table
+## 2. Competitor Comparison (Low/Null Focus)
 
-Our pricing model uses a "Base + Per System" formula. The Base Fee covers the risk of undocking and identifying the route.
+| Feature          | Vagrant (New)  | PushX               | Black Frog          |
+| :--------------- | :------------- | :------------------ | :------------------ |
+| **BR Lowsec**    | **2M / Jump**  | 3.75M / Warp        | N/A                 |
+| **DST Low/Null** | **6M / Jump**  | JF Only (Expensive) | JF Only (Expensive) |
+| **JF Low/Null**  | **60M / Jump** | 100M / Sys + Base   | ~300M+ Total        |
 
-| Service Tier | Space Security | Base Fee | Per System Rate | Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| **Standard** | HighSec (0.5 - 1.0) | **10,000,000 ISK** | **1,500,000 ISK** | Matches PushX/Red Frog baseline. |
-| **Shadow** | LowSec (0.1 - 0.4) | **20,000,000 ISK** | **12,000,000 ISK** | The core offering. Agile DST routing. |
-| **Phantom** | NullSec / NPC Null | **35,000,000 ISK** | **25,000,000 ISK** | High risk. Bubbles expected. |
+## 3. Recommended Rate Scale
 
-*Note: Routes passing through mixed security utilize the highest applicable Per System Rate for the dangerous legs only.*
+We serve four distinct tiers. The **DST (Low/Null)** rate is the star of this strategy, bridging the gap between small packages and massive freight.
 
----
+### A. Blockade Runner (BR) - _Speed & Stealth_
 
-## B. Collateral Fee Schedule
+_Fast transport for small, high-value items._
 
-To undercut Black Frog (who charges heavily for collateral) and PushX (who uses multipliers), we use a flat percentage model for high-value cargo. This simplifies the quote for the customer.
+- **Capacity**: Up to 12,500 m³
+- **Highsec**: **5M Base + 900k ISK / Jump**
+  - _Vs PushX_: We are ~40% cheaper on the jump rate.
+- **Low/Null (Dangerous)**: **15M Base + 2M ISK / Jump**
+  - _Vs PushX_: Significantly cheaper than their 3.75M/warp.
 
-| Collateral Value | Fee | Justification |
-| :--- | :--- | :--- |
-| **0 - 1 Billion ISK** | **FREE** | unbeatable entry point. Encourages standard loads. |
-| **1B - 5 Billion ISK** | **2% of Total Value** | Covers the risk of ship loss (+ cargo). |
-| **> 5 Billion ISK** | *Custom Quote* | Requires Jump Freighter or Escort. |
+### B. Deep Space Transport (DST) - _The "Vagrant Special"_
 
----
+_The primary value proposition. High volume in dangerous space without the specific JF cost._
 
-## C. System-based Pricing Logic
+- **Capacity**: Up to 62,500 m³
+- **Highsec**: **10M Base + 1.25M ISK / Jump**
+  - _Advantage_: Competitively priced against standard highsec haulers.
+- **Low/Null (Dangerous)**: **25M Base + 6M ISK / Jump**
+  - _Strategic Play_: This is aggressive. A 10-jump Lowsec run costs ~85M ISK.
+  - _Competitor Comparison_: A competitor would force a Jump Freighter quote (300M+). We offer the same volume capability for **~25-30% of the price**.
 
-### The "Danger Gap" Calculation
-*   **Competitor (Black Frog):** 100,000,000 ISK per dangerous system.
-*   **Competitor (PushX):** Only offers small Blockade Runners (12.5k m³) in Lowsec.
-*   **Our Advantage:** We charge **12M ISK** per Lowsec system.
-    *   *Result:* A client can move cargo through **8 Lowsec systems** with us for the price of **1 Black Frog system**.
+### C. Freighter - _Highsec Bulk_
 
----
+_Standard bulk hauling for safe space._
 
-## D. Premium Services & Add-ons
+- **Capacity**: Up to 1,125,000 m³
+- **Highsec**: **25M Base + 2M ISK / Jump**
 
-| Service | Price | Description |
-| :--- | :--- | :--- |
-| **Rush Delivery** | **+50,000,000 ISK** | Guaranteed delivery within 24 hours (Subject to TZ). Priority queue. |
-| **Scout Screen** | **+15,000,000 ISK** | Per dangerous system. We utilize a +1 scout alt for maximum safety. |
-| **Webbing Service** | **+10,000,000 ISK** | Insta-warp service at Jita/Amarr undocks. |
+### D. Jump Freighter (JF) - _Logistics_
 
----
+_Capital-class hauling for massive loads in dangerous space._
 
-## E. Discount Programmes
-
-1.  **"Industrialist's Loop" (Round Trip)**
-    *   **20% Discount** on the return trip if booked simultaneously.
-    *   *Target:* PI producers and Forward Operating Base (FOB) suppliers.
-2.  **"Alliance Line" (Bulk)**
-    *   **10% Discount** for 3+ contracts issued to the same destination within 24 hours.
-    *   *Target:* Alliance stagings and doctrine ship deployments.
+- **Capacity**: Up to 360,000 m³
+- **Low/Null**: **75M Base + 60M ISK / Jump**
+  - _Justification_: Covers fuel (Isotopes) and cyno usage. Still significantly undercuts the "100M/System" industry standard.
 
 ---
 
-## F. Competitive Positioning Statement
+## 4. Collateral Structure
 
-> **"Why pay for a Freighter when you only need a Truck?"**
+Tiered percentage system to favor mid-range collateral contracts up to 5B.
 
-**Vs. Black Frog Logistics (JF):**
-Black Frog is the gold standard for massive volume, but they are expensive and slow (51hr avg). For a 50,000 m³ shipment (e.g., a fitted T3 Cruiser wing or POS modules), Black Frog charges a minimum of ~300M ISK. **We do it for ~85M ISK.** We are the cost-effective choice for everything smaller than a Capital Ship.
+| Collateral Tier      | Fee               | Notes                                      |
+| :------------------- | :---------------- | :----------------------------------------- |
+| **0 - 1.5 Billion**  | **FREE**          | Entry level standard.                      |
+| **1.5B - 5 Billion** | **0.5% Fee**      | Highly competitive (beats 5x multipliers). |
+| **> 5 Billion**      | **Risako Hirano** | Manual Quote / Escort Required.            |
 
-**Vs. PushX (Blockade Runners):**
-PushX limits lowsec runs to 12,500 m³. If a client needs to move 60,000 m³, they need **5 separate PushX contracts**.
-*   PushX Cost: 5 contracts × (Base + Jumps) = High administrative overhead and cost.
-*   Our Cost: **1 Contract.** One standard DST fee. We win on volume efficiency.
+## 5. Pricing Rationale
 
----
+1.  **Safety Dividend**: We pass the savings from our "Safe Routes" directly to the customer. By not pricing in a high probability of ship loss, we can operate DSTs in Low/Null at 6M/jump.
+2.  **The DST Niche**: The 12,500m³ to 62,500m³ range in Lowsec is a "Dead Zone" for competitors. They usually upsell to a JF. We fill this zone with the DST.
+3.  **Simplified Tiers**: Removed "Shadow Class" marketing speak. The services are defined simply by the hull capability: BR, DST, Freighter, JF.
 
-## G. Sample Calculations
+## 6. Implementation Notes
 
-### Scenario 1: The "Lowsec Resupply"
-*   **Route:** Jita (Highsec) → Rancer (Lowsec)
-*   **Distance:** 10 Jumps (6 Highsec, 4 Lowsec)
-*   **Volume:** 45,000 m³ (Fuel Blocks)
-*   **Collateral:** 800M ISK
-
-| Item | Cost Calculation | Total |
-| :--- | :--- | :--- |
-| Base Fee (Shadow) | Flat Rate | 20,000,000 ISK |
-| Highsec Jumps | 6 × 1,500,000 | 9,000,000 ISK |
-| Lowsec Jumps | 4 × 12,000,000 | 48,000,000 ISK |
-| Collateral | < 1B ISK | FREE |
-| **TOTAL** | | **77,000,000 ISK** |
-*   *Competitor Comparison:* Black Frog would charge ~600M ISK. **Savings: 87%**
-
-### Scenario 2: The "Shiny Doctrine" Deployment
-*   **Route:** Amarr (Highsec) → Syndicate Region (NPC Null)
-*   **Distance:** 15 Jumps (10 Highsec, 5 Nullsec)
-*   **Volume:** 60,000 m³ (Packaged HACs)
-*   **Collateral:** 3.5 Billion ISK
-
-| Item | Cost Calculation | Total |
-| :--- | :--- | :--- |
-| Base Fee (Phantom) | Flat Rate | 35,000,000 ISK |
-| Highsec Jumps | 10 × 1,500,000 | 15,000,000 ISK |
-| Nullsec Jumps | 5 × 25,000,000 | 125,000,000 ISK |
-| Collateral Fee | 3.5B × 2% | 70,000,000 ISK |
-| **TOTAL** | | **245,000,000 ISK** |
-*   *Note:* This is a high-risk run. The price reflects the scout work required.
-
-### Scenario 3: The "Rush Job"
-*   **Route:** Highsec to Highsec (War Zone edge)
-*   **Distance:** 12 Jumps (All Highsec)
-*   **Volume:** 10,000 m³
-*   **Collateral:** 2B ISK
-*   **Add-on:** RUSH Delivery
-
-| Item | Cost Calculation | Total |
-| :--- | :--- | :--- |
-| Base Fee (Standard) | Flat Rate | 10,000,000 ISK |
-| Jumps | 12 × 1,500,000 | 18,000,000 ISK |
-| Collateral Fee | 2B × 2% | 40,000,000 ISK |
-| Rush Premium | Flat Rate | 50,000,000 ISK |
-| **TOTAL** | | **118,000,000 ISK** |
+- **Logic**: Split calculation by Hull Type AND Security.
+  - If **Dangerous Space** (checked):
+    - Vol <= 12,500 -> BR Logic (15M + 2M/J)
+    - Vol <= 62,500 -> DST Logic (25M + 6M/J)
+    - Vol <= 360,000 -> JF Logic (75M + 60M/J)
+  - If **Highsec** (unchecked):
+    - Vol <= 12,500 -> BR Logic (5M + 900k/J)
+    - Vol <= 62,500 -> DST Logic (10M + 1.25M/J)
+    - Vol <= 1,125,000 -> Freighter Logic (25M + 2M/J)

@@ -1,4 +1,4 @@
-  # Vagrant Logistics Project Documentation
+# Vagrant Logistics Project Documentation
 
 This document summarizes the development and features of the **Vagrant Logistics - Courier Calculator**, a premium web-based tool for EVE Online haulers.
 
@@ -55,7 +55,16 @@ To create a "Gold Standard" calculator that reflects the prestigious and profess
   - Reduced Jump Freighter base fee by 60% and per-jump rate by 65%.
   - Adjusted DST and Covert Ops rates to create a more gradual progression.
   - Maintained profitability through the 1.5% collateral surcharge on high-value contracts.
+- **Strategic Rate Overhaul (Jan 26, 2026)**: Complete comparative analysis vs PushX, Red Frog, and Black Frog.
+  - **Identified Gap**: Current rates (flat fees) were losing high-collateral contracts to PushX multipliers.
+  - **New Strategy**: Documented in `rates.md`. Split services into 4 tiers (BR, DST, Freighter, JF).
+  - **Key Move**: Introduced "Shadow Class" DST service in Low/Null at 15M/jump to corner the mid-size dangerous hauling market where competitors force costly JF usage.
+- **Low/Null Re-evaluation (Jan 26, 2026 - Update)**: Refined dangerous space philosophy.
+  - **Assumption**: Leveraging reduced-risk internal routing.
+  - **New DST Rate**: 25M Base + 6M/Jump. This extremely aggressive pricing aims to capture 100% of sub-freighter volume in our operational regions.
+  - **New BR Rate**: 15M Base + 2M/Jump.
+  - **Removed Branding**: Dropped "Shadow Class" naming for clarity.
 
 ---
 
-_Documented by Gemini - 2026-01-23_
+_Documented by Gemini - 2026-01-26_

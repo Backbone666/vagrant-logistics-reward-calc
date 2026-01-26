@@ -199,50 +199,60 @@
         // 3. Service Tier Logic
         if (isDangerousSpace) {
           // --- DANGEROUS SPACE (Lowsec / Nullsec) ---
-          if (volume <= 62_500) {
-            // SHADOW CLASS (DST) - The Primary Service
-            // Optimized for agility and speed.
-            baseFee = 20_000_000;
-            ratePerJump = 12_000_000;
+          if (volume <= 12_500) {
+            // BLOCKADE RUNNER (BR)
+            // Low/Null: 15M Base + 2M/Jump
+            baseFee = 15_000_000;
+            ratePerJump = 2_000_000;
+          } else if (volume <= 62_500) {
+            // DEEP SPACE TRANSPORT (DST)
+            // Low/Null: 25M Base + 6M/Jump
+            baseFee = 25_000_000;
+            ratePerJump = 6_000_000;
           } else if (volume <= 360_000) {
             // JUMP FREIGHTER (JF)
-            // For heavy lifting. Restored legacy pricing.
-            baseFee = 60_000_000;
-            ratePerJump = 12_000_000;
+            // Low/Null: 75M Base + 60M/Jump
+            baseFee = 75_000_000;
+            ratePerJump = 60_000_000;
           } else {
             return "Max Volume 360,000 m³ (JF)";
           }
         } else {
           // --- HIGH SECURITY (Highsec) ---
-          if (volume <= 62_500) {
-            // STANDARD CLASS (DST)
-            // Consolidated DST/BR rate for simplicity.
+          if (volume <= 12_500) {
+            // BLOCKADE RUNNER (BR)
+            // Highsec: 5M Base + 900k/Jump
+            baseFee = 5_000_000;
+            ratePerJump = 900_000;
+          } else if (volume <= 62_500) {
+            // DEEP SPACE TRANSPORT (DST)
+            // Highsec: 10M Base + 1.25M/Jump
             baseFee = 10_000_000;
-            ratePerJump = 1_500_000;
+            ratePerJump = 1_250_000;
           } else if (volume <= 1_125_000) {
             // FREIGHTER
-            // Bulk highsec hauling.
-            baseFee = 20_000_000;
-            ratePerJump = 6_000_000;
+            // Highsec: 25M Base + 2M/Jump
+            baseFee = 25_000_000;
+            ratePerJump = 2_000_000;
           } else {
             return "Max Volume 1,125,000 m³ (Freighter)";
           }
         }
 
         // 4. Calculate Transport Cost
-        let totalReward = baseFee + (jumps * ratePerJump);
+        let totalReward = baseFee + jumps * ratePerJump;
 
         // 5. Collateral Fee Schedule (Global)
-        // 0 - 1B: FREE
-        // 1B - 5B: 2% of Total Value
-        if (collateral > 1_000_000_000) {
-          totalReward += (collateral * 0.02);
+        // 0 - 1.5B: FREE
+        // 1.5B - 5B: 0.5% of Total Value
+        if (collateral > 1_500_000_000) {
+          totalReward += collateral * 0.005;
         }
 
         // 6. Minimum Reward Floor
         // Ensure profitability on very short jumps
         if (totalReward < baseFee) {
-           totalReward = baseFee;
+          totalReward = baseFee;
         }
 
         return totalReward;
