@@ -174,10 +174,29 @@
 
       let currentReward = 0;
 
-      const formatNumber = (val) => {
-        let num = val.toString().replace(/[^0-9]/g, "");
-        if (!num) return "";
-        return new Intl.NumberFormat("en-US").format(num);
+      const formatNumber = (val, allowDecimal = true) => {
+        let regex = allowDecimal ? /[^0-9.]/g : /[^0-9]/g;
+        let cleaned = val.toString().replace(regex, "");
+
+        if (allowDecimal) {
+          let parts = cleaned.split(".");
+          if (parts.length > 2) {
+            cleaned = parts[0] + "." + parts.slice(1).join("");
+          }
+        }
+
+        if (!cleaned) return "";
+
+        if (allowDecimal && cleaned.includes(".")) {
+          let [integerPart, decimalPart] = cleaned.split(".");
+          if (integerPart === "") return "." + decimalPart;
+          let formattedInteger = new Intl.NumberFormat("en-US").format(
+            integerPart,
+          );
+          return formattedInteger + "." + decimalPart;
+        } else {
+          return new Intl.NumberFormat("en-US").format(cleaned);
+        }
       };
 
       const parseNum = (val) => parseFloat(val.replace(/,/g, "")) || 0;
@@ -319,7 +338,9 @@
           const end = e.target.selectionEnd;
           const oldLen = e.target.value.length;
 
-          e.target.value = formatNumber(e.target.value);
+          const isDecimalAllowed =
+            e.target.id === "collateral" || e.target.id === "volume";
+          e.target.value = formatNumber(e.target.value, isDecimalAllowed);
 
           const newLen = e.target.value.length;
           const delta = newLen - oldLen;
