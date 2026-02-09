@@ -175,25 +175,25 @@
       let currentReward = 0;
 
       const formatNumber = (val, allowDecimal = true) => {
-        let regex = allowDecimal ? /[^0-9.]/g : /[^0-9]/g;
+        const regex = allowDecimal ? /[^0-9.]/g : /[^0-9]/g;
         let cleaned = val.toString().replace(regex, "");
 
         if (allowDecimal) {
-          let parts = cleaned.split(".");
+          const parts = cleaned.split(".");
           if (parts.length > 2) {
-            cleaned = parts[0] + "." + parts.slice(1).join("");
+            cleaned = `${parts[0]}.${parts.slice(1).join("")}`;
           }
         }
 
         if (!cleaned) return "";
 
         if (allowDecimal && cleaned.includes(".")) {
-          let [integerPart, decimalPart] = cleaned.split(".");
-          if (integerPart === "") return "." + decimalPart;
-          let formattedInteger = new Intl.NumberFormat("en-US").format(
+          const [integerPart, decimalPart] = cleaned.split(".");
+          if (integerPart === "") return `.${decimalPart}`;
+          const formattedInteger = new Intl.NumberFormat("en-US").format(
             integerPart,
           );
-          return formattedInteger + "." + decimalPart;
+          return `${formattedInteger}.${decimalPart}`;
         } else {
           return new Intl.NumberFormat("en-US").format(cleaned);
         }
@@ -299,12 +299,12 @@
             reward === "Risako Hirano" ? "Contact in game" : "N/A";
         } else if (reward > 0) {
           const finalVal = Math.max(1_000_000, Math.ceil(reward));
-          rewardOutput.textContent = formatNumber(finalVal) + " ISK";
+          rewardOutput.textContent = `${formatNumber(finalVal)} ISK`;
           rewardOutput.style.fontSize = "2.2rem";
 
           const ipj = finalVal / rawJumps;
           rewardIpjOutput.textContent =
-            formatNumber(Math.ceil(ipj)) + " ISK/Jump";
+            `${formatNumber(Math.ceil(ipj))} ISK/Jump`;
         } else {
           rewardOutput.textContent = "0 ISK";
           rewardOutput.style.fontSize = "2.2rem";
@@ -363,7 +363,7 @@
 
       copyBtn.addEventListener("click", async () => {
         let textToCopy = "";
-        let originalText = copyBtn.textContent;
+        const originalText = copyBtn.textContent;
 
         if (currentReward === "Risako Hirano") {
           textToCopy = "Risako Hirano";
