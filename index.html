@@ -283,10 +283,11 @@
         currentReward = reward;
         const rawJumps = parseNum(jumpsInput.value) || 1;
 
-        // Trigger animation
+        // Trigger animation via class toggle without forcing reflow
         rewardOutput.classList.remove("updated");
-        void rewardOutput.offsetWidth; // Force reflow
-        rewardOutput.classList.add("updated");
+        requestAnimationFrame(() => {
+          rewardOutput.classList.add("updated");
+        });
 
         // Reset classes
         rewardOutput.classList.remove("small");

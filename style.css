@@ -3,6 +3,7 @@
   src: url("evesansneue-regular.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 :root {
@@ -79,6 +80,7 @@ body::before {
     ),
     rgba(0, 0, 0, 0.7);
   z-index: -1;
+  will-change: transform;
 }
 
 .container {
@@ -90,12 +92,14 @@ body::before {
   flex-direction: column;
   justify-content: center;
   flex: 1;
+  contain: layout;
 }
 
 header {
   text-align: center;
   margin-bottom: var(--space-sm);
   animation: slideDown 1s cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: transform, opacity;
 }
 
 .logo {
@@ -142,6 +146,7 @@ h2 {
   overflow: visible;
   animation: cardFadeIn 1.4s cubic-bezier(0.23, 1, 0.32, 1);
   width: 100%;
+  contain: content;
 }
 
 /* Footer Styles */
@@ -159,6 +164,7 @@ h2 {
   opacity: 0.8;
   transition: var(--transition-smooth);
   padding-bottom: var(--space-md);
+  contain: layout;
 }
 
 .footer-logo {
@@ -220,6 +226,7 @@ h2 {
 .input-group {
   position: relative;
   transition: var(--transition-smooth);
+  contain: layout;
 }
 
 .input-hint {
@@ -391,6 +398,7 @@ input[type="text"]:focus {
   padding-left: var(--space-xl);
   text-align: center;
   min-width: 0;
+  contain: layout;
 }
 
 @media (max-width: 960px) {
@@ -428,6 +436,7 @@ input[type="text"]:focus {
   text-shadow: 0 0 40px var(--primary-gold-glow);
   transition: var(--transition-smooth);
   max-width: 100%;
+  will-change: transform, text-shadow;
 }
 
 .reward-value.small {
@@ -435,7 +444,7 @@ input[type="text"]:focus {
 }
 
 .reward-value.updated {
-  animation: rewardPulse 0.5s ease-out;
+  animation: rewardPulse 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 /* Screen Reader Only class */
@@ -530,7 +539,7 @@ input[type="text"]:focus {
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-30px);
+    transform: translateY(-20px);
   }
   to {
     opacity: 1;
@@ -541,7 +550,7 @@ input[type="text"]:focus {
 @keyframes cardFadeIn {
   from {
     opacity: 0;
-    transform: translateY(40px) scale(0.95);
+    transform: translateY(20px) scale(0.98);
   }
   to {
     opacity: 1;
@@ -555,7 +564,7 @@ input[type="text"]:focus {
     text-shadow: 0 0 40px var(--primary-gold-glow);
   }
   50% {
-    transform: scale(1.05);
+    transform: scale(1.03);
     text-shadow: 0 0 60px var(--primary-gold);
   }
   100% {
@@ -572,6 +581,7 @@ input[type="text"]:focus {
   margin-top: var(--space-md);
   padding-top: var(--space-sm);
   border-top: 1px solid hsla(45, 70%, 55%, 0.15);
+  contain: layout;
 }
 
 .req-card {
