@@ -19,7 +19,7 @@
 
   /* UI Tokens */
   --text-primary: #ede7d9;
-  --text-secondary: hsl(43, 30%, 75%); /* Normalized for better contrast */
+  --text-secondary: hsl(43, 40%, 85%); /* Increased brightness for WCAG AA contrast */
   --accent-glow: 0 0 30px var(--primary-gold-glow);
   --transition-smooth: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
   --font-display: "EveSansNeue", sans-serif;
