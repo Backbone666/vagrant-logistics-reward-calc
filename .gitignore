@@ -8,3 +8,4 @@ gha-creds-*.json
 node_modules/
 package-lock.json
 pnpm-lock.yaml
+conductor/dangerous-space-pricing.md
