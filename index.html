@@ -103,16 +103,7 @@
                 <option value="highsec">High Security (Highsec)</option>
                 <option value="dangerous">Low / Nullsec (Standard)</option>
                 <option value="high_risk">High-Risk Zone (FW / Tama / Rancer)</option>
-                <option value="wormhole">Wormhole Space</option>
               </select>
-            </div>
-
-            <div class="checkbox-group">
-              <label class="checkbox-item">
-                <input type="checkbox" id="rush_service" class="to_change" />
-                <span class="checkbox-custom"></span>
-                Rush Service (+50M ISK)
-              </label>
             </div>
           </section>
 
@@ -174,7 +165,6 @@
       const jumpsInput = document.getElementById("jumps");
       const volumeInput = document.getElementById("volume");
       const routeSecuritySelect = document.getElementById("route_security");
-      const rushServiceCheckbox = document.getElementById("rush_service");
       const rewardOutput = document.getElementById("reward_output");
       const rewardIpjOutput = document.getElementById("reward_ipj_output");
       const copyBtn = document.getElementById("copy_btn");
@@ -214,7 +204,6 @@
         const jumps = parseNum(jumpsInput.value);
         const collateral = parseNum(collateralInput.value);
         const routeSecurity = routeSecuritySelect.value;
-        const isRush = rushServiceCheckbox.checked;
 
         // 1. Global Collateral Cap
         if (collateral > 5_000_000_000) return "Risako Hirano";
@@ -263,10 +252,6 @@
           } else {
             return "Max Volume 360,000 m³ (JF)";
           }
-        } else if (routeSecurity === "wormhole") {
-          // --- WORMHOLE SPACE ---
-          baseFee = 50_000_000;
-          ratePerJump = 10_000_000;
         }
 
         // 4. Calculate Transport Cost with Multipliers
@@ -279,10 +264,7 @@
           totalReward += collateral * 0.005;
         }
 
-        // 6. Rush Service Premium
-        if (isRush) totalReward += 50_000_000;
-
-        // 7. Minimum Reward Floor
+        // 6. Minimum Reward Floor
         return Math.max(baseFee, totalReward);
       }
 
@@ -411,7 +393,6 @@
         jumpsInput.value = "";
         volumeInput.value = "";
         routeSecuritySelect.value = "highsec";
-        rushServiceCheckbox.checked = false;
         updateAll();
       });
 
