@@ -97,11 +97,21 @@
               </div>
             </div>
 
+            <div class="input-group">
+              <label for="route_security">Route Security</label>
+              <select id="route_security" class="to_change">
+                <option value="highsec">High Security (Highsec)</option>
+                <option value="dangerous">Low / Nullsec (Standard)</option>
+                <option value="high_risk">High-Risk Zone (FW / Tama / Rancer)</option>
+                <option value="wormhole">Wormhole Space</option>
+              </select>
+            </div>
+
             <div class="checkbox-group">
               <label class="checkbox-item">
-                <input type="checkbox" id="type_ipj" class="to_change" />
+                <input type="checkbox" id="rush_service" class="to_change" />
                 <span class="checkbox-custom"></span>
-                Low / Nullsec / Dangerous Space
+                Rush Service (+50M ISK)
               </label>
             </div>
           </section>
@@ -163,7 +173,8 @@
       const collateralInput = document.getElementById("collateral");
       const jumpsInput = document.getElementById("jumps");
       const volumeInput = document.getElementById("volume");
-      const typeIpjCheckbox = document.getElementById("type_ipj");
+      const routeSecuritySelect = document.getElementById("route_security");
+      const rushServiceCheckbox = document.getElementById("rush_service");
       const rewardOutput = document.getElementById("reward_output");
       const rewardIpjOutput = document.getElementById("reward_ipj_output");
       const copyBtn = document.getElementById("copy_btn");
@@ -202,7 +213,8 @@
         const volume = parseNum(volumeInput.value);
         const jumps = parseNum(jumpsInput.value);
         const collateral = parseNum(collateralInput.value);
-        const isDangerousSpace = typeIpjCheckbox.checked;
+        const routeSecurity = routeSecuritySelect.value;
+        const isRush = rushServiceCheckbox.checked;
 
         // 1. Global Collateral Cap
         if (collateral > 5_000_000_000) return "Risako Hirano";
@@ -212,76 +224,81 @@
 
         let baseFee = 0;
         let ratePerJump = 0;
+        let riskMultiplier = 1.0;
 
         // 3. Service Tier Logic
-        if (isDangerousSpace) {
-          // --- DANGEROUS SPACE (Lowsec / Nullsec) ---
+        if (routeSecurity === "highsec") {
+          // --- HIGH SECURITY (Highsec) ---
           if (volume <= 12_500) {
             // BLOCKADE RUNNER (BR)
-            // Low/Null: 10M Base + 2M/Jump
+            baseFee = 5_000_000;
+            ratePerJump = 900_000;
+          } else if (volume <= 62_500) {
+            // DEEP SPACE TRANSPORT (DST)
             baseFee = 10_000_000;
+            ratePerJump = 1_250_000;
+          } else if (volume <= 1_125_000) {
+            // FREIGHTER
+            baseFee = 25_000_000;
+            ratePerJump = 2_000_000;
+          } else {
+            return "Max Volume 1,125,000 m³";
+          }
+        } else if (routeSecurity === "dangerous" || routeSecurity === "high_risk") {
+          // --- DANGEROUS SPACE (Lowsec / Nullsec) ---
+          if (routeSecurity === "high_risk") riskMultiplier = 1.5;
+
+          if (volume <= 12_500) {
+            // BLOCKADE RUNNER (BR)
+            baseFee = 15_000_000;
             ratePerJump = 2_000_000;
           } else if (volume <= 62_500) {
             // DEEP SPACE TRANSPORT (DST)
-            // Low/Null: 20M Base + 5M/Jump
-            baseFee = 20_000_000;
-            ratePerJump = 5_000_000;
+            baseFee = 25_000_000;
+            ratePerJump = 6_000_000;
           } else if (volume <= 360_000) {
             // JUMP FREIGHTER (JF)
-            // Low/Null: 150M Base + 35M/Jump (CORRECTED)
             baseFee = 150_000_000;
             ratePerJump = 35_000_000;
           } else {
             return "Max Volume 360,000 m³ (JF)";
           }
-        } else {
-          // --- HIGH SECURITY (Highsec) ---
-          if (volume <= 12_500) {
-            // BLOCKADE RUNNER (BR)
-            // Highsec: 3M Base + 800k/Jump
-            baseFee = 3_000_000;
-            ratePerJump = 800_000;
-          } else if (volume <= 62_500) {
-            // DEEP SPACE TRANSPORT (DST)
-            // Highsec: 8M Base + 1.2M/Jump
-            baseFee = 8_000_000;
-            ratePerJump = 1_200_000;
-          } else if (volume <= 1_125_000) {
-            // FREIGHTER
-            // Highsec: 15M Base + 1.8M/Jump
-            baseFee = 15_000_000;
-            ratePerJump = 1_800_000;
-          } else {
-            return "Max Volume 1,125,000 m³ (Freighter)";
-          }
+        } else if (routeSecurity === "wormhole") {
+          // --- WORMHOLE SPACE ---
+          baseFee = 50_000_000;
+          ratePerJump = 10_000_000;
         }
 
-        // 4. Calculate Transport Cost
-        let totalReward = baseFee + jumps * ratePerJump;
+        // 4. Calculate Transport Cost with Multipliers
+        let totalReward = (baseFee + jumps * ratePerJump) * riskMultiplier;
 
         // 5. Collateral Fee Schedule (Global)
-        // 0 - 1B: FREE
-        // 1B - 3B: 0.3% of Total Value
-        // 3B - 5B: 0.5% of Total Value
         if (collateral > 1_000_000_000 && collateral <= 3_000_000_000) {
           totalReward += collateral * 0.003;
         } else if (collateral > 3_000_000_000) {
           totalReward += collateral * 0.005;
         }
 
-        // 6. Minimum Reward Floor
-        // Ensure profitability on very short jumps
-        if (totalReward < baseFee) {
-          totalReward = baseFee;
-        }
+        // 6. Rush Service Premium
+        if (isRush) totalReward += 50_000_000;
 
-        return totalReward;
+        // 7. Minimum Reward Floor
+        return Math.max(baseFee, totalReward);
       }
 
       function updateAll() {
         const reward = calcReward();
         currentReward = reward;
         const rawJumps = parseNum(jumpsInput.value) || 1;
+        const routeSecurity = routeSecuritySelect.value;
+        const calcCard = document.querySelector(".calculator-card");
+
+        // High-risk visual feedback
+        if (routeSecurity === "high_risk") {
+          calcCard.classList.add("high-risk-mode");
+        } else {
+          calcCard.classList.remove("high-risk-mode");
+        }
 
         // Trigger animation via class toggle without forcing reflow
         rewardOutput.classList.remove("updated");
@@ -393,7 +410,8 @@
         collateralInput.value = "";
         jumpsInput.value = "";
         volumeInput.value = "";
-        typeIpjCheckbox.checked = false;
+        routeSecuritySelect.value = "highsec";
+        rushServiceCheckbox.checked = false;
         updateAll();
       });
 
