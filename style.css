@@ -188,37 +188,10 @@ h2 {
     0 50px 100px rgba(0, 0, 0, 0.8),
     inset 0 0 50px hsla(45, 70%, 55%, 0.05);
   position: relative;
-  overflow: hidden; /* Changed from visible to hidden for shimmer containment */
+  overflow: visible;
   animation: cardFadeIn 1.4s cubic-bezier(0.23, 1, 0.32, 1);
   width: 100%;
   contain: content;
-}
-
-/* Sophisticated Gold Shimmer Effect */
-.calculator-card::after {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent 45%,
-    hsla(45, 70%, 55%, 0.05) 48%,
-    hsla(45, 70%, 55%, 0.15) 50%,
-    hsla(45, 70%, 55%, 0.05) 52%,
-    transparent 55%
-  );
-  transform: rotate(-45deg);
-  animation: goldShimmer 12s infinite linear;
-  pointer-events: none;
-  z-index: 1;
-}
-
-@keyframes goldShimmer {
-  0% { transform: translateX(-100%) translateY(-100%) rotate(-45deg); }
-  30%, 100% { transform: translateX(100%) translateY(100%) rotate(-45deg); }
 }
 
 /* Footer Styles */
