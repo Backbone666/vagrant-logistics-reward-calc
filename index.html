@@ -356,6 +356,11 @@
 
       document.querySelectorAll(".preset-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
+          // Remove active class from all presets
+          document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
+          // Add to current
+          btn.classList.add("active");
+          
           volumeInput.value = formatNumber(btn.getAttribute("data-val"));
           updateAll();
         });
