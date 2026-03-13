@@ -29,6 +29,7 @@
     />
   </head>
   <body>
+    <a href="#main-calculator" class="skip-link sr-only">Skip to main content</a>
     <div class="container">
       <header>
         <img
@@ -40,7 +41,7 @@
         <h2>Courier Calculator</h2>
       </header>
 
-      <main class="calculator-card">
+      <main class="calculator-card" id="main-calculator">
         <div class="grid">
           <section class="input-area" role="group" aria-labelledby="input-area-title">
             <h3 id="input-area-title" class="sr-only">Contract Details</h3>
@@ -124,10 +125,10 @@
           </section>
         </div>
 
-        <div class="contract-requirements">
+        <dl class="contract-requirements">
           <div class="req-card">
-            <div class="req-label">Contract To</div>
-            <div class="req-value-box">
+            <dt class="req-label">Contract To</dt>
+            <dd class="req-value-box">
               <span class="req-value">Vagrant Logistics</span>
               <button
                 type="button"
@@ -137,17 +138,17 @@
               >
                 Copy
               </button>
-            </div>
+            </dd>
           </div>
           <div class="req-card">
-            <div class="req-label">Time to Accept</div>
-            <div class="req-value">3 Days</div>
+            <dt class="req-label">Time to Accept</dt>
+            <dd class="req-value">3 Days</dd>
           </div>
           <div class="req-card">
-            <div class="req-label">Time to Complete</div>
-            <div class="req-value">3 Days</div>
+            <dt class="req-label">Time to Complete</dt>
+            <dd class="req-value">3 Days</dd>
           </div>
-        </div>
+        </dl>
       </main>
 
       <footer class="footer">
