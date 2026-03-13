@@ -104,3 +104,45 @@ The brand aims for a "Gold Standard" of professional hauling services. It reflec
 
 _Documented by Gemini - 2026-03-13_
 _Updated with Design Context from teacher-impeccable session_
+
+## Design Critique (March 2026)
+
+### Anti-Patterns Verdict
+**Pass (with caveats).** The interface successfully avoids the "generic SaaS" look by leaning heavily into EVE Online's specific aesthetic (Amarr Empire). However, tells like high-blur glassmorphism and the "Hero Metric" layout for the reward are fingerprints of modern AI-assisted design trends. The removal of redundant layout thrashing and the implementation of fluid typography have significantly elevated the quality above "out-of-the-box" slop.
+
+### Overall Impression
+The calculator feels **Competent** and **Imperial**. It effectively communicates prestige through its color palette and custom typography. The biggest opportunity lies in moving from "generic luxurious" to "functionally elite"—specifically by refining the information density and interaction feedback.
+
+### What's Working
+- **Aesthetic Consistency**: The Amarr palette (Gold/Burgundy/Onyx) is applied with discipline. Using `EveSansNeue` across the board reinforces the professional brand.
+- **Immediate Feedback**: The live-updating reward with the pulse animation creates a high-signal, "living" interface that builds user confidence.
+- **Accessibility Integration**: The move to HSL-based secondary colors and `:focus-visible` rings shows a commitment to professional-grade usability without sacrificing the theme.
+
+### Priority Issues
+
+1. **Visual Weight Balance**
+   - **What**: The "Estimated Reward" value is visually overwhelming compared to the "Contract Details" section.
+   - **Why it matters**: It creates a "top-heavy" feeling that draws the eye away from the input fields where the user is actively working.
+   - **Fix**: Slightly reduce the max clamp size of the reward value and increase the prominence of the input group headers.
+   - **Command**: `/quieter`
+
+2. **Interaction Affordance on Presets**
+   - **What**: Volume presets (Freighter, DST, BR) look like labels rather than primary action buttons.
+   - **Why it matters**: Users might not realize they can click them to auto-fill volume, missing a core efficiency feature.
+   - **Fix**: Add a subtle gold hover state that is more distinct than the background, and perhaps a small "plus" or "fill" icon pattern.
+   - **Command**: `/delight`
+
+3. **Information Density in Results**
+   - **What**: The result area has a lot of vertical whitespace on 1080p screens.
+   - **Why it matters**: It feels slightly "empty" despite the premium theme, missing an opportunity to show more value (e.g., breakdown of collateral fees).
+   - **Fix**: Add a small, toggleable or always-visible "Fee Breakdown" micro-table in the result area.
+   - **Command**: `/distill`
+
+### Minor Observations
+- The "Mini-copy" buttons in the contract section are functionally great but could use a more "tactile" feel (active states).
+- The nebula background is beautiful but could be slightly dimmed to ensure the glass cards "pop" more effectively.
+
+### Questions to Consider
+- *What if the "Dangerous Space" toggle changed the entire card's accent color from Gold to a "Warning Red" or "Darker Gold"?*
+- *Could we integrate a "Contract Verification" checklist that appears once a reward is calculated?*
+- *Is the "Clear" button too prominent? Should it be a secondary action?*
