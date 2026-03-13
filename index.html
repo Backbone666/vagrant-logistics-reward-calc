@@ -43,7 +43,8 @@
 
       <main class="calculator-card">
         <div class="grid">
-          <section class="input-area">
+          <section class="input-area" role="group" aria-labelledby="input-area-title">
+            <h3 id="input-area-title" class="sr-only">Contract Details</h3>
             <div class="input-group">
               <label for="collateral">Collateral (ISK)</label>
               <input
@@ -52,8 +53,9 @@
                 placeholder="0"
                 class="to_format_number to_change"
                 autocomplete="off"
+                aria-describedby="collateral-hint"
               />
-              <div style="font-size: 0.85rem; margin-top: 5px; opacity: 0.7">
+              <div id="collateral-hint" style="font-size: 0.85rem; margin-top: 5px; opacity: 0.7">
                 <a
                   href="https://janice.e-351.com/"
                   target="_blank"
@@ -88,14 +90,14 @@
                 class="to_format_number to_change"
                 autocomplete="off"
               />
-              <div class="presets">
-                <button type="button" class="preset-btn" data-val="1,125,000">
+              <div class="presets" role="group" aria-label="Volume Presets">
+                <button type="button" class="preset-btn" data-val="1,125,000" aria-label="Set volume to Freighter (1,125,000 m³)">
                   Freighter
                 </button>
-                <button type="button" class="preset-btn" data-val="62,500">
+                <button type="button" class="preset-btn" data-val="62,500" aria-label="Set volume to Deep Space Transport (62,500 m³)">
                   DST
                 </button>
-                <button type="button" class="preset-btn" data-val="12,500">
+                <button type="button" class="preset-btn" data-val="12,500" aria-label="Set volume to Blockade Runner (12,500 m³)">
                   Blockade Runner
                 </button>
               </div>
@@ -110,11 +112,11 @@
             </div>
           </section>
 
-          <section class="result-area">
+          <section class="result-area" aria-live="polite">
             <div class="reward-display">
-              <div class="reward-label">Estimated Reward</div>
-              <div id="reward_output" class="reward-value">0 ISK</div>
-              <div id="reward_ipj_output" class="reward-ipj">0 ISK/Jump</div>
+              <div class="reward-label" id="reward-label">Estimated Reward</div>
+              <div id="reward_output" class="reward-value" aria-labelledby="reward-label">0 ISK</div>
+              <div id="reward_ipj_output" class="reward-ipj" aria-label="Reward per Jump">0 ISK/Jump</div>
               <div class="button-group">
                 <button type="button" id="copy_btn" class="btn-copy">
                   Copy Reward
@@ -136,6 +138,7 @@
                 type="button"
                 class="btn-mini-copy"
                 data-copy="Vagrant Logistics"
+                aria-label="Copy Vagrant Logistics name"
               >
                 Copy
               </button>

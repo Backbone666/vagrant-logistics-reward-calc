@@ -6,6 +6,29 @@ This document summarizes the development and features of the **Vagrant Logistics
 
 To create a "Gold Standard" calculator that reflects the prestigious and professional identity of Vagrant Logistics and The Charter alliance. The interface focuses on high-end aesthetics (Amarr Empire theme) combined with precise, real-time calculation logic.
 
+## Design Context
+
+### Users
+EVE Online haulers and players associated with "The Charter" alliance and Vagrant Logistics corporation. These users need to quickly and precisely calculate rewards for courier contracts, often while managing complex logistics in-game. The interface must be high-signal, allowing them to calculate quotes for HighSec or Dangerous space with confidence.
+
+### Brand Personality
+**Competent, Safe, Trustworthy.**
+The brand aims for a "Gold Standard" of professional hauling services. It reflects the prestige of the Amarr Empire and the elite status of its alliance.
+
+### Aesthetic Direction
+- **Theme**: Amarr Empire inspired (Gold, Burgundy, Onyx) with glassmorphism (semi-transparent cards, high-blur).
+- **Visual Tone**: Luxurious, technical, and precise.
+- **Typography**: Strictly 'EveSansNeue' (regular weight) for all text to ensure a unified, professional appearance.
+- **Avoid**: "AI-generated", "cheap", or "out-of-the-box" UI patterns. Avoid generic utility calculator looks.
+- **Optimized For**: 1080p high-definition displays (lock-to-window layout) and mobile accessibility.
+
+### Design Principles
+1. **Competence through Precision**: Deliver real-time, accurate calculations with immediate visual feedback. Never allow ambiguity in the quote.
+2. **Trust through Safety**: Clearly communicate all fees, especially collateral risk premiums and dangerous space surcharges, to ensure transparency between the hauler and the customer.
+3. **Imperial Prestige**: Maintain the high-end Amarr aesthetic consistently across all components. Gold should be used for highlights and primary branding, while Burgundy and Onyx provide depth and contrast.
+4. **Accessible In-Game Utility**: Ensure the interface is usable in typical EVE Online contexts, including low-light environments. Explicitly support users with red-green color blindness by using shape-based indicators or contrast-rich color pairings instead of relying solely on red/green cues.
+5. **Zero-Slop Implementation**: No placeholder or "filler" elements. Every pixel should serve a purpose, reflecting the high standards of the corporation.
+
 ## Key Features
 
 ### 1. Advanced Calculation Engine
@@ -79,5 +102,5 @@ To create a "Gold Standard" calculator that reflects the prestigious and profess
 
 ---
 
-_Documented by Gemini - 2026-01-26_
-_URGENT: JF rates require immediate correction - currently 6x higher than fork source_
+_Documented by Gemini - 2026-03-13_
+_Updated with Design Context from teacher-impeccable session_
