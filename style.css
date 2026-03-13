@@ -223,13 +223,21 @@ input[type="text"] {
 }
 
 input[type="text"]:focus {
-  outline: none;
+  outline: 2px solid var(--primary-gold);
+  outline-offset: 2px;
   background: rgba(255, 255, 255, 0.05);
   border-color: var(--primary-gold);
   box-shadow:
     0 0 20px var(--primary-gold-glow),
     inset 0 2px 4px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
+}
+
+/* High-contrast focus for all interactive elements */
+:focus-visible {
+  outline: 2px solid var(--bright-gold);
+  outline-offset: 4px;
+  box-shadow: 0 0 15px var(--primary-gold-glow);
 }
 
 .presets {
@@ -251,9 +259,13 @@ input[type="text"]:focus {
   text-transform: uppercase;
   letter-spacing: 0.15em;
   font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
-.preset-btn:hover {
+.preset-btn:hover, .preset-btn:focus-visible {
   background: var(--primary-gold);
   color: var(--onyx);
   border-color: var(--primary-gold);
@@ -357,12 +369,27 @@ input[type="text"]:focus {
   color: var(--primary-gold);
   line-height: 1.1;
   word-break: break-all;
+  overflow-wrap: break-word;
   text-shadow: 0 0 40px var(--primary-gold-glow);
   transition: var(--transition-smooth);
+  max-width: 100%;
 }
 
 .reward-value.updated {
   animation: rewardPulse 0.5s ease-out;
+}
+
+/* Screen Reader Only class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 .reward-ipj {
