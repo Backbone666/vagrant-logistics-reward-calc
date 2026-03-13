@@ -173,6 +173,9 @@
 
       let currentReward = 0;
 
+      // Memoized number formatter
+      const numberFormatter = new Intl.NumberFormat("en-US");
+
       const formatNumber = (val, allowDecimal = true) => {
         const regex = allowDecimal ? /[^0-9.]/g : /[^0-9]/g;
         let cleaned = val.toString().replace(regex, "");
@@ -189,12 +192,10 @@
         if (allowDecimal && cleaned.includes(".")) {
           const [integerPart, decimalPart] = cleaned.split(".");
           if (integerPart === "") return `.${decimalPart}`;
-          const formattedInteger = new Intl.NumberFormat("en-US").format(
-            integerPart,
-          );
+          const formattedInteger = numberFormatter.format(integerPart);
           return `${formattedInteger}.${decimalPart}`;
         } else {
-          return new Intl.NumberFormat("en-US").format(cleaned);
+          return numberFormatter.format(cleaned);
         }
       };
 
