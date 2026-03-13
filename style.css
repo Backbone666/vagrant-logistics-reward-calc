@@ -46,13 +46,16 @@ body {
   background-size: cover;
   color: var(--text-primary);
   line-height: 1.4;
-  height: 100vh;
+  min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   position: relative;
+  padding: var(--space-md) 0;
 }
 
 /* Nebula Overlay */
@@ -81,22 +84,24 @@ body::before {
 .container {
   width: 100%;
   max-width: 1100px;
-  padding: var(--space-sm) var(--space-lg);
+  padding: 0 var(--space-lg);
   z-index: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  flex: 1;
 }
 
 header {
   text-align: center;
-  margin-bottom: var(--space-xs);
+  margin-bottom: var(--space-sm);
   animation: slideDown 1s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .logo {
-  width: 70px;
-  height: 70px;
+  width: clamp(50px, 10vw, 70px);
+  height: auto;
+  aspect-ratio: 1/1;
   margin-bottom: var(--space-xs);
   transition: var(--transition-smooth);
   filter: drop-shadow(0 0 25px var(--primary-gold-glow));
@@ -104,7 +109,7 @@ header {
 
 h1 {
   font-family: var(--font-display);
-  font-size: 2.2rem;
+  font-size: clamp(1.5rem, 5vw, 2.2rem);
   font-weight: 400;
   color: white;
   text-transform: uppercase;
@@ -115,7 +120,7 @@ h1 {
 
 h2 {
   font-family: var(--font-display);
-  font-size: 0.8rem;
+  font-size: clamp(0.6rem, 2vw, 0.8rem);
   color: var(--primary-gold);
   letter-spacing: 0.5em;
   text-transform: uppercase;
@@ -129,18 +134,19 @@ h2 {
   -webkit-backdrop-filter: blur(25px);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  padding: var(--space-lg) var(--space-xl);
+  padding: clamp(var(--space-md), 5vw, var(--space-lg)) clamp(var(--space-md), 5vw, var(--space-xl));
   box-shadow:
     0 50px 100px rgba(0, 0, 0, 0.8),
     inset 0 0 50px hsla(45, 70%, 55%, 0.05);
   position: relative;
   overflow: visible;
   animation: cardFadeIn 1.4s cubic-bezier(0.23, 1, 0.32, 1);
+  width: 100%;
 }
 
 /* Footer Styles */
 .footer {
-  margin-top: var(--space-md);
+  margin-top: var(--space-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -152,6 +158,7 @@ h2 {
   letter-spacing: 0.15em;
   opacity: 0.8;
   transition: var(--transition-smooth);
+  padding-bottom: var(--space-md);
 }
 
 .footer-logo {
@@ -164,15 +171,23 @@ h2 {
 
 .grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--space-xl);
+}
+
+@media (max-width: 1024px) {
+  .grid {
+    gap: var(--space-lg);
+  }
 }
 
 @media (max-width: 960px) {
   body {
-    height: auto;
-    overflow-y: auto;
-    padding: var(--space-xl) var(--space-sm);
+    padding: var(--space-lg) 0;
+  }
+
+  .container {
+    padding: 0 var(--space-md);
   }
 
   .grid {
@@ -181,12 +196,18 @@ h2 {
   }
 
   .calculator-card {
-    padding: var(--space-md) var(--space-md);
+    padding: var(--space-lg) var(--space-md);
   }
 
   h1 {
-    font-size: 2.2rem;
     letter-spacing: 0.15em;
+  }
+}
+
+@media (max-height: 800px) {
+  body {
+    height: auto;
+    justify-content: flex-start;
   }
 }
 
@@ -247,6 +268,8 @@ input[type="text"] {
   font-family: var(--font-body);
   transition: var(--transition-smooth);
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 input[type="text"]:focus {
@@ -289,7 +312,9 @@ input[type="text"]:focus {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
+  flex: 1 1 auto;
+  min-width: 100px;
+  text-align: center;
 }
 
 .preset-btn:hover, .preset-btn:focus-visible {
@@ -314,6 +339,7 @@ input[type="text"]:focus {
   color: var(--text-secondary);
   letter-spacing: 0.1em;
   transition: var(--transition-smooth);
+  padding: var(--space-xs) 0;
 }
 
 .checkbox-item:hover {
@@ -325,13 +351,14 @@ input[type="text"]:focus {
 }
 
 .checkbox-custom {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border: 2px solid var(--primary-gold);
   margin-right: 15px;
   position: relative;
   transition: var(--transition-smooth);
   border-radius: 6px;
+  flex-shrink: 0;
 }
 
 .checkbox-item:hover .checkbox-custom {
@@ -363,6 +390,7 @@ input[type="text"]:focus {
   border-left: 1px solid hsla(45, 70%, 55%, 0.15);
   padding-left: var(--space-xl);
   text-align: center;
+  min-width: 0;
 }
 
 @media (max-width: 960px) {
@@ -391,7 +419,7 @@ input[type="text"]:focus {
 
 .reward-value {
   font-family: var(--font-display);
-  font-size: 2.2rem;
+  font-size: clamp(1.8rem, 8vw, 2.8rem);
   font-weight: 400;
   color: var(--primary-gold);
   line-height: 1.1;
@@ -403,7 +431,7 @@ input[type="text"]:focus {
 }
 
 .reward-value.small {
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 4vw, 1.4rem);
 }
 
 .reward-value.updated {
@@ -424,7 +452,7 @@ input[type="text"]:focus {
 }
 
 .reward-ipj {
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 3vw, 1.2rem);
   color: var(--text-secondary);
   opacity: 0.8;
   letter-spacing: 0.05em;
@@ -435,14 +463,19 @@ input[type="text"]:focus {
   gap: var(--space-sm);
   width: 100%;
   margin-top: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.btn-copy, .btn-clear {
+  padding: var(--space-sm) var(--space-md);
+  min-height: 44px;
 }
 
 .btn-copy {
-  flex: 2;
+  flex: 2 1 200px;
   background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
   color: var(--primary-gold);
   border: 1px solid var(--primary-gold);
-  padding: var(--space-sm);
   text-transform: uppercase;
   letter-spacing: 0.2em;
   font-weight: 400;
@@ -472,11 +505,10 @@ input[type="text"]:focus {
 }
 
 .btn-clear {
-  flex: 1;
+  flex: 1 1 100px;
   background: transparent;
   color: hsla(45, 70%, 55%, 0.6);
   border: 1px solid hsla(45, 70%, 55%, 0.3);
-  padding: var(--space-sm);
   text-transform: uppercase;
   letter-spacing: 0.2em;
   font-weight: 400;
@@ -535,7 +567,7 @@ input[type="text"]:focus {
 /* Contract Requirements Section */
 .contract-requirements {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--space-md);
   margin-top: var(--space-md);
   padding-top: var(--space-sm);
@@ -549,6 +581,9 @@ input[type="text"]:focus {
   border-radius: var(--radius-md);
   text-align: center;
   transition: var(--transition-smooth);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .req-label {
@@ -565,6 +600,7 @@ input[type="text"]:focus {
   font-size: 1rem;
   color: var(--primary-gold);
   letter-spacing: 0.05em;
+  word-break: break-all;
 }
 
 .req-value-box {
@@ -572,19 +608,21 @@ input[type="text"]:focus {
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
+  flex-wrap: wrap;
 }
 
 .btn-mini-copy {
   background: hsla(45, 70%, 55%, 0.1);
   border: 1px solid hsla(45, 70%, 55%, 0.2);
   color: var(--primary-gold);
-  padding: 0.3rem 0.6rem;
+  padding: 0.4rem 0.8rem;
   font-size: 0.65rem;
   border-radius: 4px;
   cursor: pointer;
   transition: var(--transition-smooth);
   text-transform: uppercase;
   letter-spacing: 0.1em;
+  min-height: 32px;
 }
 
 .btn-mini-copy:hover {
@@ -600,7 +638,7 @@ input[type="text"]:focus {
 
 @media (max-width: 960px) {
   .contract-requirements {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: var(--space-sm);
     margin-top: var(--space-lg);
   }
@@ -624,3 +662,4 @@ input[type="text"]:focus {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary-gold);
 }
+
