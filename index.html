@@ -274,6 +274,7 @@
         const reward = calcReward();
         currentReward = reward;
         const rawJumps = parseNum(jumpsInput.value) || 1;
+        const volumeStr = volumeInput.value;
         const routeSecurity = routeSecuritySelect.value;
         const calcCard = document.querySelector(".calculator-card");
 
@@ -283,6 +284,16 @@
         } else {
           calcCard.classList.remove("high-risk-mode");
         }
+
+        // Synchronize preset active states
+        document.querySelectorAll(".preset-btn").forEach((btn) => {
+          const btnVal = btn.getAttribute("data-val");
+          if (volumeStr === btnVal) {
+            btn.classList.add("active");
+          } else {
+            btn.classList.remove("active");
+          }
+        });
 
         // Trigger animation via class toggle without forcing reflow
         rewardOutput.classList.remove("updated");

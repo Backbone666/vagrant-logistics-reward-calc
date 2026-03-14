@@ -106,8 +106,9 @@ body::before {
 
 /* Accessibility: Skip to main content link */
 .skip-link {
-  background: var(--primary-gold);
-  color: var(--onyx);
+  background: var(--deep-burgundy);
+  color: var(--primary-gold);
+  border: 1px solid var(--primary-gold);
   padding: 1rem 2rem;
   border-radius: 0 0 var(--radius-md) var(--radius-md);
   text-decoration: none;
@@ -116,11 +117,13 @@ body::before {
   top: 0;
   left: 50%;
   transform: translateX(-50%) translateY(-100%);
-  transition: transform 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
 .skip-link:focus {
   transform: translateX(-50%) translateY(0);
+  outline: none;
 }
 
 .container {
@@ -550,6 +553,7 @@ select:focus {
   opacity: 0.8;
   letter-spacing: 0.05em;
   word-break: break-all;
+  overflow-wrap: break-word;
 }
 
 .button-group {
@@ -589,7 +593,10 @@ select:focus {
 }
 
 .btn-copy:active {
-  transform: translateY(-1px);
+  transform: translateY(-1px) scale(0.96);
+  background: var(--bright-gold);
+  color: var(--onyx);
+  transition: transform 0.1s;
 }
 
 .btn-copy.copied {
@@ -621,7 +628,7 @@ select:focus {
 }
 
 .btn-clear:active {
-  transform: translateY(-1px);
+  transform: translateY(-1px) scale(0.96);
 }
 
 /* Animations */
@@ -694,6 +701,10 @@ select:focus {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
+.req-card:active {
+  transform: translateY(-1px) scale(0.96);
+}
+
 .req-label {
   font-family: var(--font-display);
   font-size: 0.7rem;
@@ -747,7 +758,7 @@ dd.req-value {
 }
 
 .btn-mini-copy:active {
-  transform: scale(0.9);
+  transform: scale(0.96);
   background: var(--bright-gold);
   transition: transform 0.1s;
 }
@@ -784,4 +795,3 @@ dd.req-value {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary-gold);
 }
-
