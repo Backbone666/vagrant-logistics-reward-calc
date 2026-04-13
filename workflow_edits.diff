@@ -1,0 +1,56 @@
+<<<<<<< SEARCH
+      - name: 'Run Gemini pull request review'
+        uses: 'google-github-actions/run-gemini-cli@v0' # ratchet:exclude
+        id: 'gemini_pr_review'
+        env:
+=======
+      - name: 'Run Gemini pull request review'
+        uses: 'google-github-actions/run-gemini-cli@v0' # ratchet:exclude
+        id: 'gemini_pr_review'
+        if: |-
+          ${{ secrets.GEMINI_API_KEY || secrets.GOOGLE_API_KEY || vars.GCP_WIF_PROVIDER }}
+        env:
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+      - name: 'Run Gemini issue analysis'
+        id: 'gemini_analysis'
+        if: |-
+          ${{ steps.get_labels.outputs.available_labels != '' }}
+        uses: 'google-github-actions/run-gemini-cli@v0' # ratchet:exclude
+        env:
+=======
+      - name: 'Run Gemini issue analysis'
+        id: 'gemini_analysis'
+        if: |-
+          ${{ steps.get_labels.outputs.available_labels != '' && (secrets.GEMINI_API_KEY || secrets.GOOGLE_API_KEY || vars.GCP_WIF_PROVIDER) }}
+        uses: 'google-github-actions/run-gemini-cli@v0' # ratchet:exclude
+        env:
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+      - name: 'Run Gemini CLI'
+        id: 'run_gemini'
+        uses: 'google-github-actions/run-gemini-cli@v0' # ratchet:exclude
+        env:
+=======
+      - name: 'Run Gemini CLI'
+        id: 'run_gemini'
+        if: |-
+          ${{ secrets.GEMINI_API_KEY || secrets.GOOGLE_API_KEY || vars.GCP_WIF_PROVIDER }}
+        uses: 'google-github-actions/run-gemini-cli@v0' # ratchet:exclude
+        env:
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+      - name: 'Run Gemini Issue Analysis'
+        id: 'gemini_issue_analysis'
+        if: |-
+          ${{ steps.find_issues.outputs.issues_to_triage != '[]' }}
+        uses: 'google-github-actions/run-gemini-cli@v0' # ratchet:exclude
+        env:
+=======
+      - name: 'Run Gemini Issue Analysis'
+        id: 'gemini_issue_analysis'
+        if: |-
+          ${{ steps.find_issues.outputs.issues_to_triage != '[]' && (secrets.GEMINI_API_KEY || secrets.GOOGLE_API_KEY || vars.GCP_WIF_PROVIDER) }}
+        uses: 'google-github-actions/run-gemini-cli@v0' # ratchet:exclude
+        env:
+>>>>>>> REPLACE
