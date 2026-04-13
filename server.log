@@ -1,0 +1,4 @@
+127.0.0.1 - - [13/Apr/2026 20:31:48] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [13/Apr/2026 20:31:48] "GET /style.css HTTP/1.1" 200 -
+127.0.0.1 - - [13/Apr/2026 20:31:48] "GET /LW9R6.webp HTTP/1.1" 200 -
+127.0.0.1 - - [13/Apr/2026 20:31:49] "GET /evesansneue-regular.otf HTTP/1.1" 200 -

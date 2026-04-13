@@ -1,0 +1,79 @@
+<<<<<<< SEARCH
+            <div class="input-group">
+              <label for="collateral">Collateral (ISK)</label>
+              <input
+                id="collateral"
+                type="text"
+                placeholder="0"
+                class="to_format_number to_change"
+                autocomplete="off"
+                aria-describedby="collateral-hint"
+              />
+=======
+            <div class="input-group">
+              <label for="collateral">Collateral (ISK)</label>
+              <input
+                id="collateral"
+                type="text"
+                inputmode="decimal"
+                placeholder="0"
+                class="to_format_number to_change"
+                autocomplete="off"
+                aria-describedby="collateral-hint"
+              />
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            <div class="input-group">
+              <label for="jumps">Number of Jumps</label>
+              <input
+                id="jumps"
+                type="text"
+                placeholder="0"
+                class="to_format_number to_change"
+                autocomplete="off"
+              />
+            </div>
+=======
+            <div class="input-group">
+              <label for="jumps">Number of Jumps</label>
+              <input
+                id="jumps"
+                type="text"
+                inputmode="numeric"
+                placeholder="0"
+                class="to_format_number to_change"
+                autocomplete="off"
+                aria-describedby="jumps-hint"
+              />
+              <div id="jumps-hint" class="input-hint">
+                <a
+                  href="https://evemaps.dotlan.net/route"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Use Dotlan to plan your route.</a
+                >
+              </div>
+            </div>
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+            <div class="input-group">
+              <label for="volume">Volume (m³)</label>
+              <input
+                id="volume"
+                type="text"
+                placeholder="0"
+                class="to_format_number to_change"
+                autocomplete="off"
+              />
+=======
+            <div class="input-group">
+              <label for="volume">Volume (m³)</label>
+              <input
+                id="volume"
+                type="text"
+                inputmode="decimal"
+                placeholder="0"
+                class="to_format_number to_change"
+                autocomplete="off"
+              />
+>>>>>>> REPLACE
