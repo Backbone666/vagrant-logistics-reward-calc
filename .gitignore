@@ -9,3 +9,5 @@ node_modules/
 package-lock.json
 pnpm-lock.yaml
 conductor/dangerous-space-pricing.md
+/plans
+skills-lock.json
