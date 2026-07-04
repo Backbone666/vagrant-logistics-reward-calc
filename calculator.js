@@ -48,7 +48,6 @@ export function calcRewardDetails({
 	collateral,
 	highsecJumps,
 	dangerousJumps,
-	insurgency,
 	rush,
 	forceJF,
 	config,
@@ -84,19 +83,6 @@ export function calcRewardDetails({
 		return {
 			error: true,
 			message: `Cargo volume exceeds maximum limits. Please split the cargo into multiple contracts. Max volume is ${maxVol} m³.`,
-		};
-	}
-
-	// 2. Insurgency Corruption Check
-	if (
-		insurgency &&
-		serviceClass !== "dangerous_space_services.jump_freighter_standard"
-	) {
-		return {
-			error: true,
-			isBlocked: true,
-			message:
-				"Route blocked due to critical pirate insurgency corruption (Stage 4/5). Please reroute or request a Jump Freighter contract.",
 		};
 	}
 
@@ -320,9 +306,6 @@ export function calcRewardDetails({
 export function calcReward(options, config) {
 	const details = calcRewardDetails({ ...options, config });
 	if (details.error) {
-		if (details.isBlocked) {
-			return "Insurgency Blocked";
-		}
 		return 0;
 	}
 	if (details.isRedirect) {

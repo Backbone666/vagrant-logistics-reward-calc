@@ -72,18 +72,6 @@
               </div>
             </div>
 
-            <div class="input-group">
-              <label for="raw_items">Raw Items (Appraisal Simulator)</label>
-              <textarea
-                id="raw_items"
-                placeholder="Paste EVE items copy-paste block here to simulate Janice Appraisal API evaluation..."
-                style="width: 100%; height: 75px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: var(--radius-md); padding: var(--space-xs); color: white; font-family: var(--font-body); resize: vertical;"
-              ></textarea>
-              <button type="button" id="appraise_btn" class="preset-btn" style="margin-top: 6px; width: 100%; border-radius: var(--radius-md);">
-                Appraise Pasted Items
-              </button>
-            </div>
-
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-sm);">
               <div class="input-group">
                 <label for="highsec_jumps">Highsec Jumps</label>
@@ -134,11 +122,6 @@
 
             <div style="display: flex; flex-direction: column; gap: var(--space-xs); margin-top: var(--space-xs);">
               <label class="checkbox-item">
-                <input type="checkbox" id="insurgency" class="to_change" />
-                <span class="checkbox-custom"></span>
-                Active Insurgency (Stage 4/5)
-              </label>
-              <label class="checkbox-item">
                 <input type="checkbox" id="rush" class="to_change" />
                 <span class="checkbox-custom"></span>
                 Rush Service
@@ -156,10 +139,6 @@
               <div class="reward-label" id="reward-label">Estimated Reward</div>
               <div id="reward_output" class="reward-value" aria-labelledby="reward-label">0 ISK</div>
               <div id="reward_ipj_output" class="reward-ipj" aria-label="Reward per Jump">0 ISK/Jump</div>
-
-              <div id="blocked_alert" class="high-risk-alert hidden" style="border-color: #ff4d4d; background: rgba(255, 77, 77, 0.1);" role="alert">
-                ⚠️ ROUTE BLOCKED: Insurgency Corruption Stage 4/5
-              </div>
 
               <div id="fee_breakdown" class="fee-breakdown hidden">
                 <div class="breakdown-title">Quote Breakdown</div>
@@ -238,12 +217,9 @@
       import { calcReward, calcRewardDetails, parseNum } from "./calculator.js";
 
       const collateralInput = document.getElementById("collateral");
-      const rawItemsTextarea = document.getElementById("raw_items");
-      const appraiseBtn = document.getElementById("appraise_btn");
       const highsecJumpsInput = document.getElementById("highsec_jumps");
       const dangerousJumpsInput = document.getElementById("dangerous_jumps");
       const volumeInput = document.getElementById("volume");
-      const insurgencyCheckbox = document.getElementById("insurgency");
       const rushCheckbox = document.getElementById("rush");
       const forceJfCheckbox = document.getElementById("force_jf");
       
@@ -292,71 +268,6 @@
         }
       };
 
-      // Simple string hashing helper for EVE item appraisal mock simulation
-      function getStringHash(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-          hash = (hash << 5) - hash + str.charCodeAt(i);
-          hash |= 0;
-        }
-        return Math.abs(hash);
-      }
-
-      // Appraise Raw Items Pasted from clipboard
-      appraiseBtn.addEventListener("click", () => {
-        const text = rawItemsTextarea.value.trim();
-        if (!text) {
-          alert("Please paste EVE Online item copy block.");
-          return;
-        }
-
-        appraiseBtn.textContent = "Querying Appraisal API...";
-        appraiseBtn.disabled = true;
-
-        setTimeout(() => {
-          const lines = text.split("\n");
-          let totalVolume = 0;
-          let totalCollateral = 0;
-
-          for (const line of lines) {
-            const cleanLine = line.trim();
-            if (!cleanLine) continue;
-
-            // Simple parsing to match quantity
-            const parts = cleanLine.split(/\t+/);
-            const itemName = parts[0] || "Unknown Item";
-            
-            let quantity = 1;
-            for (let i = 1; i < parts.length; i++) {
-              const num = parseInt(parts[i].replace(/,/g, ""), 10);
-              if (!Number.isNaN(num) && num > 0) {
-                quantity = num;
-                break;
-              }
-            }
-
-            // Estimate base collateral/volume based on hash of item name
-            const itemHash = getStringHash(itemName);
-            const mockUnitVal = (itemHash % 20) * 100000 + 5000; 
-            const mockUnitVol = (itemHash % 10) * 0.1 + 0.01;
-
-            totalCollateral += mockUnitVal * quantity;
-            totalVolume += mockUnitVol * quantity;
-          }
-
-          collateralInput.value = formatNumber(Math.ceil(totalCollateral));
-          volumeInput.value = formatNumber(Math.ceil(totalVolume * 100) / 100);
-          
-          appraiseBtn.textContent = "Appraisal Applied!";
-          setTimeout(() => {
-            appraiseBtn.textContent = "Appraise Pasted Items";
-            appraiseBtn.disabled = false;
-          }, 1500);
-
-          updateAll();
-        }, 800);
-      });
-
       function updateAll() {
         if (!config) return;
 
@@ -365,7 +276,6 @@
           collateral: collateralInput.value,
           highsecJumps: highsecJumpsInput.value,
           dangerousJumps: dangerousJumpsInput.value,
-          insurgency: insurgencyCheckbox.checked,
           rush: rushCheckbox.checked,
           forceJF: forceJfCheckbox.checked,
         };
@@ -377,15 +287,6 @@
 
         const rawJumps = (parseNum(highsecJumpsInput.value) + parseNum(dangerousJumpsInput.value)) || 1;
         const volumeStr = volumeInput.value;
-        const _calcCard = document.querySelector(".calculator-card");
-
-        // High-risk warning handling
-        const blockedAlert = document.getElementById("blocked_alert");
-        if (details.error && details.isBlocked) {
-          blockedAlert.classList.remove("hidden");
-        } else {
-          blockedAlert.classList.add("hidden");
-        }
 
         // Breakdown table update
         const feeBreakdown = document.getElementById("fee_breakdown");
@@ -431,12 +332,6 @@
           } else {
             btn.classList.remove("active");
           }
-        });
-
-        // Trigger animation
-        rewardOutput.classList.remove("updated");
-        requestAnimationFrame(() => {
-          rewardOutput.classList.add("updated");
         });
 
         // Reset classes
@@ -503,7 +398,6 @@
       });
 
       document.querySelectorAll(".preset-btn").forEach((btn) => {
-        if (btn.id === "appraise_btn") return;
         btn.addEventListener("click", () => {
           document.querySelectorAll(".preset-btn").forEach(b => { b.classList.remove("active"); });
           btn.classList.add("active");
@@ -543,11 +437,9 @@
 
       clearBtn.addEventListener("click", () => {
         collateralInput.value = "";
-        rawItemsTextarea.value = "";
         highsecJumpsInput.value = "";
         dangerousJumpsInput.value = "";
         volumeInput.value = "";
-        insurgencyCheckbox.checked = false;
         rushCheckbox.checked = false;
         forceJfCheckbox.checked = false;
         updateAll();

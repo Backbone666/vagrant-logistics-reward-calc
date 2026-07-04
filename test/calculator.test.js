@@ -88,20 +88,6 @@ test("Test 6: Jump Freighter (Volume 200k, HS Jumps 0, Dangerous Jumps 10, Colla
 	assert.equal(result, 650_000_000);
 });
 
-test("Test 7: Insurgency Warning Block", () => {
-	const result = calcReward(
-		{
-			volume: "50,000",
-			highsecJumps: "0",
-			dangerousJumps: "10",
-			collateral: "2,000,000,000",
-			insurgency: true,
-		},
-		config,
-	);
-	assert.equal(result, "Insurgency Blocked");
-});
-
 test("Test 8: Highsec Sub-Capital > 10B Collateral Redirect", () => {
 	const result = calcReward(
 		{
