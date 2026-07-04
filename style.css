@@ -389,13 +389,13 @@ select:focus {
 }
 
 .high-risk-mode {
-	border-color: #ff4d4d !important;
-	box-shadow: 0 0 30px rgba(255, 77, 77, 0.3) !important;
+	border-color: #ff4d4d;
+	box-shadow: 0 0 30px rgba(255, 77, 77, 0.3);
 }
 
 .high-risk-mode .reward-value {
-	color: #ff4d4d !important;
-	text-shadow: 0 0 40px rgba(255, 77, 77, 0.5) !important;
+	color: #ff4d4d;
+	text-shadow: 0 0 40px rgba(255, 77, 77, 0.5);
 }
 
 /* High-contrast focus for all interactive elements */
@@ -552,7 +552,6 @@ select:focus {
 }
 
 .reward-label {
-
 	font-size: 0.9rem;
 	color: var(--text-secondary);
 	text-transform: uppercase;
@@ -560,7 +559,6 @@ select:focus {
 }
 
 .reward-value {
-
 	font-size: clamp(1.6rem, 6vw, 2.2rem);
 	font-weight: 400;
 	color: var(--primary-gold);
@@ -754,7 +752,6 @@ select:focus {
 }
 
 .req-label {
-
 	font-size: 0.7rem;
 	color: var(--text-secondary);
 	text-transform: uppercase;
@@ -764,7 +761,6 @@ select:focus {
 }
 
 .req-value {
-
 	font-size: 1rem;
 	color: var(--primary-gold);
 	letter-spacing: 0.05em;
@@ -871,7 +867,6 @@ dd.req-value {
 }
 
 .breakdown-title {
-
 	color: var(--primary-gold);
 	text-transform: uppercase;
 	letter-spacing: 0.15em;
@@ -899,5 +894,5 @@ dd.req-value {
 }
 
 .hidden {
-	display: none !important;
+	display: none;
 }
