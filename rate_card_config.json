@@ -1,0 +1,78 @@
+{
+	"service_provider": "Vagrant Logistics",
+	"effective_period": "2026_2027",
+	"currency": "ISK",
+	"highsec_services": {
+		"blockade_runner_dst": {
+			"hull_class": "BR / DST Highsec Standard",
+			"max_volume_m3": 62500,
+			"calculation_type": "jump_based",
+			"base_rate_per_jump": 1500000,
+			"minimum_contract_fee": 4500000,
+			"collateral_brackets": [
+				{ "max_collateral_isk": 1500000000, "multiplier": 1.0, "surcharge": 0 },
+				{ "max_collateral_isk": 2000000000, "multiplier": 1.8, "surcharge": 0 },
+				{ "max_collateral_isk": 3000000000, "multiplier": 2.2, "surcharge": 0 },
+				{ "max_collateral_isk": 5000000000, "multiplier": 4.0, "surcharge": 0 },
+				{
+					"max_collateral_isk": 10000000000,
+					"multiplier": 4.0,
+					"surcharge": 12000000
+				}
+			]
+		},
+		"freighter_standard": {
+			"hull_class": "Freighter / Bowhead / Avalanche",
+			"max_volume_m3": 950000,
+			"calculation_type": "jump_based",
+			"base_rate_per_jump": 1750000,
+			"minimum_contract_fee": 10000000,
+			"collateral_brackets": [
+				{ "max_collateral_isk": 1500000000, "multiplier": 1.0 },
+				{ "max_collateral_isk": 3000000000, "multiplier": 1.8 },
+				{ "max_collateral_isk": 5000000000, "multiplier": 3.5 }
+			]
+		}
+	},
+	"dangerous_space_services": {
+		"blockade_runner_stargate": {
+			"region": "Lowsec / NPC Nullsec Stargate",
+			"hull_class": "Blockade Runner",
+			"max_volume_m3": 12500,
+			"base_rate_per_jump_dangerous": 3000000,
+			"base_rate_per_jump_highsec": 1500000,
+			"max_collateral_isk": 5000000000,
+			"collateral_surcharge_per_1b": 35000000
+		},
+		"scouted_dst_stargate": {
+			"region": "Lowsec / Selected Nullsec Stargate (Scouted)",
+			"hull_class": "Deep Space Transport",
+			"max_volume_m3": 62500,
+			"base_rate_per_jump_dangerous": 10000000,
+			"base_rate_per_jump_highsec": 2000000,
+			"max_collateral_isk": 3000000000,
+			"collateral_surcharge_per_1b": 80000000
+		},
+		"jump_freighter_standard": {
+			"region": "Cynosural Jump Network",
+			"hull_class": "Jump Freighter",
+			"max_volume_m3": 360000,
+			"base_rate_isk": 150000000,
+			"cyno_jump_fee_isk": 50000000,
+			"max_collateral_isk": 50000000000,
+			"collateral_brackets": [
+				{ "max_collateral_isk": 5000000000, "surcharge_isk": 0 },
+				{ "max_collateral_isk": 10000000000, "surcharge_isk": 30000000 },
+				{ "max_collateral_isk": 20000000000, "surcharge_isk": 150000000 },
+				{ "max_collateral_isk": 30000000000, "surcharge_isk": 300000000 },
+				{ "max_collateral_isk": 40000000000, "surcharge_isk": 450000000 },
+				{ "max_collateral_isk": 50000000000, "surcharge_isk": 650000000 }
+			]
+		}
+	},
+	"operational_modifiers": {
+		"insurgency_corruption_max": 4,
+		"rush_surcharge_subcapital": 45000000,
+		"rush_surcharge_jf": 150000000
+	}
+}

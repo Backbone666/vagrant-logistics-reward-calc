@@ -1,133 +1,131 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import test from "node:test";
-import { calcReward, calcRewardDetails } from "../calculator.js";
+import { calcReward } from "../calculator.js";
 
-test("Test 1: BR Highsec (Small Package)", () => {
-	const result = calcReward({
-		volume: "10,000",
-		jumps: "10",
-		collateral: "500,000,000",
-		routeSecurity: "highsec",
-	});
-	assert.equal(result, 11_000_000);
+const config = JSON.parse(
+	fs.readFileSync(
+		new URL("../rate_card_config.json", import.meta.url),
+		"utf-8",
+	),
+);
+
+test("Test 1: BR/DST Highsec (Volume 10k, Jumps 10, Collateral 500M)", () => {
+	const result = calcReward(
+		{
+			volume: "10,000",
+			highsecJumps: "10",
+			dangerousJumps: "0",
+			collateral: "500,000,000",
+		},
+		config,
+	);
+	assert.equal(result, 15_000_000);
 });
 
-test("Test 2: DST Highsec (Medium Package)", () => {
-	const result = calcReward({
-		volume: "50,000",
-		jumps: "10",
-		collateral: "500,000,000",
-		routeSecurity: "highsec",
-	});
-	assert.equal(result, 20_000_000);
+test("Test 2: BR/DST Highsec with Collateral (Volume 50k, Jumps 10, Collateral 2B)", () => {
+	const result = calcReward(
+		{
+			volume: "50,000",
+			highsecJumps: "10",
+			dangerousJumps: "0",
+			collateral: "2,000,000,000",
+		},
+		config,
+	);
+	assert.equal(result, 27_000_000);
 });
 
-test("Test 3: Freighter Highsec (Large Package)", () => {
-	const result = calcReward({
-		volume: "500,000",
-		jumps: "10",
-		collateral: "1,000,000,000",
-		routeSecurity: "highsec",
-	});
-	assert.equal(result, 33_000_000);
+test("Test 3: Freighter Highsec (Volume 500k, Jumps 10, Collateral 1B)", () => {
+	const result = calcReward(
+		{
+			volume: "500,000",
+			highsecJumps: "10",
+			dangerousJumps: "0",
+			collateral: "1,000,000,000",
+		},
+		config,
+	);
+	assert.equal(result, 17_500_000);
 });
 
-test("Test 4: DST Highsec with Collateral (1-3B tier)", () => {
-	const result = calcReward({
-		volume: "50,000",
-		jumps: "10",
-		collateral: "2,000,000,000",
-		routeSecurity: "highsec",
-	});
-	assert.equal(result, 26_000_000);
+test("Test 4: BR Lowsec (Volume 10k, HS Jumps 0, Dangerous Jumps 10, Collateral 500M)", () => {
+	const result = calcReward(
+		{
+			volume: "10,000",
+			highsecJumps: "0",
+			dangerousJumps: "10",
+			collateral: "500,000,000",
+		},
+		config,
+	);
+	assert.equal(result, 47_500_000);
 });
 
-test("Test 5: DST Highsec with Collateral (3-5B tier)", () => {
-	const result = calcReward({
-		volume: "50,000",
-		jumps: "10",
-		collateral: "4,000,000,000",
-		routeSecurity: "highsec",
-	});
-	assert.equal(result, 40_000_000);
+test("Test 5: DST Lowsec (Volume 50k, HS Jumps 0, Dangerous Jumps 10, Collateral 2B)", () => {
+	const result = calcReward(
+		{
+			volume: "50,000",
+			highsecJumps: "0",
+			dangerousJumps: "10",
+			collateral: "2,000,000,000",
+		},
+		config,
+	);
+	assert.equal(result, 260_000_000);
 });
 
-test("Test 6: BR Lowsec", () => {
-	const result = calcReward({
-		volume: "10,000",
-		jumps: "10",
-		collateral: "500,000,000",
-		routeSecurity: "dangerous",
-	});
-	assert.equal(result, 30_000_000);
+test("Test 6: Jump Freighter (Volume 200k, HS Jumps 0, Dangerous Jumps 10, Collateral 2B)", () => {
+	const result = calcReward(
+		{
+			volume: "200,000",
+			highsecJumps: "0",
+			dangerousJumps: "10",
+			collateral: "2,000,000,000",
+		},
+		config,
+	);
+	assert.equal(result, 650_000_000);
 });
 
-test("Test 7: DST Lowsec (Our Competitive Advantage)", () => {
-	const result = calcReward({
-		volume: "50,000",
-		jumps: "10",
-		collateral: "2,000,000,000",
-		routeSecurity: "dangerous",
-	});
-	assert.equal(result, 76_000_000);
+test("Test 7: Insurgency Warning Block", () => {
+	const result = calcReward(
+		{
+			volume: "50,000",
+			highsecJumps: "0",
+			dangerousJumps: "10",
+			collateral: "2,000,000,000",
+			insurgency: true,
+		},
+		config,
+	);
+	assert.equal(result, "Insurgency Blocked");
 });
 
-test("Test 8: JF (CORRECTED PRICING)", () => {
-	const result = calcReward({
-		volume: "200,000",
-		jumps: "10",
-		collateral: "2,000,000,000",
-		routeSecurity: "dangerous",
-	});
-	assert.equal(result, 506_000_000);
-});
-
-test("Test 9: Over 5B Collateral", () => {
-	const result = calcReward({
-		volume: "50,000",
-		jumps: "10",
-		collateral: "6,000,000,000",
-		routeSecurity: "highsec",
-	});
+test("Test 8: Highsec Sub-Capital > 10B Collateral Redirect", () => {
+	const result = calcReward(
+		{
+			volume: "50,000",
+			highsecJumps: "10",
+			dangerousJumps: "0",
+			collateral: "11,000,000,000",
+		},
+		config,
+	);
 	assert.equal(result, "Risako Hirano");
 });
 
-test("Test calcRewardDetails breakdown", () => {
-	const result = calcRewardDetails({
-		volume: "50,000",
-		jumps: "10",
-		collateral: "2,000,000,000",
-		routeSecurity: "dangerous",
-	});
-	assert.deepEqual(result, {
-		isRedirect: false,
-		total: 76_000_000,
-		baseFee: 20_000_000,
-		distanceFee: 50_000_000,
-		collateralFee: 6_000_000,
-		riskMultiplier: 1.0,
-	});
-});
-
-test("Test calcRewardDetails error", () => {
-	const result = calcRewardDetails({
-		volume: "0",
-		jumps: "10",
-		collateral: "2,000,000,000",
-		routeSecurity: "dangerous",
-	});
-	assert.deepEqual(result, { error: true });
-});
-
-test("Test calcRewardDetails redirect", () => {
-	const result = calcRewardDetails({
-		volume: "50,000",
-		jumps: "10",
-		collateral: "6,000,000,000",
-		routeSecurity: "dangerous",
-	});
-	assert.deepEqual(result, {
-		isRedirect: true,
-		redirectTarget: "Risako Hirano",
-	});
+test("Test 9: Jump Freighter Rush Service", () => {
+	const result = calcReward(
+		{
+			volume: "200,000",
+			highsecJumps: "0",
+			dangerousJumps: "10",
+			collateral: "2,000,000,000",
+			rush: true,
+		},
+		config,
+	);
+	// 150M Base + 500M Jump + 0 Collateral + 150M Rush Surcharge = 800M
+	assert.equal(result, 800_000_000);
 });
