@@ -1,4 +1,10 @@
 {
+	"type": "module",
+	"scripts": {
+		"test": "node test/calculator.test.js",
+		"lint": "biome check .",
+		"format": "biome format --write ."
+	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.14",
 		"tscanner": "^0.1.3"

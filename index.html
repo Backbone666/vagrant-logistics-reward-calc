@@ -9,6 +9,12 @@
       type="image/png"
       href="https://images.evetech.net/corporations/98403600/logo"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="style.css" />
     <meta
       name="description"
@@ -125,6 +131,32 @@
               <div class="reward-label" id="reward-label">Estimated Reward</div>
               <div id="reward_output" class="reward-value" aria-labelledby="reward-label">0 ISK</div>
               <div id="reward_ipj_output" class="reward-ipj" aria-label="Reward per Jump">0 ISK/Jump</div>
+
+              <div id="high_risk_alert" class="high-risk-alert hidden" role="alert">
+                ⚠️ HIGH-RISK ZONE ACTIVE (1.5x Surcharge Applied)
+              </div>
+
+              <div id="fee_breakdown" class="fee-breakdown hidden">
+                <div class="breakdown-title">Quote Breakdown</div>
+                <div class="breakdown-grid">
+                  <div class="breakdown-row">
+                    <span>Base Transport:</span>
+                    <span id="bd_base">0 ISK</span>
+                  </div>
+                  <div class="breakdown-row">
+                    <span>Distance Jumps:</span>
+                    <span id="bd_distance">0 ISK</span>
+                  </div>
+                  <div class="breakdown-row">
+                    <span>Collateral Fee:</span>
+                    <span id="bd_collateral">0 ISK</span>
+                  </div>
+                  <div class="breakdown-row highlight">
+                    <span>Risk Surcharge:</span>
+                    <span id="bd_security">1.0x</span>
+                  </div>
+                </div>
+              </div>
               <div class="button-group">
                 <button type="button" id="copy_btn" class="btn-copy">
                   Copy Reward
@@ -173,7 +205,9 @@
       </footer>
     </div>
 
-    <script>
+    <script type="module">
+      import { calcReward, calcRewardDetails, parseNum } from "./calculator.js";
+
       const collateralInput = document.getElementById("collateral");
       const jumpsInput = document.getElementById("jumps");
       const volumeInput = document.getElementById("volume");
@@ -211,80 +245,24 @@
         }
       };
 
-      const parseNum = (val) => parseFloat(val.replace(/,/g, "")) || 0;
 
-      function calcReward() {
-        const volume = parseNum(volumeInput.value);
-        const jumps = parseNum(jumpsInput.value);
-        const collateral = parseNum(collateralInput.value);
-        const routeSecurity = routeSecuritySelect.value;
-
-        // 1. Global Collateral Cap
-        if (collateral > 5_000_000_000) return "Risako Hirano";
-
-        // 2. Basic Validation
-        if (volume <= 0 || jumps <= 0 || collateral < 0) return 0;
-
-        let baseFee = 0;
-        let ratePerJump = 0;
-        let riskMultiplier = 1.0;
-
-        // 3. Service Tier Logic
-        if (routeSecurity === "highsec") {
-          // --- HIGH SECURITY (Highsec) ---
-          if (volume <= 12_500) {
-            // BLOCKADE RUNNER (BR)
-            baseFee = 5_000_000;
-            ratePerJump = 900_000;
-          } else if (volume <= 62_500) {
-            // DEEP SPACE TRANSPORT (DST)
-            baseFee = 10_000_000;
-            ratePerJump = 1_250_000;
-          } else if (volume <= 1_125_000) {
-            // FREIGHTER
-            baseFee = 25_000_000;
-            ratePerJump = 2_000_000;
-          } else {
-            return "Max Volume 1,125,000 m³";
-          }
-        } else if (routeSecurity === "dangerous" || routeSecurity === "high_risk") {
-          // --- DANGEROUS SPACE (Lowsec / Nullsec) ---
-          if (routeSecurity === "high_risk") riskMultiplier = 1.5;
-
-          if (volume <= 12_500) {
-            // BLOCKADE RUNNER (BR)
-            baseFee = 15_000_000;
-            ratePerJump = 2_000_000;
-          } else if (volume <= 62_500) {
-            // DEEP SPACE TRANSPORT (DST)
-            baseFee = 25_000_000;
-            ratePerJump = 6_000_000;
-          } else if (volume <= 360_000) {
-            // JUMP FREIGHTER (JF)
-            baseFee = 150_000_000;
-            ratePerJump = 35_000_000;
-          } else {
-            return "Max Volume 360,000 m³ (JF)";
-          }
-        }
-
-        // 4. Calculate Transport Cost with Multipliers
-        let totalReward = (baseFee + jumps * ratePerJump) * riskMultiplier;
-
-        // 5. Collateral Fee Schedule (Global)
-        if (collateral > 1_000_000_000 && collateral <= 3_000_000_000) {
-          totalReward += collateral * 0.003;
-        } else if (collateral > 3_000_000_000) {
-          totalReward += collateral * 0.005;
-        }
-
-        // 6. Minimum Reward Floor
-        return Math.max(baseFee, totalReward);
-      }
 
       function updateAll() {
-        const reward = calcReward();
+        const reward = calcReward({
+          volume: volumeInput.value,
+          jumps: jumpsInput.value,
+          collateral: collateralInput.value,
+          routeSecurity: routeSecuritySelect.value
+        });
         currentReward = reward;
+        
+        const details = calcRewardDetails({
+          volume: volumeInput.value,
+          jumps: jumpsInput.value,
+          collateral: collateralInput.value,
+          routeSecurity: routeSecuritySelect.value
+        });
+
         const rawJumps = parseNum(jumpsInput.value) || 1;
         const volumeStr = volumeInput.value;
         const routeSecurity = routeSecuritySelect.value;
@@ -295,6 +273,40 @@
           calcCard.classList.add("high-risk-mode");
         } else {
           calcCard.classList.remove("high-risk-mode");
+        }
+
+        // Colorblind accessible warning
+        const highRiskAlert = document.getElementById("high_risk_alert");
+        if (routeSecurity === "high_risk" && !details.error && !details.isRedirect) {
+          highRiskAlert.classList.remove("hidden");
+        } else {
+          highRiskAlert.classList.add("hidden");
+        }
+
+        // Breakdown table update
+        const feeBreakdown = document.getElementById("fee_breakdown");
+        if (details.error || details.isRedirect) {
+          feeBreakdown.classList.add("hidden");
+          
+          if (details.isRedirect && details.redirectTarget === "Risako Hirano") {
+            copyBtn.disabled = false;
+            copyBtn.style.opacity = "1";
+            copyBtn.style.cursor = "pointer";
+          } else {
+            copyBtn.disabled = true;
+            copyBtn.style.opacity = "0.5";
+            copyBtn.style.cursor = "not-allowed";
+          }
+        } else {
+          feeBreakdown.classList.remove("hidden");
+          document.getElementById("bd_base").textContent = `${formatNumber(details.baseFee)} ISK`;
+          document.getElementById("bd_distance").textContent = `${formatNumber(details.distanceFee)} ISK`;
+          document.getElementById("bd_collateral").textContent = `${formatNumber(details.collateralFee)} ISK`;
+          document.getElementById("bd_security").textContent = `${details.riskMultiplier}x`;
+
+          copyBtn.disabled = false;
+          copyBtn.style.opacity = "1";
+          copyBtn.style.cursor = "pointer";
         }
 
         // Synchronize preset active states
