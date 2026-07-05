@@ -172,6 +172,9 @@
                 <button type="button" id="copy_btn" class="btn-copy">
                   Copy Reward
                 </button>
+                <button type="button" id="copy_quote_btn" class="btn-copy">
+                  Copy Full Quote
+                </button>
                 <button type="button" id="clear_btn" class="btn-clear">
                   Clear
                 </button>
@@ -229,6 +232,7 @@
       const rewardOutput = document.getElementById("reward_output");
       const rewardIpjOutput = document.getElementById("reward_ipj_output");
       const copyBtn = document.getElementById("copy_btn");
+      const copyQuoteBtn = document.getElementById("copy_quote_btn");
       const clearBtn = document.getElementById("clear_btn");
 
       let currentReward = 0;
@@ -325,6 +329,26 @@
       function updateAll() {
         if (!config) return;
 
+        // Update URL params
+        const url = new URL(window.location);
+        const params = {
+          c: collateralInput.value.replace(/,/g, ""),
+          hj: highsecJumpsInput.value.replace(/,/g, ""),
+          dj: dangerousJumpsInput.value.replace(/,/g, ""),
+          v: volumeInput.value.replace(/,/g, ""),
+          r: rushCheckbox.checked ? "1" : "",
+          jf: forceJfCheckbox.checked ? "1" : "",
+        };
+
+        for (const [key, val] of Object.entries(params)) {
+          if (val) {
+            url.searchParams.set(key, val);
+          } else {
+            url.searchParams.delete(key);
+          }
+        }
+        window.history.replaceState({}, "", url.toString());
+
         const options = {
           volume: volumeInput.value,
           collateral: collateralInput.value,
@@ -350,10 +374,16 @@
             copyBtn.disabled = false;
             copyBtn.style.opacity = "1";
             copyBtn.style.cursor = "pointer";
+            copyQuoteBtn.disabled = false;
+            copyQuoteBtn.style.opacity = "1";
+            copyQuoteBtn.style.cursor = "pointer";
           } else {
             copyBtn.disabled = true;
             copyBtn.style.opacity = "0.5";
             copyBtn.style.cursor = "not-allowed";
+            copyQuoteBtn.disabled = true;
+            copyQuoteBtn.style.opacity = "0.5";
+            copyQuoteBtn.style.cursor = "not-allowed";
           }
         } else {
           feeBreakdown.classList.remove("hidden");
@@ -375,6 +405,9 @@
           copyBtn.disabled = false;
           copyBtn.style.opacity = "1";
           copyBtn.style.cursor = "pointer";
+          copyQuoteBtn.disabled = false;
+          copyQuoteBtn.style.opacity = "1";
+          copyQuoteBtn.style.cursor = "pointer";
         }
 
         // Synchronize preset active states
@@ -488,6 +521,51 @@
         }
       });
 
+      copyQuoteBtn.addEventListener("click", async () => {
+        const originalText = copyQuoteBtn.textContent;
+        const details = calcRewardDetails({
+          volume: volumeInput.value,
+          collateral: collateralInput.value,
+          highsecJumps: highsecJumpsInput.value,
+          dangerousJumps: dangerousJumpsInput.value,
+          rush: rushCheckbox.checked,
+          forceJF: forceJfCheckbox.checked,
+          config,
+        });
+
+        if (details.error) return;
+
+        let detailsText = "";
+        if (details.isRedirect) {
+          detailsText = `Redirect to: ${details.redirectTarget}`;
+        } else {
+          detailsText = `${formatNumber(Math.max(1000000, Math.ceil(details.total)))} ISK`;
+        }
+
+        const template = [
+          `Vagrant Logistics Courier Quote`,
+          `------------------------------`,
+          `Volume: ${volumeInput.value || 0} m³`,
+          `Collateral: ${collateralInput.value || 0} ISK`,
+          `Route: ${highsecJumpsInput.value || 0} HighSec / ${dangerousJumpsInput.value || 0} Dangerous Jumps`,
+          `Rush Service: ${rushCheckbox.checked ? "Yes" : "No"}`,
+          `Estimated Reward: ${detailsText}`,
+          `Link: ${window.location.href}`
+        ].join("\n");
+
+        try {
+          await navigator.clipboard.writeText(template);
+          copyQuoteBtn.textContent = "Quote Copied!";
+          copyQuoteBtn.classList.add("copied");
+          setTimeout(() => {
+            copyQuoteBtn.textContent = originalText;
+            copyQuoteBtn.classList.remove("copied");
+          }, 2000);
+        } catch (err) {
+          console.error("Failed to copy quote: ", err);
+        }
+      });
+
       clearBtn.addEventListener("click", () => {
         collateralInput.value = "";
         highsecJumpsInput.value = "";
@@ -498,7 +576,20 @@
         updateAll();
       });
 
+      // Initialize inputs from URL params
+      function initParamsFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        if (urlParams.has("c")) collateralInput.value = formatNumber(urlParams.get("c"));
+        if (urlParams.has("hj")) highsecJumpsInput.value = formatNumber(urlParams.get("hj"), false);
+        if (urlParams.has("dj")) dangerousJumpsInput.value = formatNumber(urlParams.get("dj"), false);
+        if (urlParams.has("v")) volumeInput.value = formatNumber(urlParams.get("v"));
+        if (urlParams.get("r") === "1") rushCheckbox.checked = true;
+        if (urlParams.get("jf") === "1") forceJfCheckbox.checked = true;
+      }
+
       // Load config dynamically on startup
+      initParamsFromUrl();
       loadConfig();
     </script>
   </body>
