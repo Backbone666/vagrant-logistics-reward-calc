@@ -59,15 +59,7 @@
 			"max_volume_m3": 360000,
 			"base_rate_isk": 150000000,
 			"cyno_jump_fee_isk": 35000000,
-			"max_collateral_isk": 50000000000,
-			"collateral_brackets": [
-				{ "max_collateral_isk": 5000000000, "surcharge_isk": 0 },
-				{ "max_collateral_isk": 10000000000, "surcharge_isk": 30000000 },
-				{ "max_collateral_isk": 20000000000, "surcharge_isk": 150000000 },
-				{ "max_collateral_isk": 30000000000, "surcharge_isk": 300000000 },
-				{ "max_collateral_isk": 40000000000, "surcharge_isk": 450000000 },
-				{ "max_collateral_isk": 50000000000, "surcharge_isk": 650000000 }
-			]
+			"max_collateral_isk": 50000000000
 		}
 	},
 	"operational_modifiers": {
