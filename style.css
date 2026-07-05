@@ -174,7 +174,6 @@ body::before {
 	flex-direction: column;
 	justify-content: center;
 	flex: 1;
-	contain: layout;
 }
 
 header {
@@ -234,7 +233,6 @@ h2 {
 	overflow: visible;
 	animation: cardFadeIn 1.4s cubic-bezier(0.23, 1, 0.32, 1);
 	width: 100%;
-	contain: content;
 }
 
 /* Footer Styles */
@@ -252,7 +250,6 @@ h2 {
 	opacity: 0.8;
 	transition: var(--transition-smooth);
 	padding-bottom: var(--space-md);
-	contain: layout;
 }
 
 .footer-logo {
@@ -311,10 +308,21 @@ h2 {
 	gap: var(--space-md);
 }
 
+.jumps-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: var(--space-sm);
+}
+
+@media (max-width: 480px) {
+	.jumps-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
 .input-group {
 	position: relative;
 	transition: var(--transition-smooth);
-	contain: layout;
 }
 
 .input-hint {
@@ -557,7 +565,6 @@ select:focus {
 	padding-left: var(--space-xl);
 	text-align: center;
 	min-width: 0;
-	contain: layout;
 }
 
 @media (max-width: 960px) {
@@ -748,7 +755,6 @@ select:focus {
 	margin-top: var(--space-md);
 	padding-top: var(--space-sm);
 	border-top: 1px solid hsla(45, 70%, 55%, 0.15);
-	contain: layout;
 	margin-bottom: 0;
 }
 
@@ -920,4 +926,24 @@ dd.req-value {
 
 .hidden {
 	display: none;
+}
+
+@media (max-width: 480px) {
+	h1 {
+		font-size: clamp(1.2rem, 6vw, 1.6rem);
+		letter-spacing: 0.15em;
+	}
+
+	h2 {
+		font-size: clamp(0.5rem, 3vw, 0.7rem);
+		letter-spacing: 0.25em;
+	}
+
+	label {
+		letter-spacing: 0.1em;
+	}
+
+	.calculator-card {
+		padding: var(--space-md);
+	}
 }
