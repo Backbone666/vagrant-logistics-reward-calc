@@ -97,15 +97,19 @@ function calcStargateRouteReward({
 	};
 }
 
-export function calcRewardDetails({
-	volume,
-	collateral,
-	highsecJumps,
-	dangerousJumps,
-	rush,
-	forceJF,
-	config,
-}) {
+export function calcRewardDetails(options, configOpt) {
+	const {
+		volume,
+		collateral,
+		highsecJumps,
+		dangerousJumps,
+		rush,
+		forceJF,
+		config: inlineConfig,
+	} = options || {};
+
+	const config = inlineConfig || configOpt;
+
 	if (!config) {
 		return { error: true, message: "Configuration not loaded" };
 	}

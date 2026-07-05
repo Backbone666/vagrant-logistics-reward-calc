@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
-import { calcReward } from "../calculator.js";
+import { calcReward, classifyService, calcRewardDetails, parseNum } from "../calculator.js";
 
 const config = JSON.parse(
 	fs.readFileSync(
@@ -115,3 +115,41 @@ test("Test 9: Jump Freighter Rush Service", () => {
 	// 150M Base + 350M Jump + 6M Collateral + 150M Rush Surcharge = 656M
 	assert.equal(result, 656_000_000);
 });
+
+test("Sub-unit: classifyService outputs correct classes based on volume/collateral", () => {
+	// Highsec Blockade Runner / DST case
+	const highsecBrDst = classifyService({ volume: 10000, dangerousJumps: 0 });
+	assert.equal(highsecBrDst, "highsec_services.blockade_runner_dst");
+
+	// Dangerous Stargate Blockade Runner case
+	const dangerousBr = classifyService({ volume: 10000, dangerousJumps: 10 });
+	assert.equal(dangerousBr, "dangerous_space_services.blockade_runner_stargate");
+
+	// Dangerous Stargate DST case
+	const dangerousDst = classifyService({ volume: 50000, dangerousJumps: 10 });
+	assert.equal(dangerousDst, "dangerous_space_services.scouted_dst_stargate");
+});
+
+test("Sub-unit: calcRewardDetails computes structured breakdown", () => {
+	const details = calcRewardDetails(
+		{
+			volume: "50,000",
+			highsecJumps: "10",
+			dangerousJumps: "0",
+			collateral: "2,000,000,000",
+		},
+		config,
+	);
+	assert.equal(details.isRedirect, false);
+	assert.equal(details.serviceClass, "highsec_services.blockade_runner_dst");
+	assert.equal(details.total, 27000000);
+});
+
+test("Sub-unit: parseNum handles number format cleanups", () => {
+	assert.equal(parseNum("2,000,000,000"), 2000000000);
+	assert.equal(parseNum(123.45), 123.45);
+	assert.equal(parseNum(""), 0);
+	assert.equal(parseNum(null), 0);
+});
+
+
