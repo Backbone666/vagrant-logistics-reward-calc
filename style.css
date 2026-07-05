@@ -43,14 +43,23 @@
 	box-sizing: border-box;
 	margin: 0;
 	padding: 0;
-	transition: none !important;
-	animation: none !important;
 }
 
-*::before,
-*::after {
-	transition: none !important;
-	animation: none !important;
+@media (prefers-reduced-motion: reduce) {
+	* {
+		/* biome-ignore lint/complexity/noImportantStyles: standard accessibility reset for reduced motion */
+		transition: none !important;
+		/* biome-ignore lint/complexity/noImportantStyles: standard accessibility reset for reduced motion */
+		animation: none !important;
+	}
+
+	*::before,
+	*::after {
+		/* biome-ignore lint/complexity/noImportantStyles: standard accessibility reset for reduced motion */
+		transition: none !important;
+		/* biome-ignore lint/complexity/noImportantStyles: standard accessibility reset for reduced motion */
+		animation: none !important;
+	}
 }
 
 button,
