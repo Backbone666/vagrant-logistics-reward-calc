@@ -1,0 +1,128 @@
+# Review package: d2c551e..68d4d7d
+
+## Commits
+68d4d7d feat: implement competitive JF cyno fees and percentage-based collateral surcharges
+d85664e feat: implement competitive JF cyno fees and percentage-based collateral surcharges
+
+## Files changed
+ calculator.js         | 29 +++++++++++++----------------
+ rate_card_config.json |  2 +-
+ 2 files changed, 14 insertions(+), 17 deletions(-)
+
+## Diff
+diff --git a/calculator.js b/calculator.js
+index 571e08c..33edaac 100644
+--- a/calculator.js
++++ b/calculator.js
+@@ -60,22 +60,21 @@ function calcStargateRouteReward({
+ }) {
+ 	let isRedirect = false;
+ 	if (parsedCollateral > (service.max_collateral_isk || maxCollateral)) {
+ 		isRedirect = true;
+ 	}
+ 
+ 	const dangerousJumpRate = service.base_rate_per_jump_dangerous || 0;
+ 	const hsJumpRate = service.base_rate_per_jump_highsec || 0;
+ 
+ 	const baseFee =
+-		parsedDangerousJumps * dangerousJumpRate +
+-		parsedHighsecJumps * hsJumpRate;
++		parsedDangerousJumps * dangerousJumpRate + parsedHighsecJumps * hsJumpRate;
+ 	const collateralFee =
+ 		(parsedCollateral / 1_000_000_000) *
+ 		(service.collateral_surcharge_per_1b || 0);
+ 
+ 	let total = baseFee + collateralFee;
+ 	if (rush) {
+ 		total += opsConfig.rush_surcharge_subcapital || 0;
+ 	}
+ 
+ 	return {
+@@ -259,48 +258,46 @@ export function calcRewardDetails({
+ 		const service = dangerousConfig.jump_freighter_standard || {};
+ 		const jfBase = service.base_rate_isk || 0;
+ 		const cynoFee = service.cyno_jump_fee_isk || 0;
+ 
+ 		if (parsedCollateral > (service.max_collateral_isk || 50_000_000_000)) {
+ 			isRedirect = true;
+ 			redirectTarget = "Executive Review";
+ 		}
+ 
+ 		baseFee = jfBase;
+-		distanceFee = parsedDangerousJumps * cynoFee; // Cyno Jumps assumes 1 per dangerous jump
++		distanceFee = parsedDangerousJumps * cynoFee;
+ 
+-		let matchedSurcharge = 0;
++		collateralFee = 0;
+ 		if (!isRedirect) {
+-			const brackets = service.collateral_brackets || [];
+-			const matchedBracket = brackets.find(
+-				(b) => parsedCollateral <= b.max_collateral_isk,
+-			);
+-			if (matchedBracket) {
+-				matchedSurcharge = matchedBracket.surcharge_isk ?? 0;
+-			} else {
+-				isRedirect = true;
+-				redirectTarget = "Executive Review";
++			if (
++				parsedCollateral > 1_000_000_000 &&
++				parsedCollateral <= 3_000_000_000
++			) {
++				collateralFee = parsedCollateral * 0.003;
++			} else if (parsedCollateral > 3_000_000_000) {
++				collateralFee = parsedCollateral * 0.005;
+ 			}
+ 		}
+ 
+-		let total = baseFee + distanceFee + matchedSurcharge;
++		let total = baseFee + distanceFee + collateralFee;
+ 		if (rush) {
+ 			total += opsConfig.rush_surcharge_jf || 0;
+ 		}
+ 
+ 		return {
+ 			isRedirect,
+-			redirectTarget,
++			redirectTarget: isRedirect ? "Executive Review" : "",
+ 			total,
+ 			baseFee,
+ 			distanceFee,
+-			collateralFee: matchedSurcharge,
++			collateralFee,
+ 			multiplier: 1.0,
+ 			surcharge: 0,
+ 			serviceClass,
+ 		};
+ 	}
+ 
+ 	return { error: true, message: "Unknown service class classification" };
+ }
+ 
+ export function calcReward(options, config) {
+diff --git a/rate_card_config.json b/rate_card_config.json
+index 5a72866..a5fa0b1 100644
+--- a/rate_card_config.json
++++ b/rate_card_config.json
+@@ -51,21 +51,21 @@
+ 			"base_rate_per_jump_dangerous": 10000000,
+ 			"base_rate_per_jump_highsec": 2000000,
+ 			"max_collateral_isk": 3000000000,
+ 			"collateral_surcharge_per_1b": 80000000
+ 		},
+ 		"jump_freighter_standard": {
+ 			"region": "Cynosural Jump Network",
+ 			"hull_class": "Jump Freighter",
+ 			"max_volume_m3": 360000,
+ 			"base_rate_isk": 150000000,
+-			"cyno_jump_fee_isk": 50000000,
++			"cyno_jump_fee_isk": 35000000,
+ 			"max_collateral_isk": 50000000000,
+ 			"collateral_brackets": [
+ 				{ "max_collateral_isk": 5000000000, "surcharge_isk": 0 },
+ 				{ "max_collateral_isk": 10000000000, "surcharge_isk": 30000000 },
+ 				{ "max_collateral_isk": 20000000000, "surcharge_isk": 150000000 },
+ 				{ "max_collateral_isk": 30000000000, "surcharge_isk": 300000000 },
+ 				{ "max_collateral_isk": 40000000000, "surcharge_isk": 450000000 },
+ 				{ "max_collateral_isk": 50000000000, "surcharge_isk": 650000000 }
+ 			]
+ 		}

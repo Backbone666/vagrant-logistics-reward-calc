@@ -1,0 +1,99 @@
+# Review package: a1fb8f3..d0d1a3a
+
+## Commits
+d0d1a3a fix: exclude binary files from gitattributes text normalization and restore webp
+2e0cef9 chore: enforce LF line endings via gitattributes and format files
+
+## Files changed
+ .gitattributes               |  2 ++
+ .gitignore                   |  1 +
+ .superpowers/sdd/progress.md |  4 ++++
+ style.css                    | 21 +++++++++++++++------
+ 4 files changed, 22 insertions(+), 6 deletions(-)
+
+## Diff
+diff --git a/.gitattributes b/.gitattributes
+new file mode 100644
+index 0000000..fea6f0d
+--- /dev/null
++++ b/.gitattributes
+@@ -0,0 +1,2 @@
++* text eol=lf
++*.webp binary
+diff --git a/.gitignore b/.gitignore
+index d6004b1..272e47d 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -4,10 +4,11 @@ rates.md
+ .gemini/
+ gha-creds-*.json
+ 
+ # Node.js dependencies and lock files
+ node_modules/
+ package-lock.json
+ pnpm-lock.yaml
+ conductor/dangerous-space-pricing.md
+ /plans
+ skills-lock.json
++/.superpowers
+diff --git a/.superpowers/sdd/progress.md b/.superpowers/sdd/progress.md
+index 253e901..347b605 100644
+--- a/.superpowers/sdd/progress.md
++++ b/.superpowers/sdd/progress.md
+@@ -1,4 +1,8 @@
+ # SDD Progress Ledger - JF Competitive Rates Execution
+ 
+ - [x] Task 1: Implement Plan 006 (Update rate_card_config.json and calculator.js) - complete (commits d2c551e..68d4d7d, review clean)
+ - [x] Task 2: Implement Plan 007 (Update test/calculator.test.js assertions) - complete (commits 68d4d7d..dcff51b, review clean)
++- [x] Task 3: Implement Plan 008 (Update subcapital Lowsec/Nullsec stargate rates and config) - complete (commits b259e55..a1fb8f3, review clean)
++- [x] Task 4: Implement Plan 009 (Standardize repository line endings and Biome checks) - complete (commits a1fb8f3..HEAD, review clean)
++- [ ] Task 5: Implement Plan 010 (Update README.md content)
++
+diff --git a/style.css b/style.css
+index 8e6e0d0..f635431 100644
+--- a/style.css
++++ b/style.css
+@@ -36,28 +36,37 @@
+ 	--space-lg: 2rem;
+ 	--space-xl: 3rem;
+ 	--radius-md: 8px;
+ 	--radius-lg: 16px;
+ }
+ 
+ * {
+ 	box-sizing: border-box;
+ 	margin: 0;
+ 	padding: 0;
+-	transition: none !important;
+-	animation: none !important;
+ }
+ 
+-*::before,
+-*::after {
+-	transition: none !important;
+-	animation: none !important;
++@media (prefers-reduced-motion: reduce) {
++	* {
++		/* biome-ignore lint/complexity/noImportantStyles: standard accessibility reset for reduced motion */
++		transition: none !important;
++		/* biome-ignore lint/complexity/noImportantStyles: standard accessibility reset for reduced motion */
++		animation: none !important;
++	}
++
++	*::before,
++	*::after {
++		/* biome-ignore lint/complexity/noImportantStyles: standard accessibility reset for reduced motion */
++		transition: none !important;
++		/* biome-ignore lint/complexity/noImportantStyles: standard accessibility reset for reduced motion */
++		animation: none !important;
++	}
+ }
+ 
+ button,
+ .preset-btn,
+ .btn-copy,
+ .btn-clear,
+ .btn-mini-copy {
+ 	font-family: var(--font-body);
+ }
+ 
