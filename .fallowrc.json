@@ -1,0 +1,5 @@
+{
+	"entry": ["index.html", "calculator.js", "test/calculator.test.js"],
+	"includeEntryExports": true,
+	"ignorePatterns": ["style.css", "plans/**", ".superpowers/**"]
+}
