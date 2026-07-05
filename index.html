@@ -44,6 +44,9 @@
         />
         <h1>Vagrant Logistics</h1>
         <h2>Courier Calculator</h2>
+        <div id="config-warning" class="fallback-warning hidden" role="alert">
+          Failed to load live rates. Operating in cached offline mode.
+        </div>
       </header>
 
       <main class="calculator-card" id="main-calculator">
@@ -231,6 +234,54 @@
       let currentReward = 0;
       let config = null;
 
+      const FALLBACK_CONFIG = {
+        highsec_services: {
+          blockade_runner_dst: {
+            base_rate_per_jump: 1500000,
+            minimum_contract_fee: 4500000,
+            collateral_brackets: [
+              { max_collateral_isk: 1500000000, multiplier: 1.0, surcharge: 0 },
+              { max_collateral_isk: 2000000000, multiplier: 1.8, surcharge: 0 },
+              { max_collateral_isk: 3000000000, multiplier: 2.2, surcharge: 0 },
+              { max_collateral_isk: 5000000000, multiplier: 4.0, surcharge: 0 },
+              { max_collateral_isk: 10000000000, multiplier: 4.0, surcharge: 12000000 }
+            ]
+          },
+          freighter_standard: {
+            base_rate_per_jump: 1750000,
+            minimum_contract_fee: 10000000,
+            collateral_brackets: [
+              { max_collateral_isk: 1500000000, multiplier: 1.0 },
+              { max_collateral_isk: 3000000000, multiplier: 1.8 },
+              { max_collateral_isk: 5000000000, multiplier: 3.5 }
+            ]
+          }
+        },
+        dangerous_space_services: {
+          blockade_runner_stargate: {
+            base_rate_isk: 10000000,
+            base_rate_per_jump_dangerous: 2000000,
+            base_rate_per_jump_highsec: 1500000,
+            max_collateral_isk: 5000000000
+          },
+          scouted_dst_stargate: {
+            base_rate_isk: 20000000,
+            base_rate_per_jump_dangerous: 5000000,
+            base_rate_per_jump_highsec: 2000000,
+            max_collateral_isk: 3000000000
+          },
+          jump_freighter_standard: {
+            base_rate_isk: 150000000,
+            cyno_jump_fee_isk: 35000000,
+            max_collateral_isk: 50000000000
+          }
+        },
+        operational_modifiers: {
+          rush_surcharge_subcapital: 45000000,
+          rush_surcharge_jf: 150000000
+        }
+      };
+
       // Fetch dynamic configuration
       async function loadConfig() {
         try {
@@ -238,7 +289,10 @@
           config = await response.json();
           updateAll();
         } catch (err) {
-          console.error("Failed to load rate configuration:", err);
+          console.warn("Failed to load dynamic rates, using offline fallback config:", err);
+          config = FALLBACK_CONFIG;
+          document.getElementById("config-warning").classList.remove("hidden");
+          updateAll();
         }
       }
 
