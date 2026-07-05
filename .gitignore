@@ -1,15 +1,22 @@
 implementation_plan.md
 rates.md
 
+# Gemini & Agent configs
 .gemini/
+.agents/
+.Jules/
+/docs/superpowers
+/plans
+/.superpowers
 gha-creds-*.json
 
-# Node.js dependencies and lock files
+# Node.js and dependencies
 node_modules/
 package-lock.json
 pnpm-lock.yaml
-conductor/dangerous-space-pricing.md
-/plans
+pnpm-workspace.yaml
 skills-lock.json
-/.superpowers
-/.superpowers
+
+# Local workspace directories
+conductor/
+.fallow/
