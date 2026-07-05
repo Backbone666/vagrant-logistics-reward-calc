@@ -48,6 +48,16 @@ function findCollateralBracket(service, parsedCollateral) {
 	return brackets.find((b) => parsedCollateral <= b.max_collateral_isk);
 }
 
+function calcCollateralSurcharge(parsedCollateral) {
+	if (parsedCollateral > 1_000_000_000 && parsedCollateral <= 3_000_000_000) {
+		return parsedCollateral * 0.003;
+	}
+	if (parsedCollateral > 3_000_000_000) {
+		return parsedCollateral * 0.005;
+	}
+	return 0;
+}
+
 function calcStargateRouteReward({
 	service,
 	parsedHighsecJumps,
@@ -72,11 +82,7 @@ function calcStargateRouteReward({
 
 	let collateralFee = 0;
 	if (!isRedirect) {
-		if (parsedCollateral > 1_000_000_000 && parsedCollateral <= 3_000_000_000) {
-			collateralFee = parsedCollateral * 0.003;
-		} else if (parsedCollateral > 3_000_000_000) {
-			collateralFee = parsedCollateral * 0.005;
-		}
+		collateralFee = calcCollateralSurcharge(parsedCollateral);
 	}
 
 	let total = baseRate + distanceFee + collateralFee;
@@ -97,15 +103,14 @@ function calcStargateRouteReward({
 	};
 }
 
-function calcHighsecBrDstReward({
-	hsConfig,
+function calcHighsecReward({
+	service,
 	opsConfig,
 	parsedHighsecJumps,
 	parsedCollateral,
 	rush,
 	serviceClass,
 }) {
-	const service = hsConfig.blockade_runner_dst || {};
 	const baseJumpRate = service.base_rate_per_jump || 0;
 	const minFee = service.minimum_contract_fee || 0;
 
@@ -128,7 +133,8 @@ function calcHighsecBrDstReward({
 		surcharge = matchedBracket.surcharge ?? 0;
 	}
 
-	let total = baseFee * multiplier + surcharge;
+	const collateralFee = baseFee * (multiplier - 1) + surcharge;
+	let total = baseFee + collateralFee;
 	if (rush) {
 		total += opsConfig.rush_surcharge_subcapital || 0;
 	}
@@ -139,61 +145,9 @@ function calcHighsecBrDstReward({
 		total,
 		baseFee,
 		distanceFee: 0,
-		collateralFee: total - baseFee,
+		collateralFee,
 		multiplier,
 		surcharge,
-		serviceClass,
-	};
-}
-
-function calcHighsecFreighterReward({
-	hsConfig,
-	opsConfig,
-	parsedHighsecJumps,
-	parsedCollateral,
-	rush,
-	serviceClass,
-}) {
-	const service = hsConfig.freighter_standard || {};
-	const baseJumpRate = service.base_rate_per_jump || 0;
-	const minFee = service.minimum_contract_fee || 0;
-
-	let baseFee = parsedHighsecJumps * baseJumpRate;
-	if (baseFee < minFee) {
-		baseFee = minFee;
-	}
-
-	let isRedirect = false;
-	let redirectTarget = "";
-	let multiplier = 1.0;
-
-	if (parsedCollateral > 5_000_000_000) {
-		isRedirect = true;
-		redirectTarget = "Risako Hirano";
-	} else {
-		const matchedBracket = findCollateralBracket(service, parsedCollateral);
-		if (!matchedBracket) {
-			isRedirect = true;
-			redirectTarget = "Risako Hirano";
-		} else {
-			multiplier = matchedBracket.multiplier ?? 1.0;
-		}
-	}
-
-	let total = baseFee * multiplier;
-	if (rush) {
-		total += opsConfig.rush_surcharge_subcapital || 0;
-	}
-
-	return {
-		isRedirect,
-		redirectTarget,
-		total,
-		baseFee,
-		distanceFee: 0,
-		collateralFee: total - baseFee,
-		multiplier,
-		surcharge: 0,
 		serviceClass,
 	};
 }
@@ -220,11 +174,7 @@ function calcJumpFreighterReward({
 
 	let collateralFee = 0;
 	if (!isRedirect) {
-		if (parsedCollateral > 1_000_000_000 && parsedCollateral <= 3_000_000_000) {
-			collateralFee = parsedCollateral * 0.003;
-		} else if (parsedCollateral > 3_000_000_000) {
-			collateralFee = parsedCollateral * 0.005;
-		}
+		collateralFee = calcCollateralSurcharge(parsedCollateral);
 	}
 
 	let total = baseFee + distanceFee + collateralFee;
@@ -244,7 +194,6 @@ function calcJumpFreighterReward({
 		serviceClass,
 	};
 }
-
 export function calcRewardDetails(options, configOpt) {
 	const {
 		volume,
@@ -298,8 +247,8 @@ export function calcRewardDetails(options, configOpt) {
 	const opsConfig = config.operational_modifiers || {};
 
 	if (serviceClass === "highsec_services.blockade_runner_dst") {
-		return calcHighsecBrDstReward({
-			hsConfig,
+		return calcHighsecReward({
+			service: hsConfig.blockade_runner_dst || {},
 			opsConfig,
 			parsedHighsecJumps,
 			parsedCollateral,
@@ -309,8 +258,8 @@ export function calcRewardDetails(options, configOpt) {
 	}
 
 	if (serviceClass === "highsec_services.freighter_standard") {
-		return calcHighsecFreighterReward({
-			hsConfig,
+		return calcHighsecReward({
+			service: hsConfig.freighter_standard || {},
 			opsConfig,
 			parsedHighsecJumps,
 			parsedCollateral,

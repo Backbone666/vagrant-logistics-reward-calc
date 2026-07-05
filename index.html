@@ -217,7 +217,7 @@
     </div>
 
     <script type="module">
-      import { calcReward, calcRewardDetails, parseNum } from "./calculator.js";
+      import { calcRewardDetails, parseNum } from "./calculator.js";
 
       const collateralInput = document.getElementById("collateral");
       const highsecJumpsInput = document.getElementById("highsec_jumps");
@@ -334,10 +334,9 @@
           forceJF: forceJfCheckbox.checked,
         };
 
-        const reward = calcReward(options, config);
-        currentReward = reward;
-        
         const details = calcRewardDetails({ ...options, config });
+        const reward = details.error ? 0 : (details.isRedirect ? details.redirectTarget : details.total);
+        currentReward = reward;
 
         const rawJumps = (parseNum(highsecJumpsInput.value) + parseNum(dangerousJumpsInput.value)) || 1;
         const volumeStr = volumeInput.value;
