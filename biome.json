@@ -1,0 +1,24 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.3.14/schema.json",
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"a11y": {
+				"useSemanticElements": "off",
+				"useAriaPropsSupportedByRole": "off"
+			},
+			"style": {
+				"noDescendingSpecificity": "off"
+			},
+			"suspicious": {
+				"noDuplicateProperties": "off"
+			}
+		}
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab",
+		"lineWidth": 100
+	}
+}

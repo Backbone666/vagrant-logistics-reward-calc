@@ -2,6 +2,7 @@
 	"type": "module",
 	"scripts": {
 		"test": "node test/calculator.test.js",
+		"test:coverage": "node --experimental-test-coverage test/calculator.test.js",
 		"lint": "biome check .",
 		"format": "biome format --write ."
 	},
