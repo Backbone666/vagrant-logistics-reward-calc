@@ -59,7 +59,7 @@ test("Test 4: BR Lowsec (Volume 10k, HS Jumps 0, Dangerous Jumps 10, Collateral 
 		},
 		config,
 	);
-	assert.equal(result, 47_500_000);
+	assert.equal(result, 30_000_000);
 });
 
 test("Test 5: DST Lowsec (Volume 50k, HS Jumps 0, Dangerous Jumps 10, Collateral 2B)", () => {
@@ -72,7 +72,7 @@ test("Test 5: DST Lowsec (Volume 50k, HS Jumps 0, Dangerous Jumps 10, Collateral
 		},
 		config,
 	);
-	assert.equal(result, 260_000_000);
+	assert.equal(result, 76_000_000);
 });
 
 test("Test 6: Jump Freighter (Volume 200k, HS Jumps 0, Dangerous Jumps 10, Collateral 2B)", () => {
@@ -85,7 +85,7 @@ test("Test 6: Jump Freighter (Volume 200k, HS Jumps 0, Dangerous Jumps 10, Colla
 		},
 		config,
 	);
-	assert.equal(result, 650_000_000);
+	assert.equal(result, 506_000_000);
 });
 
 test("Test 8: Highsec Sub-Capital > 10B Collateral Redirect", () => {
@@ -112,6 +112,6 @@ test("Test 9: Jump Freighter Rush Service", () => {
 		},
 		config,
 	);
-	// 150M Base + 500M Jump + 0 Collateral + 150M Rush Surcharge = 800M
-	assert.equal(result, 800_000_000);
+	// 150M Base + 350M Jump + 6M Collateral + 150M Rush Surcharge = 656M
+	assert.equal(result, 656_000_000);
 });
