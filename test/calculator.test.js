@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
-import { calcReward, classifyService, calcRewardDetails, parseNum } from "../calculator.js";
+import {
+	calcReward,
+	calcRewardDetails,
+	classifyService,
+	parseNum,
+} from "../calculator.js";
 
 const config = JSON.parse(
 	fs.readFileSync(
@@ -123,7 +128,10 @@ test("Sub-unit: classifyService outputs correct classes based on volume/collater
 
 	// Dangerous Stargate Blockade Runner case
 	const dangerousBr = classifyService({ volume: 10000, dangerousJumps: 10 });
-	assert.equal(dangerousBr, "dangerous_space_services.blockade_runner_stargate");
+	assert.equal(
+		dangerousBr,
+		"dangerous_space_services.blockade_runner_stargate",
+	);
 
 	// Dangerous Stargate DST case
 	const dangerousDst = classifyService({ volume: 50000, dangerousJumps: 10 });
@@ -151,5 +159,3 @@ test("Sub-unit: parseNum handles number format cleanups", () => {
 	assert.equal(parseNum(""), 0);
 	assert.equal(parseNum(null), 0);
 });
-
-
