@@ -9,35 +9,35 @@
 - Volume: 10,000 m³
 - Jumps: 10
 - Collateral: 500M ISK
-- Expected: 3M + (10 \* 800k) = **11M ISK**
+- Expected: 4.5M minimum + (10 \* 1.5M) \* 1.0 (brackets) = **15M ISK**
 
 **Test 2: DST Highsec (Medium Package)**
 
 - Volume: 50,000 m³
 - Jumps: 10
 - Collateral: 500M ISK
-- Expected: 8M + (10 \* 1.2M) = **20M ISK**
+- Expected: 15M + (10 \* 1.5M) \* 1.0 (brackets) = **15M ISK**
 
 **Test 3: Freighter Highsec (Large Package)**
 
 - Volume: 500,000 m³
 - Jumps: 10
 - Collateral: 1B ISK
-- Expected: 15M + (10 \* 1.8M) = **33M ISK**
+- Expected: 17.5M + (10 \* 1.75M) \* 1.0 (brackets) = **17.5M ISK**
 
 **Test 4: DST Highsec with Collateral (1-3B tier)**
 
 - Volume: 50,000 m³
 - Jumps: 10
 - Collateral: 2B ISK
-- Expected: 20M + (2B \* 0.3%) = 20M + 6M = **26M ISK**
+- Expected: 15M + (10 \* 1.5M) \* 1.8 (brackets) = **27M ISK**
 
 **Test 5: DST Highsec with Collateral (3-5B tier)**
 
 - Volume: 50,000 m³
 - Jumps: 10
 - Collateral: 4B ISK
-- Expected: 20M + (4B \* 0.5%) = 20M + 20M = **40M ISK**
+- Expected: 15M + (10 \* 1.5M) \* 4.0 (brackets) = **60M ISK**
 
 ### Low/Null Tests
 

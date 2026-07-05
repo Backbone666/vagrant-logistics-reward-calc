@@ -88,13 +88,13 @@ const FALLBACK_CONFIG = {
 async function loadConfig() {
 	try {
 		const response = await fetch("./rate_card_config.json");
+		if (!response.ok) {
+			throw new Error(`HTTP error! status: ${response.status}`);
+		}
 		config = await response.json();
 		updateAll();
 	} catch (err) {
-		console.warn(
-			"Failed to load dynamic rates, using offline fallback config:",
-			err,
-		);
+		console.warn("Failed to load dynamic rates, using offline fallback config:", err);
 		config = FALLBACK_CONFIG;
 		configWarning.classList.remove("hidden");
 		updateAll();
@@ -159,16 +159,10 @@ function updateAll() {
 	};
 
 	const details = calcRewardDetails({ ...options, config });
-	const reward = details.error
-		? 0
-		: details.isRedirect
-			? details.redirectTarget
-			: details.total;
+	const reward = details.error ? 0 : details.isRedirect ? details.redirectTarget : details.total;
 	currentReward = reward;
 
-	const rawJumps =
-		parseNum(highsecJumpsInput.value) + parseNum(dangerousJumpsInput.value) ||
-		1;
+	const rawJumps = parseNum(highsecJumpsInput.value) + parseNum(dangerousJumpsInput.value) || 1;
 	const volumeStr = volumeInput.value;
 
 	// Breakdown table update
@@ -177,8 +171,7 @@ function updateAll() {
 
 		if (
 			details.isRedirect &&
-			(details.redirectTarget === "Risako Hirano" ||
-				details.redirectTarget === "Executive Review")
+			(details.redirectTarget === "Risako Hirano" || details.redirectTarget === "Executive Review")
 		) {
 			copyBtn.disabled = false;
 			copyBtn.style.opacity = "1";
@@ -203,8 +196,7 @@ function updateAll() {
 			const parts = details.serviceClass.split(".");
 			if (parts.length === 2) {
 				const [section, service] = parts;
-				readableService =
-					config[section]?.[service]?.hull_class || readableService;
+				readableService = config[section]?.[service]?.hull_class || readableService;
 			}
 		}
 
@@ -279,8 +271,7 @@ toFormatNumberInputs.forEach((input) => {
 		const end = e.target.selectionEnd;
 		const oldLen = e.target.value.length;
 
-		const isDecimalAllowed =
-			e.target.id === "collateral" || e.target.id === "volume";
+		const isDecimalAllowed = e.target.id === "collateral" || e.target.id === "volume";
 		e.target.value = formatNumber(e.target.value, isDecimalAllowed);
 
 		const newLen = e.target.value.length;
@@ -311,10 +302,7 @@ copyBtn.addEventListener("click", async () => {
 	let textToCopy = "";
 	const originalText = copyBtn.textContent;
 
-	if (
-		currentReward === "Risako Hirano" ||
-		currentReward === "Executive Review"
-	) {
+	if (currentReward === "Risako Hirano" || currentReward === "Executive Review") {
 		textToCopy = currentReward;
 	} else if (typeof currentReward === "number" && currentReward > 0) {
 		textToCopy = Math.max(1_000_000, Math.ceil(currentReward)).toString();
@@ -324,8 +312,7 @@ copyBtn.addEventListener("click", async () => {
 		try {
 			await navigator.clipboard.writeText(textToCopy);
 			copyBtn.textContent =
-				currentReward === "Risako Hirano" ||
-				currentReward === "Executive Review"
+				currentReward === "Risako Hirano" || currentReward === "Executive Review"
 					? "Name Copied!"
 					: "Reward Copied!";
 			copyBtn.classList.add("copied");
@@ -398,12 +385,9 @@ clearBtn.addEventListener("click", () => {
 function initParamsFromUrl() {
 	const urlParams = new URLSearchParams(window.location.search);
 
-	if (urlParams.has("c"))
-		collateralInput.value = formatNumber(urlParams.get("c"));
-	if (urlParams.has("hj"))
-		highsecJumpsInput.value = formatNumber(urlParams.get("hj"), false);
-	if (urlParams.has("dj"))
-		dangerousJumpsInput.value = formatNumber(urlParams.get("dj"), false);
+	if (urlParams.has("c")) collateralInput.value = formatNumber(urlParams.get("c"));
+	if (urlParams.has("hj")) highsecJumpsInput.value = formatNumber(urlParams.get("hj"), false);
+	if (urlParams.has("dj")) dangerousJumpsInput.value = formatNumber(urlParams.get("dj"), false);
 	if (urlParams.has("v")) volumeInput.value = formatNumber(urlParams.get("v"));
 	if (urlParams.get("r") === "1") rushCheckbox.checked = true;
 	if (urlParams.get("jf") === "1") forceJfCheckbox.checked = true;

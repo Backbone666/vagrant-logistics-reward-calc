@@ -4,17 +4,10 @@ export const parseNum = (val) => {
 	return parseFloat(val.toString().replace(/,/g, "")) || 0;
 };
 
-export function classifyService({
-	volume,
-	routeSecurity,
-	dangerousJumps,
-	forceJF,
-}) {
+export function classifyService({ volume, routeSecurity, dangerousJumps, forceJF }) {
 	const parsedVolume = parseNum(volume);
 	const hasDangerousJumps =
-		parseNum(dangerousJumps) > 0 ||
-		routeSecurity === "dangerous" ||
-		routeSecurity === "high_risk";
+		parseNum(dangerousJumps) > 0 || routeSecurity === "dangerous" || routeSecurity === "high_risk";
 
 	if (forceJF) {
 		return "dangerous_space_services.jump_freighter_standard";
@@ -77,8 +70,7 @@ function calcStargateRouteReward({
 	const dangerousJumpRate = service.base_rate_per_jump_dangerous || 0;
 	const hsJumpRate = service.base_rate_per_jump_highsec || 0;
 
-	const distanceFee =
-		parsedDangerousJumps * dangerousJumpRate + parsedHighsecJumps * hsJumpRate;
+	const distanceFee = parsedDangerousJumps * dangerousJumpRate + parsedHighsecJumps * hsJumpRate;
 
 	let collateralFee = 0;
 	if (!isRedirect) {

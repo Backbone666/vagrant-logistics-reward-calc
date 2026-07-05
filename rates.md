@@ -104,7 +104,7 @@ The original formula creates **MUCH LOWER** JF prices than our current implement
 
 ---
 
-## 3. RECOMMENDED RATE SCALE (Revised)
+## 3. Current Baseline Rate Scale
 
 ### Philosophy
 
@@ -168,7 +168,7 @@ The original formula creates **MUCH LOWER** JF prices than our current implement
 
 ---
 
-## 4. Collateral Structure
+## 4. Current Baseline Collateral Structure
 
 | Collateral Tier | Fee               | Rationale                                     |
 | :-------------- | :---------------- | :-------------------------------------------- |
@@ -232,7 +232,7 @@ The original formula creates **MUCH LOWER** JF prices than our current implement
 
 ---
 
-## 6. Implementation Recommendations
+## 6. Implementation History
 
 ### Immediate Changes Required
 
