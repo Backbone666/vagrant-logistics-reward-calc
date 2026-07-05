@@ -24,7 +24,7 @@ export function classifyService({
 		if (parsedVolume <= 62500) {
 			return "highsec_services.blockade_runner_dst";
 		}
-		if (parsedVolume <= 950000) {
+		if (parsedVolume <= 1125000) {
 			return "highsec_services.freighter_standard";
 		}
 		return "volume_limit_exceeded";
@@ -41,6 +41,60 @@ export function classifyService({
 		return "dangerous_space_services.jump_freighter_standard";
 	}
 	return "volume_limit_exceeded";
+}
+
+function findCollateralBracket(service, parsedCollateral) {
+	const brackets = service.collateral_brackets || [];
+	return brackets.find((b) => parsedCollateral <= b.max_collateral_isk);
+}
+
+function calcStargateRouteReward({
+	service,
+	parsedHighsecJumps,
+	parsedDangerousJumps,
+	parsedCollateral,
+	rush,
+	opsConfig,
+	serviceClass,
+	maxCollateral,
+}) {
+	let isRedirect = false;
+	if (parsedCollateral > (service.max_collateral_isk || maxCollateral)) {
+		isRedirect = true;
+	}
+
+	const baseRate = service.base_rate_isk || 0;
+	const dangerousJumpRate = service.base_rate_per_jump_dangerous || 0;
+	const hsJumpRate = service.base_rate_per_jump_highsec || 0;
+
+	const distanceFee =
+		parsedDangerousJumps * dangerousJumpRate + parsedHighsecJumps * hsJumpRate;
+
+	let collateralFee = 0;
+	if (!isRedirect) {
+		if (parsedCollateral > 1_000_000_000 && parsedCollateral <= 3_000_000_000) {
+			collateralFee = parsedCollateral * 0.003;
+		} else if (parsedCollateral > 3_000_000_000) {
+			collateralFee = parsedCollateral * 0.005;
+		}
+	}
+
+	let total = baseRate + distanceFee + collateralFee;
+	if (rush) {
+		total += opsConfig.rush_surcharge_subcapital || 0;
+	}
+
+	return {
+		isRedirect,
+		redirectTarget: isRedirect ? "Risako Hirano" : "",
+		total,
+		baseFee: baseRate,
+		distanceFee,
+		collateralFee,
+		multiplier: 1.0,
+		surcharge: 0,
+		serviceClass,
+	};
 }
 
 export function calcRewardDetails({
@@ -79,7 +133,7 @@ export function calcRewardDetails({
 	});
 
 	if (serviceClass === "volume_limit_exceeded") {
-		const maxVol = routeSecurity === "highsec" ? "950,000" : "360,000";
+		const maxVol = routeSecurity === "highsec" ? "1,125,000" : "360,000";
 		return {
 			error: true,
 			message: `Cargo volume exceeds maximum limits. Please split the cargo into multiple contracts. Max volume is ${maxVol} m³.`,
@@ -110,10 +164,7 @@ export function calcRewardDetails({
 		}
 
 		// Find collateral bracket
-		const brackets = service.collateral_brackets || [];
-		const matchedBracket = brackets.find(
-			(b) => parsedCollateral <= b.max_collateral_isk,
-		);
+		const matchedBracket = findCollateralBracket(service, parsedCollateral);
 
 		if (!matchedBracket) {
 			isRedirect = true;
@@ -155,10 +206,7 @@ export function calcRewardDetails({
 			isRedirect = true;
 			redirectTarget = "Risako Hirano";
 		} else {
-			const brackets = service.collateral_brackets || [];
-			const matchedBracket = brackets.find(
-				(b) => parsedCollateral <= b.max_collateral_isk,
-			);
+			const matchedBracket = findCollateralBracket(service, parsedCollateral);
 			if (!matchedBracket) {
 				isRedirect = true;
 				redirectTarget = "Risako Hirano";
@@ -187,72 +235,30 @@ export function calcRewardDetails({
 
 	if (serviceClass === "dangerous_space_services.blockade_runner_stargate") {
 		const service = dangerousConfig.blockade_runner_stargate || {};
-		const dangerousJumpRate = service.base_rate_per_jump_dangerous || 0;
-		const hsJumpRate = service.base_rate_per_jump_highsec || 0;
-
-		if (parsedCollateral > (service.max_collateral_isk || 5_000_000_000)) {
-			isRedirect = true;
-			redirectTarget = "Risako Hirano"; // "reject stargate contract and recommend Jump Freighter routing" -> represented by redirect/manual quote
-		}
-
-		baseFee =
-			parsedDangerousJumps * dangerousJumpRate +
-			parsedHighsecJumps * hsJumpRate;
-		collateralFee =
-			(parsedCollateral / 1_000_000_000) *
-			(service.collateral_surcharge_per_1b || 0);
-
-		let total = baseFee + collateralFee;
-		if (rush) {
-			total += opsConfig.rush_surcharge_subcapital || 0;
-		}
-
-		return {
-			isRedirect,
-			redirectTarget: isRedirect ? "Risako Hirano" : "",
-			total,
-			baseFee,
-			distanceFee: 0,
-			collateralFee,
-			multiplier: 1.0,
-			surcharge: 0,
+		return calcStargateRouteReward({
+			service,
+			parsedHighsecJumps,
+			parsedDangerousJumps,
+			parsedCollateral,
+			rush,
+			opsConfig,
 			serviceClass,
-		};
+			maxCollateral: 5_000_000_000,
+		});
 	}
 
 	if (serviceClass === "dangerous_space_services.scouted_dst_stargate") {
 		const service = dangerousConfig.scouted_dst_stargate || {};
-		const dangerousJumpRate = service.base_rate_per_jump_dangerous || 0;
-		const hsJumpRate = service.base_rate_per_jump_highsec || 0;
-
-		if (parsedCollateral > (service.max_collateral_isk || 3_000_000_000)) {
-			isRedirect = true;
-			redirectTarget = "Risako Hirano";
-		}
-
-		baseFee =
-			parsedDangerousJumps * dangerousJumpRate +
-			parsedHighsecJumps * hsJumpRate;
-		collateralFee =
-			(parsedCollateral / 1_000_000_000) *
-			(service.collateral_surcharge_per_1b || 0);
-
-		let total = baseFee + collateralFee;
-		if (rush) {
-			total += opsConfig.rush_surcharge_subcapital || 0;
-		}
-
-		return {
-			isRedirect,
-			redirectTarget: isRedirect ? "Risako Hirano" : "",
-			total,
-			baseFee,
-			distanceFee: 0,
-			collateralFee,
-			multiplier: 1.0,
-			surcharge: 0,
+		return calcStargateRouteReward({
+			service,
+			parsedHighsecJumps,
+			parsedDangerousJumps,
+			parsedCollateral,
+			rush,
+			opsConfig,
 			serviceClass,
-		};
+			maxCollateral: 3_000_000_000,
+		});
 	}
 
 	if (serviceClass === "dangerous_space_services.jump_freighter_standard") {
@@ -266,34 +272,32 @@ export function calcRewardDetails({
 		}
 
 		baseFee = jfBase;
-		distanceFee = parsedDangerousJumps * cynoFee; // Cyno Jumps assumes 1 per dangerous jump
+		distanceFee = parsedDangerousJumps * cynoFee;
 
-		let matchedSurcharge = 0;
+		collateralFee = 0;
 		if (!isRedirect) {
-			const brackets = service.collateral_brackets || [];
-			const matchedBracket = brackets.find(
-				(b) => parsedCollateral <= b.max_collateral_isk,
-			);
-			if (matchedBracket) {
-				matchedSurcharge = matchedBracket.surcharge_isk ?? 0;
-			} else {
-				isRedirect = true;
-				redirectTarget = "Executive Review";
+			if (
+				parsedCollateral > 1_000_000_000 &&
+				parsedCollateral <= 3_000_000_000
+			) {
+				collateralFee = parsedCollateral * 0.003;
+			} else if (parsedCollateral > 3_000_000_000) {
+				collateralFee = parsedCollateral * 0.005;
 			}
 		}
 
-		let total = baseFee + distanceFee + matchedSurcharge;
+		let total = baseFee + distanceFee + collateralFee;
 		if (rush) {
 			total += opsConfig.rush_surcharge_jf || 0;
 		}
 
 		return {
 			isRedirect,
-			redirectTarget,
+			redirectTarget: isRedirect ? "Executive Review" : "",
 			total,
 			baseFee,
 			distanceFee,
-			collateralFee: matchedSurcharge,
+			collateralFee,
 			multiplier: 1.0,
 			surcharge: 0,
 			serviceClass,
