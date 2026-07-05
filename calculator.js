@@ -97,6 +97,154 @@ function calcStargateRouteReward({
 	};
 }
 
+function calcHighsecBrDstReward({
+	hsConfig,
+	opsConfig,
+	parsedHighsecJumps,
+	parsedCollateral,
+	rush,
+	serviceClass,
+}) {
+	const service = hsConfig.blockade_runner_dst || {};
+	const baseJumpRate = service.base_rate_per_jump || 0;
+	const minFee = service.minimum_contract_fee || 0;
+
+	let baseFee = parsedHighsecJumps * baseJumpRate;
+	if (baseFee < minFee) {
+		baseFee = minFee;
+	}
+
+	const matchedBracket = findCollateralBracket(service, parsedCollateral);
+	let isRedirect = false;
+	let redirectTarget = "";
+	let multiplier = 1.0;
+	let surcharge = 0;
+
+	if (!matchedBracket) {
+		isRedirect = true;
+		redirectTarget = "Risako Hirano";
+	} else {
+		multiplier = matchedBracket.multiplier ?? 1.0;
+		surcharge = matchedBracket.surcharge ?? 0;
+	}
+
+	let total = baseFee * multiplier + surcharge;
+	if (rush) {
+		total += opsConfig.rush_surcharge_subcapital || 0;
+	}
+
+	return {
+		isRedirect,
+		redirectTarget,
+		total,
+		baseFee,
+		distanceFee: 0,
+		collateralFee: total - baseFee,
+		multiplier,
+		surcharge,
+		serviceClass,
+	};
+}
+
+function calcHighsecFreighterReward({
+	hsConfig,
+	opsConfig,
+	parsedHighsecJumps,
+	parsedCollateral,
+	rush,
+	serviceClass,
+}) {
+	const service = hsConfig.freighter_standard || {};
+	const baseJumpRate = service.base_rate_per_jump || 0;
+	const minFee = service.minimum_contract_fee || 0;
+
+	let baseFee = parsedHighsecJumps * baseJumpRate;
+	if (baseFee < minFee) {
+		baseFee = minFee;
+	}
+
+	let isRedirect = false;
+	let redirectTarget = "";
+	let multiplier = 1.0;
+
+	if (parsedCollateral > 5_000_000_000) {
+		isRedirect = true;
+		redirectTarget = "Risako Hirano";
+	} else {
+		const matchedBracket = findCollateralBracket(service, parsedCollateral);
+		if (!matchedBracket) {
+			isRedirect = true;
+			redirectTarget = "Risako Hirano";
+		} else {
+			multiplier = matchedBracket.multiplier ?? 1.0;
+		}
+	}
+
+	let total = baseFee * multiplier;
+	if (rush) {
+		total += opsConfig.rush_surcharge_subcapital || 0;
+	}
+
+	return {
+		isRedirect,
+		redirectTarget,
+		total,
+		baseFee,
+		distanceFee: 0,
+		collateralFee: total - baseFee,
+		multiplier,
+		surcharge: 0,
+		serviceClass,
+	};
+}
+
+function calcJumpFreighterReward({
+	dangerousConfig,
+	opsConfig,
+	parsedDangerousJumps,
+	parsedCollateral,
+	rush,
+	serviceClass,
+}) {
+	const service = dangerousConfig.jump_freighter_standard || {};
+	const jfBase = service.base_rate_isk || 0;
+	const cynoFee = service.cyno_jump_fee_isk || 0;
+
+	let isRedirect = false;
+	if (parsedCollateral > (service.max_collateral_isk || 50_000_000_000)) {
+		isRedirect = true;
+	}
+
+	const baseFee = jfBase;
+	const distanceFee = parsedDangerousJumps * cynoFee;
+
+	let collateralFee = 0;
+	if (!isRedirect) {
+		if (parsedCollateral > 1_000_000_000 && parsedCollateral <= 3_000_000_000) {
+			collateralFee = parsedCollateral * 0.003;
+		} else if (parsedCollateral > 3_000_000_000) {
+			collateralFee = parsedCollateral * 0.005;
+		}
+	}
+
+	let total = baseFee + distanceFee + collateralFee;
+	if (rush) {
+		total += opsConfig.rush_surcharge_jf || 0;
+	}
+
+	return {
+		isRedirect,
+		redirectTarget: isRedirect ? "Executive Review" : "",
+		total,
+		baseFee,
+		distanceFee,
+		collateralFee,
+		multiplier: 1.0,
+		surcharge: 0,
+		serviceClass,
+	};
+}
+
 export function calcRewardDetails(options, configOpt) {
 	const {
 		volume,
@@ -149,92 +297,26 @@ export function calcRewardDetails(options, configOpt) {
 	const dangerousConfig = config.dangerous_space_services || {};
 	const opsConfig = config.operational_modifiers || {};
 
-	let baseFee = 0;
-	let distanceFee = 0;
-	let collateralFee = 0;
-	let multiplier = 1.0;
-	let surcharge = 0;
-	let isRedirect = false;
-	let redirectTarget = "";
-
 	if (serviceClass === "highsec_services.blockade_runner_dst") {
-		const service = hsConfig.blockade_runner_dst || {};
-		const baseJumpRate = service.base_rate_per_jump || 0;
-		const minFee = service.minimum_contract_fee || 0;
-
-		baseFee = parsedHighsecJumps * baseJumpRate;
-		if (baseFee < minFee) {
-			baseFee = minFee;
-		}
-
-		// Find collateral bracket
-		const matchedBracket = findCollateralBracket(service, parsedCollateral);
-
-		if (!matchedBracket) {
-			isRedirect = true;
-			redirectTarget = "Risako Hirano";
-		} else {
-			multiplier = matchedBracket.multiplier ?? 1.0;
-			surcharge = matchedBracket.surcharge ?? 0;
-		}
-
-		let total = baseFee * multiplier + surcharge;
-		if (rush) {
-			total += opsConfig.rush_surcharge_subcapital || 0;
-		}
-
-		return {
-			isRedirect,
-			redirectTarget,
-			total,
-			baseFee,
-			distanceFee: 0, // In this model baseFee represents the whole jump calculation before multipliers
-			collateralFee: total - baseFee,
-			multiplier,
-			surcharge,
+		return calcHighsecBrDstReward({
+			hsConfig,
+			opsConfig,
+			parsedHighsecJumps,
+			parsedCollateral,
+			rush,
 			serviceClass,
-		};
+		});
 	}
 
 	if (serviceClass === "highsec_services.freighter_standard") {
-		const service = hsConfig.freighter_standard || {};
-		const baseJumpRate = service.base_rate_per_jump || 0;
-		const minFee = service.minimum_contract_fee || 0;
-
-		baseFee = parsedHighsecJumps * baseJumpRate;
-		if (baseFee < minFee) {
-			baseFee = minFee;
-		}
-
-		if (parsedCollateral > 5_000_000_000) {
-			isRedirect = true;
-			redirectTarget = "Risako Hirano";
-		} else {
-			const matchedBracket = findCollateralBracket(service, parsedCollateral);
-			if (!matchedBracket) {
-				isRedirect = true;
-				redirectTarget = "Risako Hirano";
-			} else {
-				multiplier = matchedBracket.multiplier ?? 1.0;
-			}
-		}
-
-		let total = baseFee * multiplier;
-		if (rush) {
-			total += opsConfig.rush_surcharge_subcapital || 0;
-		}
-
-		return {
-			isRedirect,
-			redirectTarget,
-			total,
-			baseFee,
-			distanceFee: 0,
-			collateralFee: total - baseFee,
-			multiplier,
-			surcharge: 0,
+		return calcHighsecFreighterReward({
+			hsConfig,
+			opsConfig,
+			parsedHighsecJumps,
+			parsedCollateral,
+			rush,
 			serviceClass,
-		};
+		});
 	}
 
 	if (serviceClass === "dangerous_space_services.blockade_runner_stargate") {
@@ -266,46 +348,14 @@ export function calcRewardDetails(options, configOpt) {
 	}
 
 	if (serviceClass === "dangerous_space_services.jump_freighter_standard") {
-		const service = dangerousConfig.jump_freighter_standard || {};
-		const jfBase = service.base_rate_isk || 0;
-		const cynoFee = service.cyno_jump_fee_isk || 0;
-
-		if (parsedCollateral > (service.max_collateral_isk || 50_000_000_000)) {
-			isRedirect = true;
-			redirectTarget = "Executive Review";
-		}
-
-		baseFee = jfBase;
-		distanceFee = parsedDangerousJumps * cynoFee;
-
-		collateralFee = 0;
-		if (!isRedirect) {
-			if (
-				parsedCollateral > 1_000_000_000 &&
-				parsedCollateral <= 3_000_000_000
-			) {
-				collateralFee = parsedCollateral * 0.003;
-			} else if (parsedCollateral > 3_000_000_000) {
-				collateralFee = parsedCollateral * 0.005;
-			}
-		}
-
-		let total = baseFee + distanceFee + collateralFee;
-		if (rush) {
-			total += opsConfig.rush_surcharge_jf || 0;
-		}
-
-		return {
-			isRedirect,
-			redirectTarget: isRedirect ? "Executive Review" : "",
-			total,
-			baseFee,
-			distanceFee,
-			collateralFee,
-			multiplier: 1.0,
-			surcharge: 0,
+		return calcJumpFreighterReward({
+			dangerousConfig,
+			opsConfig,
+			parsedDangerousJumps,
+			parsedCollateral,
+			rush,
 			serviceClass,
-		};
+		});
 	}
 
 	return { error: true, message: "Unknown service class classification" };
