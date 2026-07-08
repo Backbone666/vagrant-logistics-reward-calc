@@ -18,6 +18,8 @@ const bdBase = document.getElementById("bd_base");
 const bdDistance = document.getElementById("bd_distance");
 const bdCollateral = document.getElementById("bd_collateral");
 const bdSecurity = document.getElementById("bd_security");
+const bdRushRow = document.getElementById("bd_rush_row");
+const bdRush = document.getElementById("bd_rush");
 const configWarning = document.getElementById("config-warning");
 const presetBtns = document.querySelectorAll(".preset-btn");
 const miniCopyBtns = document.querySelectorAll(".btn-mini-copy");
@@ -92,10 +94,18 @@ async function loadConfig() {
 			throw new Error(`HTTP error! status: ${response.status}`);
 		}
 		config = await response.json();
+		try {
+			localStorage.setItem("vagrant_logistics_rate_config", JSON.stringify(config));
+		} catch (e) {
+			console.warn("Failed to cache configuration to localStorage:", e);
+		}
+		configWarning.classList.add("hidden");
 		updateAll();
 	} catch (err) {
-		console.warn("Failed to load dynamic rates, using offline fallback config:", err);
-		config = FALLBACK_CONFIG;
+		console.warn("Failed to load dynamic rates, trying local fallbacks:", err);
+		if (!config) {
+			config = FALLBACK_CONFIG;
+		}
 		configWarning.classList.remove("hidden");
 		updateAll();
 	}
@@ -126,18 +136,15 @@ const formatNumber = (val, allowDecimal = true) => {
 	return numberFormatter.format(cleaned);
 };
 
-function updateAll() {
-	if (!config) return;
-
-	// Update URL params
+function syncUrlParams(options) {
 	const url = new URL(window.location);
 	const params = {
-		c: collateralInput.value.replace(/,/g, ""),
-		hj: highsecJumpsInput.value.replace(/,/g, ""),
-		dj: dangerousJumpsInput.value.replace(/,/g, ""),
-		v: volumeInput.value.replace(/,/g, ""),
-		r: rushCheckbox.checked ? "1" : "",
-		jf: forceJfCheckbox.checked ? "1" : "",
+		c: options.collateral.replace(/,/g, ""),
+		hj: options.highsecJumps.replace(/,/g, ""),
+		dj: options.dangerousJumps.replace(/,/g, ""),
+		v: options.volume.replace(/,/g, ""),
+		r: options.rush ? "1" : "",
+		jf: options.forceJF ? "1" : "",
 	};
 
 	for (const [key, val] of Object.entries(params)) {
@@ -148,8 +155,10 @@ function updateAll() {
 		}
 	}
 	window.history.replaceState({}, "", url.toString());
+}
 
-	const options = {
+function getFormInputs() {
+	return {
 		volume: volumeInput.value,
 		collateral: collateralInput.value,
 		highsecJumps: highsecJumpsInput.value,
@@ -157,17 +166,27 @@ function updateAll() {
 		rush: rushCheckbox.checked,
 		forceJF: forceJfCheckbox.checked,
 	};
+}
 
-	const details = calcRewardDetails({ ...options, config });
-	const reward = details.error ? 0 : details.isRedirect ? details.redirectTarget : details.total;
-	currentReward = reward;
+function syncPresets(volumeStr) {
+	presetBtns.forEach((btn) => {
+		const btnVal = btn.getAttribute("data-val");
+		if (volumeStr === btnVal) {
+			btn.classList.add("active");
+		} else {
+			btn.classList.remove("active");
+		}
+	});
+}
 
-	const rawJumps = parseNum(highsecJumpsInput.value) + parseNum(dangerousJumpsInput.value) || 1;
-	const volumeStr = volumeInput.value;
-
-	// Breakdown table update
+function renderBreakdown(details) {
 	if (details.error || details.isRedirect) {
-		feeBreakdown.classList.add("hidden");
+		feeBreakdown.classList.add("placeholder-active");
+		bdService.textContent = "—";
+		bdBase.textContent = "—";
+		bdDistance.textContent = "—";
+		bdCollateral.textContent = "—";
+		bdSecurity.textContent = "—";
 
 		if (
 			details.isRedirect &&
@@ -188,9 +207,8 @@ function updateAll() {
 			copyQuoteBtn.style.cursor = "not-allowed";
 		}
 	} else {
-		feeBreakdown.classList.remove("hidden");
+		feeBreakdown.classList.remove("placeholder-active");
 
-		// Human readable service class format
 		let readableService = "Standard Sub-Capital";
 		if (details.serviceClass) {
 			const parts = details.serviceClass.split(".");
@@ -206,6 +224,13 @@ function updateAll() {
 		bdCollateral.textContent = `${formatNumber(details.collateralFee)} ISK`;
 		bdSecurity.textContent = `${details.multiplier}x`;
 
+		if (details.rushFee > 0) {
+			bdRushRow.style.display = "flex";
+			bdRush.textContent = `${formatNumber(details.rushFee)} ISK`;
+		} else {
+			bdRushRow.style.display = "none";
+		}
+
 		copyBtn.disabled = false;
 		copyBtn.style.opacity = "1";
 		copyBtn.style.cursor = "pointer";
@@ -213,18 +238,9 @@ function updateAll() {
 		copyQuoteBtn.style.opacity = "1";
 		copyQuoteBtn.style.cursor = "pointer";
 	}
+}
 
-	// Synchronize preset active states
-	presetBtns.forEach((btn) => {
-		const btnVal = btn.getAttribute("data-val");
-		if (volumeStr === btnVal) {
-			btn.classList.add("active");
-		} else {
-			btn.classList.remove("active");
-		}
-	});
-
-	// Reset classes
+function renderReward(reward, rawJumps) {
 	rewardOutput.classList.remove("small");
 
 	if (typeof reward === "string") {
@@ -243,6 +259,33 @@ function updateAll() {
 		rewardOutput.textContent = "0 ISK";
 		rewardIpjOutput.textContent = "0 ISK/Jump";
 	}
+}
+
+function updateAll() {
+	if (!config) return;
+
+	const options = getFormInputs();
+	syncUrlParams(options);
+
+	const calcCard = document.querySelector(".calculator-card");
+	if (calcCard) {
+		const isDangerous = (parseNum(options.dangerousJumps) || 0) > 0 || options.forceJF;
+		if (isDangerous) {
+			calcCard.classList.add("route-dangerous");
+		} else {
+			calcCard.classList.remove("route-dangerous");
+		}
+	}
+
+	const details = calcRewardDetails({ ...options, config });
+	const reward = details.error ? 0 : details.isRedirect ? details.redirectTarget : details.total;
+	currentReward = reward;
+
+	const rawJumps = parseNum(options.highsecJumps) + parseNum(options.dangerousJumps) || 1;
+
+	renderBreakdown(details);
+	syncPresets(options.volume);
+	renderReward(reward, rawJumps);
 }
 
 // Mini copy buttons
@@ -395,4 +438,15 @@ function initParamsFromUrl() {
 
 // Load config dynamically on startup
 initParamsFromUrl();
+
+// Try loading from localStorage first to render instantly
+try {
+	const cachedConfig = localStorage.getItem("vagrant_logistics_rate_config");
+	if (cachedConfig) {
+		config = JSON.parse(cachedConfig);
+	}
+} catch (e) {
+	console.warn("Failed to parse cached configuration:", e);
+}
+
 loadConfig();
