@@ -109,6 +109,7 @@ async function loadConfig() {
 		if (!config) {
 			config = FALLBACK_CONFIG;
 		}
+		configWarning.textContent = `Failed to load live rates (${err.message || err}). Operating in cached offline mode.`;
 		configWarning.classList.remove("hidden");
 		updateAll();
 	}
