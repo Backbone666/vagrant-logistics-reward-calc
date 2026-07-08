@@ -78,8 +78,10 @@ function calcStargateRouteReward({
 	}
 
 	let total = baseRate + distanceFee + collateralFee;
+	let rushFee = 0;
 	if (rush) {
-		total += opsConfig.rush_surcharge_subcapital || 0;
+		rushFee = opsConfig.rush_surcharge_subcapital || 0;
+		total += rushFee;
 	}
 
 	return {
@@ -89,6 +91,7 @@ function calcStargateRouteReward({
 		baseFee: baseRate,
 		distanceFee,
 		collateralFee,
+		rushFee,
 		multiplier: 1.0,
 		surcharge: 0,
 		serviceClass,
@@ -127,8 +130,10 @@ function calcHighsecReward({
 
 	const collateralFee = baseFee * (multiplier - 1) + surcharge;
 	let total = baseFee + collateralFee;
+	let rushFee = 0;
 	if (rush) {
-		total += opsConfig.rush_surcharge_subcapital || 0;
+		rushFee = opsConfig.rush_surcharge_subcapital || 0;
+		total += rushFee;
 	}
 
 	return {
@@ -138,6 +143,7 @@ function calcHighsecReward({
 		baseFee,
 		distanceFee: 0,
 		collateralFee,
+		rushFee,
 		multiplier,
 		surcharge,
 		serviceClass,
@@ -170,8 +176,10 @@ function calcJumpFreighterReward({
 	}
 
 	let total = baseFee + distanceFee + collateralFee;
+	let rushFee = 0;
 	if (rush) {
-		total += opsConfig.rush_surcharge_jf || 0;
+		rushFee = opsConfig.rush_surcharge_jf || 0;
+		total += rushFee;
 	}
 
 	return {
@@ -181,6 +189,7 @@ function calcJumpFreighterReward({
 		baseFee,
 		distanceFee,
 		collateralFee,
+		rushFee,
 		multiplier: 1.0,
 		surcharge: 0,
 		serviceClass,
@@ -211,6 +220,8 @@ export function calcRewardDetails(options, configOpt) {
 	if (
 		parsedVolume <= 0 ||
 		parsedCollateral < 0 ||
+		parsedHighsecJumps < 0 ||
+		parsedDangerousJumps < 0 ||
 		(parsedHighsecJumps === 0 && parsedDangerousJumps === 0)
 	) {
 		return { error: true, message: "Invalid volume, jumps, or collateral" };
