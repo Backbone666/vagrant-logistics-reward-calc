@@ -98,7 +98,10 @@ The brand aims for a "Gold Standard" of professional hauling services. It reflec
     - PushX 10-jump JF: 1.2B ISK
     - Black Frog estimate: 300-400M ISK
   - **Recommended Fix**: Reduce JF to 150M Base + 35M/Jump (10 jumps = 500M, competitive with market)
-  - **Collateral Adjustment**: Implement graduated tiers (0.3% for 1-3B, 0.5% for 3-5B) for better competitiveness
+- **Rate Configuration Fetch & Webview Robustness Fix (Jul 8, 2026)**: Addressed a bug causing "Failed to load live rates" warning banner on deployed site.
+  - **History API Exception Prevention**: Wrapped `window.history.replaceState` in a `try...catch` block. This prevents security exceptions in sandboxed iframe widgets or EVE Online's in-game browser from interrupting the configuration loading cycle.
+  - **Cache-Busted Configuration Requests**: Added cache-buster query parameters (`?t=...`) and `{ cache: "no-cache" }` headers to the `rate_card_config.json` fetch request to bypass stale/broken browser and proxy cache results.
+  - **Local Development Compatibility**: Updated the local `dev.js` HTTP server to strip query parameters before file path lookup, enabling full local testing with cache-busting.
 
 ---
 

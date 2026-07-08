@@ -89,7 +89,10 @@ const FALLBACK_CONFIG = {
 // Fetch dynamic configuration
 async function loadConfig() {
 	try {
-		const response = await fetch("./rate_card_config.json");
+		// Include cache-buster and no-cache header to bypass stale/broken browser or proxy caches
+		const response = await fetch(`./rate_card_config.json?t=${Date.now()}`, {
+			cache: "no-cache",
+		});
 		if (!response.ok) {
 			throw new Error(`HTTP error! status: ${response.status}`);
 		}
@@ -154,7 +157,13 @@ function syncUrlParams(options) {
 			url.searchParams.delete(key);
 		}
 	}
-	window.history.replaceState({}, "", url.toString());
+
+	// Wrap in try-catch to prevent SecurityError in sandboxed iframe or EVE webview environments
+	try {
+		window.history.replaceState({}, "", url.toString());
+	} catch (e) {
+		console.warn("Failed to update URL parameters (history API restricted):", e);
+	}
 }
 
 function getFormInputs() {
