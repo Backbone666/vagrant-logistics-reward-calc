@@ -15,6 +15,7 @@ const clearBtn = document.getElementById("clear_btn");
 const feeBreakdown = document.getElementById("fee_breakdown");
 const bdService = document.getElementById("bd_service");
 const bdBase = document.getElementById("bd_base");
+const bdDistanceLabel = document.getElementById("bd_distance_label");
 const bdDistance = document.getElementById("bd_distance");
 const bdCollateral = document.getElementById("bd_collateral");
 const bdSecurity = document.getElementById("bd_security");
@@ -197,6 +198,7 @@ function renderBreakdown(details) {
 		bdDistance.textContent = "—";
 		bdCollateral.textContent = "—";
 		bdSecurity.textContent = "—";
+		bdDistanceLabel.textContent = "Distance Jump Fee:";
 
 		if (
 			details.isRedirect &&
@@ -220,6 +222,9 @@ function renderBreakdown(details) {
 		feeBreakdown.classList.remove("placeholder-active");
 
 		let readableService = "Standard Sub-Capital";
+		const isJF = details.serviceClass?.includes("jump_freighter");
+		bdDistanceLabel.textContent = isJF ? "Distance Cyno Fee:" : "Distance Jump Fee:";
+
 		if (details.serviceClass) {
 			const parts = details.serviceClass.split(".");
 			if (parts.length === 2) {
