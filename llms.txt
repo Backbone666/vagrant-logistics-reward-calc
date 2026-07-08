@@ -1,0 +1,29 @@
+# Vagrant Logistics Courier Calculator
+
+> Premium web-based calculator for EVE Online courier contracts, optimised for the Amarr Empire aesthetic and precise real-time logistics calculations.
+
+This repository contains the courier calculator used by Vagrant Logistics and The Charter alliance members to generate quotes based on volume, collateral, and route safety.
+
+## Documentation
+
+- [Project Overview](README.md): General documentation on getting started and running the application.
+- [Vagrant Logistics Project Documentation](gemini.md): Historical context, design critique, branding personality, and development milestones.
+- [Pricing Rates](rates.md): Strategic rates analysis, ship class definitions, and route pricing strategy.
+- [Verification Test Cases](test-cases.md): Reference test cases and exact calculator reward expectations.
+
+## Specifications
+
+- [Pricing Configuration](rate_card_config.json): Active JSON pricing configuration defining base fees, per-jump fees, and collateral surcharges.
+- [Fallow Configuration Specification](docs/superpowers/specs/2026-07-05-fallow-config-and-coverage-design.md): Design specification for Fallow code quality metrics and testing coverage.
+
+## Core Code
+
+- [Main UI Layout](index.html): HTML5 structure following the Amarr Empire design language and glassmorphism styling.
+- [Application Presentation Logic](app.js): Handles URL parameter parsing, local storage caching, UI events, and presentation updates.
+- [Calculator Calculation Engine](calculator.js): Core pure reward calculation function and service classification logic.
+
+## Optional
+
+- [Fallow Configuration Plan](docs/superpowers/plans/2026-07-05-fallow-config-and-coverage-plan.md): Implementation details for setting up static analysis and coverage tools.
+- [Frontend Redesign Plan](docs/superpowers/plans/2026-07-08-frontend-redesign.md): Detailed layout and styling design goals for the UI overhaul.
+- [Implementation Plans Index](plans/README.md): Index of technical improvement plans for the codebase.

@@ -17,6 +17,10 @@
 	--card-bg: hsla(0, 10%, 5%, 0.75);
 	--glass-border: hsla(45, 70%, 55%, 0.3);
 
+	/* Warning / Dangerous route theme variables */
+	--warning-amber: hsl(28, 90%, 55%);
+	--warning-glow: hsla(28, 90%, 55%, 0.25);
+
 	/* UI Tokens */
 	--text-primary: #ede7d9;
 	--text-secondary: hsl(43, 40%, 85%); /* Increased brightness for WCAG AA contrast */
@@ -127,7 +131,7 @@ body::before {
 	background:
 		radial-gradient(circle at 20% 30%, hsla(0, 70%, 15%, 0.2) 0%, transparent 50%),
 		radial-gradient(circle at 80% 70%, hsla(45, 70%, 55%, 0.1) 0%, transparent 50%),
-		rgba(0, 0, 0, 0.7);
+		rgba(0, 0, 0, 0.85); /* Dimmed from 0.7 to 0.85 */
 	z-index: -1;
 }
 
@@ -219,6 +223,67 @@ h2 {
 	overflow: visible;
 	animation: cardFadeIn 1.4s cubic-bezier(0.23, 1, 0.32, 1);
 	width: 100%;
+	transition:
+		border-color 0.4s ease,
+		box-shadow 0.4s ease;
+}
+
+/* Dangerous Route Theme Shift */
+.calculator-card.route-dangerous {
+	border-color: var(--warning-amber);
+	box-shadow:
+		0 50px 100px rgba(0, 0, 0, 0.8),
+		inset 0 0 50px hsla(28, 90%, 55%, 0.05);
+}
+
+.calculator-card.route-dangerous label {
+	color: var(--warning-amber);
+}
+
+.calculator-card.route-dangerous .input-group:focus-within label {
+	color: hsl(28, 100%, 75%);
+}
+
+.calculator-card.route-dangerous input[type="text"]:focus {
+	outline-color: var(--warning-amber);
+	border-color: var(--warning-amber);
+	box-shadow:
+		0 0 20px var(--warning-glow),
+		inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.calculator-card.route-dangerous .reward-value {
+	color: var(--warning-amber);
+	text-shadow: 0 0 40px var(--warning-glow);
+}
+
+.calculator-card.route-dangerous .preset-btn {
+	background: hsla(28, 90%, 55%, 0.05);
+	border-color: hsla(28, 90%, 55%, 0.25);
+}
+
+.calculator-card.route-dangerous .preset-btn::before {
+	color: var(--warning-amber);
+}
+
+.calculator-card.route-dangerous .preset-btn:hover {
+	background: hsla(28, 90%, 55%, 0.15);
+	border-color: var(--warning-amber);
+	box-shadow: 0 5px 15px var(--warning-glow);
+}
+
+.calculator-card.route-dangerous .preset-btn.active {
+	background: hsla(28, 90%, 55%, 0.20);
+	border-color: hsl(28, 100%, 75%);
+}
+
+.calculator-card.route-dangerous #bd_service {
+	color: var(--warning-amber) !important;
+}
+
+.calculator-card.route-dangerous .breakdown-title {
+	color: var(--warning-amber);
+	border-color: hsla(28, 90%, 55%, 0.25);
 }
 
 /* Footer Styles */
@@ -242,6 +307,31 @@ h2 {
 	width: 24px;
 	height: 24px;
 	filter: drop-shadow(0 0 5px var(--primary-gold-glow));
+}
+
+.legal-footer {
+	margin-top: var(--space-sm);
+	padding: var(--space-sm) var(--space-md) var(--space-md);
+	text-align: center;
+	max-width: 640px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.legal-footer small {
+	font-size: 0.65rem;
+	color: var(--text-secondary);
+	opacity: 0.5;
+	line-height: 1.5;
+	display: block;
+}
+
+.legal-footer p {
+	margin: 0 0 0.4em;
+}
+
+.legal-footer p:last-child {
+	margin-bottom: 0;
 }
 
 /* Ornate Accents removed */
@@ -407,12 +497,12 @@ input[type="text"]:focus {
 }
 
 .preset-btn {
-	background: hsla(45, 70%, 55%, 0.08);
-	border: 1px solid hsla(45, 70%, 55%, 0.2);
+	background: hsla(0, 0%, 15%, 0.5);
+	border: 1px solid var(--glass-border);
 	color: var(--text-secondary);
-	padding: 0.6rem 1.2rem;
+	padding: 0.5rem 1rem;
+	border-radius: var(--radius-md);
 	font-size: 0.75rem;
-	border-radius: 30px;
 	cursor: pointer;
 	transition: var(--transition-smooth);
 	text-transform: uppercase;
@@ -424,6 +514,7 @@ input[type="text"]:focus {
 	flex: 1 1 auto;
 	min-width: 100px;
 	text-align: center;
+	font-family: var(--font-body);
 }
 
 .preset-btn::before {
@@ -434,13 +525,14 @@ input[type="text"]:focus {
 }
 
 .preset-btn:hover::before {
-	color: var(--onyx);
+	color: var(--primary-gold);
 }
 
+/* Add Hover and Focus Affordance */
 .preset-btn:hover,
 .preset-btn:focus-visible {
-	background: var(--primary-gold);
-	color: var(--onyx);
+	background: hsla(45, 70%, 55%, 0.15);
+	color: var(--bright-gold);
 	border-color: var(--primary-gold);
 	transform: translateY(-2px) scale(1.03);
 	box-shadow: 0 5px 15px var(--primary-gold-glow);
@@ -449,7 +541,7 @@ input[type="text"]:focus {
 .preset-btn:active {
 	transform: translateY(-1px) scale(0.96);
 	box-shadow: 0 2px 8px var(--primary-gold-glow);
-	background: var(--bright-gold);
+	background: hsla(45, 70%, 55%, 0.25);
 	transition: transform 0.1s;
 }
 
@@ -555,7 +647,7 @@ input[type="text"]:focus {
 }
 
 .reward-value {
-	font-size: clamp(1.6rem, 6vw, 2.2rem);
+	font-size: clamp(1.4rem, 4vw, 1.8rem);
 	font-weight: 400;
 	color: var(--primary-gold);
 	line-height: 1.1;
@@ -623,17 +715,21 @@ input[type="text"]:focus {
 }
 
 .btn-copy:hover {
-	background: var(--primary-gold);
+	background: var(--bright-gold);
 	color: var(--onyx);
-	box-shadow: 0 8px 25px var(--primary-gold-glow);
-	transform: translateY(-3px);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 15px var(--primary-gold-glow);
 }
 
 .btn-copy:active {
-	transform: translateY(-1px) scale(0.96);
+	transform: translateY(1px);
+	box-shadow: none;
+	filter: brightness(0.9);
 	background: var(--bright-gold);
 	color: var(--onyx);
-	transition: transform 0.1s;
+	transition:
+		transform 0.1s,
+		filter 0.1s;
 }
 
 .btn-copy.copied {
@@ -787,14 +883,21 @@ dd.req-value {
 }
 
 .btn-mini-copy:hover {
-	background: var(--primary-gold);
+	background: var(--bright-gold);
 	color: var(--onyx);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 15px var(--primary-gold-glow);
 }
 
 .btn-mini-copy:active {
-	transform: scale(0.96);
+	transform: translateY(1px);
+	box-shadow: none;
+	filter: brightness(0.9);
 	background: var(--bright-gold);
-	transition: transform 0.1s;
+	color: var(--onyx);
+	transition:
+		transform 0.1s,
+		filter 0.1s;
 }
 
 .btn-mini-copy.copied {
@@ -839,6 +942,19 @@ dd.req-value {
 	font-family: var(--font-body);
 	width: 100%;
 	font-size: 0.85rem;
+	transition: var(--transition-smooth);
+}
+
+.fee-breakdown.placeholder-active {
+	opacity: 0.45;
+}
+
+.fee-breakdown.placeholder-active .breakdown-row span {
+	color: var(--text-secondary);
+}
+
+.fee-breakdown.placeholder-active #bd_service {
+	color: var(--text-secondary) !important;
 }
 
 .breakdown-title {
