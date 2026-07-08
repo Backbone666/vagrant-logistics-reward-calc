@@ -273,12 +273,12 @@ h2 {
 }
 
 .calculator-card.route-dangerous .preset-btn.active {
-	background: hsla(28, 90%, 55%, 0.20);
+	background: hsla(28, 90%, 55%, 0.2);
 	border-color: hsl(28, 100%, 75%);
 }
 
 .calculator-card.route-dangerous #bd_service {
-	color: var(--warning-amber) !important;
+	color: var(--warning-amber);
 }
 
 .calculator-card.route-dangerous .breakdown-title {
@@ -954,7 +954,7 @@ dd.req-value {
 }
 
 .fee-breakdown.placeholder-active #bd_service {
-	color: var(--text-secondary) !important;
+	color: var(--text-secondary);
 }
 
 .breakdown-title {
