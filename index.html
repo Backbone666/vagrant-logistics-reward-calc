@@ -3,12 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vagrant Logistics - Courier Calculator</title>
+    <title>EVE Online Courier Calculator — Vagrant Logistics | Domain &amp; Providence</title>
     <link
       rel="icon"
       type="image/png"
       href="https://images.evetech.net/corporations/98403600/logo"
     />
+    <link rel="canonical" href="https://vglgi.backb0ne.cloud/" />
+    <meta name="theme-color" content="#c9a84c" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -18,20 +20,123 @@
     <link rel="stylesheet" href="style.css" />
     <meta
       name="description"
-      content="Premium Vagrant Logistics Courier Calculator for EVE Online. Get precise quotes for your hauling needs with a gold-standard interface."
+      content="Free courier contract calculator for EVE Online haulers. Get instant reward quotes for Freighter, DST, Blockade Runner, and Jump Freighter routes across Domain, Providence, Amarr, and Jita."
     />
     <meta
       property="og:title"
-      content="Vagrant Logistics - Courier Calculator"
+      content="EVE Online Courier Calculator — Vagrant Logistics"
     />
     <meta
       property="og:description"
-      content="Calculate your shipping rewards with precision and style."
+      content="Instant reward quotes for courier contracts across Domain, Providence, and major trade hubs. Freighter, DST, Blockade Runner, and Jump Freighter pricing."
     />
     <meta
       property="og:image"
       content="https://images.evetech.net/corporations/98403600/logo"
     />
+    <meta property="og:url" content="https://vglgi.backb0ne.cloud/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Vagrant Logistics" />
+    <meta property="og:locale" content="en_GB" />
+    <meta name="twitter:card" content="summary" />
+    <meta
+      name="twitter:title"
+      content="EVE Online Courier Calculator — Vagrant Logistics"
+    />
+    <meta
+      name="twitter:description"
+      content="Instant reward quotes for courier contracts across Domain, Providence, and major trade hubs."
+    />
+    <meta
+      name="twitter:image"
+      content="https://images.evetech.net/corporations/98403600/logo"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "name": "Vagrant Logistics",
+            "url": "https://vglgi.backb0ne.cloud",
+            "logo": "https://images.evetech.net/corporations/98403600/logo",
+            "parentOrganization": {
+              "@type": "Organization",
+              "name": "The Charter"
+            }
+          },
+          {
+            "@type": "WebApplication",
+            "name": "Vagrant Logistics Courier Calculator",
+            "url": "https://vglgi.backb0ne.cloud",
+            "applicationCategory": "UtilityApplication",
+            "operatingSystem": "Web",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "description": "Calculate courier contract rewards for EVE Online hauling services across Domain, Providence, and major trade hubs."
+          },
+          {
+            "@type": "Service",
+            "name": "EVE Online Courier and Hauling Service",
+            "provider": {
+              "@type": "Organization",
+              "name": "Vagrant Logistics"
+            },
+            "areaServed": [
+              "Domain (EVE Online Region)",
+              "Providence (EVE Online Region)",
+              "Amarr Trade Hub",
+              "Jita Trade Hub",
+              "Dodixie Trade Hub",
+              "Rens Trade Hub",
+              "Hek Trade Hub"
+            ],
+            "serviceType": "Courier Contract Hauling",
+            "description": "Professional freight and courier contract services. Freighter, Deep Space Transport, Blockade Runner, and Jump Freighter logistics across high-sec, low-sec, and null-sec space."
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "What is the maximum collateral for Vagrant Logistics courier contracts?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "The standard collateral limit is 5 Billion ISK across all service tiers including HighSec and Dangerous space routes. Contracts exceeding this limit are handled through manual review."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Which EVE Online regions does Vagrant Logistics serve?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Vagrant Logistics primarily serves the Domain and Providence regions, including the Amarr trade hub. We also handle routes to and from Jita, Dodixie, Rens, and Hek."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What ship classes does Vagrant Logistics use for hauling?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "We operate Blockade Runners (up to 12,500 m³), Deep Space Transports (up to 62,500 m³), Freighters (up to 950,000 m³), and Jump Freighters for dangerous low-sec and null-sec routes."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How do I set up a courier contract with Vagrant Logistics?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Use the Courier Calculator to get your reward quote, then create an in-game courier contract to 'Vagrant Logistics' with a 3-day acceptance window and 3-day completion window."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <a href="#main-calculator" class="skip-link sr-only">Skip to main content</a>
@@ -43,7 +148,15 @@
           class="logo"
         />
         <h1>Vagrant Logistics</h1>
-        <h2>Courier Calculator</h2>
+        <h2>Courier Calculator — Domain &amp; Providence</h2>
+        <p class="sr-only">
+          Vagrant Logistics is a professional EVE Online courier and freight
+          service operating across the Domain and Providence regions. We offer
+          Blockade Runner, Deep Space Transport, Freighter, and Jump Freighter
+          hauling with routes connecting Amarr, Jita, Dodixie, Rens, and Hek
+          trade hubs. Use this calculator to get an instant reward quote for
+          your courier contract.
+        </p>
         <div id="config-warning" class="fallback-warning hidden" role="alert">
           Failed to load live rates. Operating in cached offline mode.
         </div>
@@ -111,7 +224,7 @@
                 autocomplete="off"
               />
               <div class="presets" role="group" aria-label="Volume Presets">
-                <button type="button" class="preset-btn" data-val="1,125,000" aria-label="Set volume to Freighter (1,125,000 m³)">
+                <button type="button" class="preset-btn" data-val="950,000" aria-label="Set volume to Freighter (950,000 m³)">
                   Freighter
                 </button>
                 <button type="button" class="preset-btn" data-val="62,500" aria-label="Set volume to Deep Space Transport (62,500 m³)">
@@ -143,7 +256,7 @@
               <div id="reward_output" class="reward-value" aria-labelledby="reward-label">0 ISK</div>
               <div id="reward_ipj_output" class="reward-ipj" aria-label="Reward per Jump">0 ISK/Jump</div>
 
-              <div id="fee_breakdown" class="fee-breakdown hidden">
+              <div id="fee_breakdown" class="fee-breakdown">
                 <div class="breakdown-title">Quote Breakdown</div>
                 <div class="breakdown-grid">
                   <div class="breakdown-row">
@@ -165,6 +278,10 @@
                   <div class="breakdown-row highlight">
                     <span>Collateral Multiplier:</span>
                     <span id="bd_security">1.0x</span>
+                  </div>
+                  <div class="breakdown-row" id="bd_rush_row" style="display: none;">
+                    <span>Rush Surcharge:</span>
+                    <span id="bd_rush">0 ISK</span>
                   </div>
                 </div>
               </div>
@@ -216,6 +333,25 @@
           class="footer-logo"
         />
         <span>Member of The Charter</span>
+      </footer>
+
+      <footer class="legal-footer">
+        <small>
+          <p>
+            EVE Online and the EVE logo are the registered trademarks of
+            Fenris Creations ehf. All rights are reserved worldwide. All
+            other trademarks are the property of their respective owners.
+            All artwork, screenshots, characters, vehicles, storylines,
+            world facts or other recognisable features of the intellectual
+            property relating to these trademarks are likewise the
+            intellectual property of Fenris Creations ehf.
+          </p>
+          <p>
+            This material is used with limited permission of Fenris
+            Creations. No official affiliation or endorsement by Fenris
+            Creations is stated or implied.
+          </p>
+        </small>
       </footer>
     </div>
 
