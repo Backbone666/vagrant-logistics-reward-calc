@@ -198,7 +198,9 @@ function renderBreakdown(details) {
 		bdDistance.textContent = "—";
 		bdCollateral.textContent = "—";
 		bdSecurity.textContent = "—";
-		bdDistanceLabel.textContent = "Distance Jump Fee:";
+		if (bdDistanceLabel) {
+			bdDistanceLabel.textContent = "Distance Jump Fee:";
+		}
 
 		if (
 			details.isRedirect &&
@@ -223,7 +225,9 @@ function renderBreakdown(details) {
 
 		let readableService = "Standard Sub-Capital";
 		const isJF = details.serviceClass?.includes("jump_freighter");
-		bdDistanceLabel.textContent = isJF ? "Distance Cyno Fee:" : "Distance Jump Fee:";
+		if (bdDistanceLabel) {
+			bdDistanceLabel.textContent = isJF ? "Distance Cyno Fee:" : "Distance Jump Fee:";
+		}
 
 		if (details.serviceClass) {
 			const parts = details.serviceClass.split(".");
