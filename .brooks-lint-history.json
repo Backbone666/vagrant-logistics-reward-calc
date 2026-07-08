@@ -1,0 +1,24 @@
+[
+	{
+		"date": "2026-07-08",
+		"mode": "Health Dashboard",
+		"score": 97,
+		"findings": {
+			"critical": 0,
+			"warning": 2,
+			"suggestion": 0
+		},
+		"scope": "entire project"
+	},
+	{
+		"date": "2026-07-08",
+		"mode": "Tech Debt Assessment",
+		"score": 90,
+		"findings": {
+			"critical": 0,
+			"warning": 2,
+			"suggestion": 0
+		},
+		"scope": "entire project"
+	}
+]

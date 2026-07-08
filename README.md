@@ -2,21 +2,24 @@
 
 A shipping contract reward calculator for EVE Online's Vagrant Logistics corporation and The Charter alliance. Built with high-end glassmorphism styling and precise, real-time quote computations.
 
-## Installation & Usage
+## Installation & Local Development
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/backbone666/vagrant-logistics-reward-calc.git
-   ```
-2. **Open the App**:
-   Open `index.html` directly in any modern web browser.
+1. Clone the repository:
+```bash
+git clone https://github.com/backbone666/vagrant-logistics-reward-calc.git
+cd vagrant-logistics-reward-calc
+```
 
-3. **Calculate Quotes**:
-   * Input the **Collateral** in ISK (suggested Janice Sell value).
-   * Input the route's **Highsec Jumps** and **Dangerous Jumps** (Lowsec/Nullsec).
-   * Input the **Volume** in m³ (or click the volume preset buttons: Freighter, DST, Blockade Runner).
-   * The reward quote and route breakdown update instantly as you type.
-   * Click **Copy Reward** to copy the calculated value to your clipboard.
+2. Install development tools:
+```bash
+npm install
+```
+
+3. Launch the local development server (avoids CORS issues loading rate config files):
+```bash
+npm run dev
+```
+Open http://localhost:3000 in your web browser.
 
 ## Project Structure
 
