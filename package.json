@@ -1,6 +1,7 @@
 {
 	"type": "module",
 	"scripts": {
+		"dev": "node dev.js",
 		"test": "node test/calculator.test.js",
 		"test:coverage": "node --experimental-test-coverage test/calculator.test.js",
 		"lint": "biome check .",

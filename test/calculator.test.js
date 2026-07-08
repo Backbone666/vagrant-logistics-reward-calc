@@ -430,3 +430,84 @@ test("Sub-unit: Pricing Modifiers (Minimum Fees & Rush)", () => {
 	);
 	assert.equal(jfCollateralSurcharge, jfNonRush + 20000000);
 });
+
+test("Test 10: Negative jumps return error", () => {
+	const result = calcReward(
+		{
+			volume: "50,000",
+			highsecJumps: "-5",
+			dangerousJumps: "0",
+			collateral: "2,000,000,000",
+		},
+		config,
+	);
+	assert.equal(result, 0);
+});
+
+test("Test 11: Negative volume returns error", () => {
+	const result = calcReward(
+		{
+			volume: "-100",
+			highsecJumps: "10",
+			dangerousJumps: "0",
+			collateral: "500,000,000",
+		},
+		config,
+	);
+	assert.equal(result, 0);
+});
+
+test("Test 12: Zero jumps return error", () => {
+	const result = calcReward(
+		{
+			volume: "10,000",
+			highsecJumps: "0",
+			dangerousJumps: "0",
+			collateral: "500,000,000",
+		},
+		config,
+	);
+	assert.equal(result, 0);
+});
+
+test("Test 13: Exact maximum freighter collateral (5B) does not redirect", () => {
+	const result = calcReward(
+		{
+			volume: "500,000",
+			highsecJumps: "10",
+			dangerousJumps: "0",
+			collateral: "5,000,000,000",
+		},
+		config,
+	);
+	// Base: 10 * 1.75M = 17.5M (min 10M, so 17.5M).
+	// Collateral 5B matched bracket multiplier = 3.5.
+	// Total = 17.5M * 3.5 = 61.25M
+	assert.equal(result, 61_250_000);
+});
+
+test("Test 14: Over maximum freighter collateral (>5B) redirects to Risako Hirano", () => {
+	const result = calcReward(
+		{
+			volume: "500,000",
+			highsecJumps: "10",
+			dangerousJumps: "0",
+			collateral: "5,000,000,001",
+		},
+		config,
+	);
+	assert.equal(result, "Risako Hirano");
+});
+
+test("Test 15: Over maximum JF collateral (>50B) redirects to Executive Review", () => {
+	const result = calcReward(
+		{
+			volume: "200,000",
+			highsecJumps: "0",
+			dangerousJumps: "10",
+			collateral: "50,000,000,001",
+		},
+		config,
+	);
+	assert.equal(result, "Executive Review");
+});
