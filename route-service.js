@@ -102,13 +102,21 @@ function combineSignals(signals) {
 		return AbortSignal.any(signals);
 	}
 	const controller = new AbortController();
+	const cleanups = [];
 	for (const sig of signals) {
 		if (!sig) continue;
 		if (sig.aborted) {
 			controller.abort(sig.reason);
 			return sig;
 		}
-		sig.addEventListener("abort", () => controller.abort(sig.reason), { once: true });
+		const onAbort = () => {
+			for (const cleanup of cleanups) {
+				cleanup();
+			}
+			controller.abort(sig.reason);
+		};
+		sig.addEventListener("abort", onAbort, { once: true });
+		cleanups.push(() => sig.removeEventListener("abort", onAbort));
 	}
 	return controller.signal;
 }
