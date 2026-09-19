@@ -3,12 +3,17 @@
 	"version": "1.0.0",
 	"private": true,
 	"type": "module",
+	"engines": {
+		"node": ">=20.0.0"
+	},
 	"scripts": {
 		"dev": "node dev.js",
-		"test": "node test/calculator.test.js",
+		"test": "node --test test/calculator.test.js",
 		"test:coverage": "node --experimental-test-coverage test/calculator.test.js",
 		"lint": "biome check .",
-		"format": "biome format --write ."
+		"lint:fix": "biome check --write .",
+		"format": "biome format --write .",
+		"check": "npm run lint && npm test"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.14"
