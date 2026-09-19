@@ -1,5 +1,5 @@
 export const parseNum = (val) => {
-	if (typeof val === "number") return val;
+	if (typeof val === "number") return Number.isNaN(val) ? 0 : val;
 	if (!val) return 0;
 	return parseFloat(val.toString().replace(/,/g, "")) || 0;
 };

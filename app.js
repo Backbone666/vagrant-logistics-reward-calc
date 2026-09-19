@@ -469,15 +469,35 @@ clearBtn.addEventListener("click", () => {
 });
 
 // Initialize inputs from URL params
-function initParamsFromUrl() {
-	const urlParams = new URLSearchParams(window.location.search);
+function clampInputVal(rawVal, min, max, allowDecimal = false) {
+	if (rawVal === null || rawVal === undefined || rawVal === "") return "";
+	const num = parseNum(rawVal);
+	if (Number.isNaN(num) || num < min) return formatNumber(min, allowDecimal);
+	if (num > max) return formatNumber(max, allowDecimal);
+	return formatNumber(rawVal, allowDecimal);
+}
 
-	if (urlParams.has("c")) collateralInput.value = formatNumber(urlParams.get("c"));
-	if (urlParams.has("hj")) highsecJumpsInput.value = formatNumber(urlParams.get("hj"), false);
-	if (urlParams.has("dj")) dangerousJumpsInput.value = formatNumber(urlParams.get("dj"), false);
-	if (urlParams.has("v")) volumeInput.value = formatNumber(urlParams.get("v"));
-	if (urlParams.get("r") === "1") rushCheckbox.checked = true;
-	if (urlParams.get("jf") === "1") forceJfCheckbox.checked = true;
+function initParamsFromUrl() {
+	try {
+		const urlParams = new URLSearchParams(window.location.search);
+
+		if (urlParams.has("c")) {
+			collateralInput.value = clampInputVal(urlParams.get("c"), 0, 100_000_000_000, true);
+		}
+		if (urlParams.has("hj")) {
+			highsecJumpsInput.value = clampInputVal(urlParams.get("hj"), 0, 100, false);
+		}
+		if (urlParams.has("dj")) {
+			dangerousJumpsInput.value = clampInputVal(urlParams.get("dj"), 0, 100, false);
+		}
+		if (urlParams.has("v")) {
+			volumeInput.value = clampInputVal(urlParams.get("v"), 0, 1_500_000, true);
+		}
+		if (urlParams.get("r") === "1") rushCheckbox.checked = true;
+		if (urlParams.get("jf") === "1") forceJfCheckbox.checked = true;
+	} catch (err) {
+		console.warn("Failed to parse URL query parameters defensively:", err);
+	}
 }
 
 // Load config dynamically on startup
