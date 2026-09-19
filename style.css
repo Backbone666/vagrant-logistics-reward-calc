@@ -131,7 +131,7 @@ body::before {
 	top: 0;
 	left: 50%;
 	transform: translateX(-50%) translateY(-100%);
-	transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+	transition: var(--transition-smooth);
 	box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
