@@ -455,7 +455,6 @@ input[type="text"]:focus {
 	box-shadow:
 		0 0 20px var(--primary-gold-glow),
 		inset 0 2px 4px rgba(0, 0, 0, 0.3);
-	transform: translateY(-2px);
 }
 
 /* High-contrast focus for all interactive elements */
@@ -553,7 +552,14 @@ input[type="text"]:focus {
 }
 
 .checkbox-item input {
-	display: none;
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
 }
 
 .checkbox-custom {
@@ -570,6 +576,12 @@ input[type="text"]:focus {
 .checkbox-item:hover .checkbox-custom {
 	background: hsla(45, 70%, 55%, 0.15);
 	box-shadow: 0 0 10px var(--primary-gold-glow);
+}
+
+.checkbox-item input:focus-visible + .checkbox-custom {
+	outline: 2px solid var(--bright-gold);
+	outline-offset: 3px;
+	box-shadow: 0 0 12px var(--primary-gold-glow);
 }
 
 .checkbox-item input:checked + .checkbox-custom {
