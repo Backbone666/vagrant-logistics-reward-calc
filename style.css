@@ -162,13 +162,11 @@ header {
 	height: auto;
 	aspect-ratio: 1 / 1;
 	margin-bottom: var(--space-xs);
-	transition: var(--transition-smooth);
-	filter: drop-shadow(0 0 25px var(--primary-gold-glow));
+	transition: transform 150ms ease;
 }
 
 .logo:hover {
-	transform: scale(1.05) rotate(5deg);
-	filter: drop-shadow(0 0 35px var(--primary-gold));
+	transform: scale(1.03);
 }
 
 h1 {
@@ -193,30 +191,25 @@ h2 {
 }
 
 .calculator-card {
-	background: var(--card-bg);
-	backdrop-filter: blur(25px);
-	-webkit-backdrop-filter: blur(25px);
+	background: hsl(0, 0%, 7%);
 	border: 1px solid var(--glass-border);
 	border-radius: var(--radius-lg);
 	padding: clamp(var(--space-md), 5vw, var(--space-lg)) clamp(var(--space-md), 5vw, var(--space-xl));
-	box-shadow:
-		0 50px 100px rgba(0, 0, 0, 0.8),
-		inset 0 0 50px hsla(45, 70%, 55%, 0.05);
+	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
 	position: relative;
 	overflow: visible;
-	animation: cardFadeIn 1.4s cubic-bezier(0.23, 1, 0.32, 1);
 	width: 100%;
 	transition:
-		border-color 0.4s ease,
-		box-shadow 0.4s ease;
+		border-color 150ms ease,
+		box-shadow 150ms ease;
 }
 
 /* Dangerous Route Theme Shift */
 .calculator-card.route-dangerous {
 	border-color: var(--warning-amber);
 	box-shadow:
-		0 50px 100px rgba(0, 0, 0, 0.8),
-		inset 0 0 50px hsla(28, 90%, 55%, 0.05);
+		0 12px 32px rgba(0, 0, 0, 0.6),
+		0 0 0 1px var(--warning-amber);
 }
 
 .calculator-card.route-dangerous label {
@@ -237,7 +230,6 @@ h2 {
 
 .calculator-card.route-dangerous .reward-value {
 	color: var(--warning-amber);
-	text-shadow: 0 0 40px var(--warning-glow);
 }
 
 .calculator-card.route-dangerous .preset-btn {
@@ -636,7 +628,6 @@ input[type="text"]:focus {
 	line-height: 1.1;
 	word-break: break-all;
 	overflow-wrap: break-word;
-	text-shadow: 0 0 40px var(--primary-gold-glow);
 	transition: var(--transition-smooth);
 	max-width: 100%;
 }
