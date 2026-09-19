@@ -25,7 +25,8 @@
 	--text-primary: #ede7d9;
 	--text-secondary: hsl(43, 40%, 85%); /* Increased brightness for WCAG AA contrast */
 	--accent-glow: 0 0 30px var(--primary-gold-glow);
-	--transition-smooth: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+	--transition-smooth:
+		opacity 150ms cubic-bezier(0.2, 0, 0, 1), transform 150ms cubic-bezier(0.2, 0, 0, 1);
 	--font-display: "Cinzel", serif;
 	--font-body: "EveSansNeue", sans-serif;
 
@@ -98,26 +99,8 @@ body::after {
 	background: url("LW9R6.webp") no-repeat center center;
 	background-size: cover;
 	z-index: -2;
-	animation: ambientFloat 60s infinite linear;
-	will-change: transform;
-}
-
-@keyframes ambientFloat {
-	0% {
-		transform: translate(0, 0);
-	}
-	25% {
-		transform: translate(1%, -1%);
-	}
-	50% {
-		transform: translate(0, -2%);
-	}
-	75% {
-		transform: translate(-1%, -1%);
-	}
-	100% {
-		transform: translate(0, 0);
-	}
+	/* Static GPU-composited background without continuous redraw loop */
+	transform: translate3d(0, 0, 0);
 }
 
 /* Nebula Overlay */
