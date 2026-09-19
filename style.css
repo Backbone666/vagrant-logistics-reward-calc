@@ -1,6 +1,8 @@
 @font-face {
 	font-family: "EveSansNeue";
-	src: url("evesansneue-regular.otf") format("opentype");
+	src:
+		url("evesansneue-regular.woff2") format("woff2"),
+		url("evesansneue-regular.otf") format("opentype");
 	font-weight: normal;
 	font-style: normal;
 	font-display: swap;
