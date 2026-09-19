@@ -173,6 +173,7 @@ let syncUrlTimeout = null;
 function debouncedSyncUrlParams(options) {
 	if (syncUrlTimeout) clearTimeout(syncUrlTimeout);
 	syncUrlTimeout = setTimeout(() => {
+		syncUrlTimeout = null;
 		syncUrlParams(options);
 	}, 200);
 }
@@ -313,6 +314,7 @@ function updateAll() {
 		cancelAnimationFrame(renderRafId);
 	}
 	renderRafId = scheduleFrame(() => {
+		renderRafId = null;
 		if (calcCard) {
 			calcCard.classList.toggle("route-dangerous", isDangerous);
 		}
@@ -408,6 +410,12 @@ copyQuoteBtn.addEventListener("click", async () => {
 	const details = lastDetails;
 	if (!details || details.error) return;
 
+	if (syncUrlTimeout) {
+		clearTimeout(syncUrlTimeout);
+		syncUrlTimeout = null;
+	}
+	syncUrlParams(getFormInputs());
+
 	let detailsText = "";
 	if (details.isRedirect) {
 		detailsText = `Redirect to: ${details.redirectTarget}`;
@@ -447,7 +455,10 @@ clearBtn.addEventListener("click", () => {
 	rushCheckbox.checked = false;
 	forceJfCheckbox.checked = false;
 	updateAll();
-	if (syncUrlTimeout) clearTimeout(syncUrlTimeout);
+	if (syncUrlTimeout) {
+		clearTimeout(syncUrlTimeout);
+		syncUrlTimeout = null;
+	}
 	syncUrlParams(getFormInputs());
 });
 
@@ -472,6 +483,7 @@ try {
 	const cachedConfig = localStorage.getItem("vagrant_logistics_rate_config");
 	if (cachedConfig) {
 		config = JSON.parse(cachedConfig);
+		updateAll();
 	}
 } catch (e) {
 	console.warn("Failed to parse cached configuration:", e);
