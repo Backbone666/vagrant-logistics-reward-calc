@@ -169,6 +169,14 @@ function syncUrlParams(options) {
 	}
 }
 
+let syncUrlTimeout = null;
+function debouncedSyncUrlParams(options) {
+	if (syncUrlTimeout) clearTimeout(syncUrlTimeout);
+	syncUrlTimeout = setTimeout(() => {
+		syncUrlParams(options);
+	}, 200);
+}
+
 function getFormInputs() {
 	return {
 		volume: volumeInput.value,
@@ -285,7 +293,7 @@ function updateAll() {
 	if (!config) return;
 
 	const options = getFormInputs();
-	syncUrlParams(options);
+	debouncedSyncUrlParams(options);
 
 	if (calcCard) {
 		const isDangerous = (parseNum(options.dangerousJumps) || 0) > 0 || options.forceJF;
@@ -441,6 +449,8 @@ clearBtn.addEventListener("click", () => {
 	rushCheckbox.checked = false;
 	forceJfCheckbox.checked = false;
 	updateAll();
+	if (syncUrlTimeout) clearTimeout(syncUrlTimeout);
+	syncUrlParams(getFormInputs());
 });
 
 // Initialize inputs from URL params
@@ -457,6 +467,7 @@ function initParamsFromUrl() {
 
 // Load config dynamically on startup
 initParamsFromUrl();
+syncUrlParams(getFormInputs());
 
 // Try loading from localStorage first to render instantly
 try {
