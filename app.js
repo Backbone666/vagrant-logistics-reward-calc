@@ -233,21 +233,11 @@ function renderBreakdown(details) {
 	} else {
 		feeBreakdown.classList.remove("placeholder-active");
 
-		let readableService = "Standard Sub-Capital";
-		const isJF = details.serviceClass?.includes("jump_freighter");
+		bdService.textContent = details.serviceName || "Standard Sub-Capital";
 		if (bdDistanceLabel) {
-			bdDistanceLabel.textContent = isJF ? "Distance Cyno Fee:" : "Distance Jump Fee:";
+			bdDistanceLabel.textContent = details.distanceLabel || "Distance Jump Fee:";
 		}
 
-		if (details.serviceClass) {
-			const parts = details.serviceClass.split(".");
-			if (parts.length === 2) {
-				const [section, service] = parts;
-				readableService = config[section]?.[service]?.hull_class || readableService;
-			}
-		}
-
-		bdService.textContent = readableService;
 		bdBase.textContent = `${formatNumber(details.baseFee)} ISK`;
 		bdDistance.textContent = `${formatNumber(details.distanceFee)} ISK`;
 		bdCollateral.textContent = `${formatNumber(details.collateralFee)} ISK`;
@@ -279,10 +269,9 @@ function renderReward(reward, rawJumps) {
 		}
 		rewardIpjOutput.textContent = "Contact in game";
 	} else if (reward > 0) {
-		const finalVal = Math.max(1_000_000, Math.ceil(reward));
-		rewardOutput.textContent = `${formatNumber(finalVal)} ISK`;
+		rewardOutput.textContent = `${formatNumber(reward)} ISK`;
 
-		const ipj = finalVal / rawJumps;
+		const ipj = reward / rawJumps;
 		rewardIpjOutput.textContent = `${formatNumber(Math.ceil(ipj))} ISK/Jump`;
 	} else {
 		rewardOutput.textContent = "0 ISK";
@@ -306,7 +295,11 @@ function updateAll() {
 	const details = calcRewardDetails({ ...options, config });
 	lastDetails = details;
 
-	const reward = details.error ? 0 : details.isRedirect ? details.redirectTarget : details.total;
+	const reward = details.error
+		? 0
+		: details.isRedirect
+			? details.redirectTarget
+			: details.finalTotal;
 	currentReward = reward;
 	const rawJumps = parseNum(options.highsecJumps) + parseNum(options.dangerousJumps) || 1;
 
@@ -384,7 +377,7 @@ copyBtn.addEventListener("click", async () => {
 	if (currentReward === "Risako Hirano" || currentReward === "Executive Review") {
 		textToCopy = currentReward;
 	} else if (typeof currentReward === "number" && currentReward > 0) {
-		textToCopy = Math.max(1_000_000, Math.ceil(currentReward)).toString();
+		textToCopy = currentReward.toString();
 	}
 
 	if (textToCopy) {
@@ -420,7 +413,7 @@ copyQuoteBtn.addEventListener("click", async () => {
 	if (details.isRedirect) {
 		detailsText = `Redirect to: ${details.redirectTarget}`;
 	} else {
-		detailsText = `${formatNumber(Math.max(1000000, Math.ceil(details.total)))} ISK`;
+		detailsText = `${formatNumber(details.finalTotal)} ISK`;
 	}
 
 	const template = [
