@@ -389,6 +389,7 @@ h2 {
 .route-status-container {
 	min-height: 1.2rem;
 	margin-top: calc(-1 * var(--space-xs));
+	margin-bottom: calc(-1 * var(--space-xs));
 	display: flex;
 	align-items: center;
 }
