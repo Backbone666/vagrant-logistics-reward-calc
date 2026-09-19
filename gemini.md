@@ -103,6 +103,14 @@ The brand aims for a "Gold Standard" of professional hauling services. It reflec
   - **Cache-Busted Configuration Requests**: Added cache-buster query parameters (`?t=...`) and `{ cache: "no-cache" }` headers to the `rate_card_config.json` fetch request to bypass stale/broken browser and proxy cache results.
   - **Local Development Compatibility**: Updated the local `dev.js` HTTP server to strip query parameters before file path lookup, enabling full local testing with cache-busting.
 
+## Operational Invariants & Development Workflow
+
+**Strict Mandate: Adhere to zero-framework deployment and git integration rules.**
+- **Local Integration Mandate**: When completing feature branches (e.g. `advisor/*`), always fast-forward merge into `gh-pages` locally and delete the feature branch once verification passes (`npm run check`). Do not prompt interactively for branch integration.
+- **Lockfile Synchronization**: Any change to `package.json` (metadata, engines, scripts, dependencies) must immediately be accompanied by running `npm install --package-lock-only` to keep `package-lock.json` in lockstep before committing.
+- **Static Root Asset Guard**: Root files (`CNAME`, `robots.txt`, `sitemap.xml`, `llms.txt`) are protected invariants. Never delete, rename, or truncate them during refactoring or clean-up tasks.
+- **Automated Releases**: The repository uses `googleapis/release-please-action` on `gh-pages`. All commits must strictly adhere to Conventional Commits format (`feat:`, `fix:`, `perf:`, `chore:`, `ci:`).
+
 ---
 
 _Documented by Gemini - 2026-03-13_
