@@ -728,6 +728,12 @@ input[type="text"]:focus {
 	border-color: #27ae60;
 }
 
+.btn-copy.copy-failed,
+.btn-mini-copy.copy-failed {
+	border-color: var(--warning-amber);
+	color: var(--warning-amber);
+}
+
 .btn-clear {
 	flex: 1 1 100px;
 	background: transparent;
