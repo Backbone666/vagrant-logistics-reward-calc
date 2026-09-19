@@ -283,8 +283,10 @@ function updateAll() {
 	const options = getFormInputs();
 	debouncedSyncUrlParams(options);
 
-	const isDangerous = (parseNum(options.dangerousJumps) || 0) > 0 || options.forceJF;
-	const details = calcRewardDetails({ ...options, config });
+	const hsJumps = parseNum(options.highsecJumps);
+	const dangerousJumps = parseNum(options.dangerousJumps);
+	const isDangerous = dangerousJumps > 0 || options.forceJF;
+	const details = calcRewardDetails({ ...options, highsecJumps: hsJumps, dangerousJumps, config });
 	lastDetails = details;
 
 	const reward = details.error
@@ -293,7 +295,7 @@ function updateAll() {
 			? details.redirectTarget
 			: details.finalTotal;
 	currentReward = reward;
-	const rawJumps = parseNum(options.highsecJumps) + parseNum(options.dangerousJumps) || 1;
+	const rawJumps = hsJumps + dangerousJumps || 1;
 
 	if (renderRafId && typeof cancelAnimationFrame === "function") {
 		cancelAnimationFrame(renderRafId);
