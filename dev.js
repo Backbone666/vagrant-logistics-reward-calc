@@ -15,6 +15,7 @@ const MIME_TYPES = {
 	".json": "application/json",
 	".webp": "image/webp",
 	".otf": "font/otf",
+	".woff2": "font/woff2",
 };
 
 const server = http.createServer((req, res) => {
@@ -34,7 +35,7 @@ const server = http.createServer((req, res) => {
 			}
 		} else {
 			res.writeHead(200, { "Content-Type": contentType });
-			res.end(content, "utf-8");
+			res.end(content);
 		}
 	});
 });
