@@ -795,6 +795,19 @@ input[type="text"]:focus {
 .btn-quote:disabled {
 	opacity: 0.5;
 	cursor: not-allowed;
+	transform: none;
+	box-shadow: none;
+}
+
+.btn-copy:disabled:hover,
+.btn-quote:disabled:hover,
+.btn-copy:disabled:active,
+.btn-quote:disabled:active {
+	background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+	color: var(--primary-gold);
+	transform: none;
+	box-shadow: none;
+	filter: none;
 }
 
 .btn-copy.copy-failed,

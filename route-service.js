@@ -95,30 +95,38 @@ export function buildRouteUrl(origin, destination, options = {}) {
  * Combine multiple abort signals with fallback for runtimes lacking AbortSignal.any.
  *
  * @param {Array<AbortSignal>} signals
- * @returns {AbortSignal}
+ * @returns {{ signal: AbortSignal, cleanup: () => void }}
  */
 function combineSignals(signals) {
 	if (typeof AbortSignal.any === "function") {
-		return AbortSignal.any(signals);
+		return { signal: AbortSignal.any(signals), cleanup: () => {} };
 	}
 	const controller = new AbortController();
 	const cleanups = [];
+	const cleanup = () => {
+		while (cleanups.length > 0) {
+			const fn = cleanups.pop();
+			try {
+				fn();
+			} catch {
+				// ignore
+			}
+		}
+	};
 	for (const sig of signals) {
 		if (!sig) continue;
 		if (sig.aborted) {
 			controller.abort(sig.reason);
-			return sig;
+			return { signal: sig, cleanup: () => {} };
 		}
 		const onAbort = () => {
-			for (const cleanup of cleanups) {
-				cleanup();
-			}
+			cleanup();
 			controller.abort(sig.reason);
 		};
 		sig.addEventListener("abort", onAbort, { once: true });
 		cleanups.push(() => sig.removeEventListener("abort", onAbort));
 	}
-	return controller.signal;
+	return { signal: controller.signal, cleanup };
 }
 
 /**
@@ -175,72 +183,79 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 	const timeoutSignal = AbortSignal.timeout(timeoutMs);
 
 	let signal;
+	let cleanup = () => {};
 	if (options.signal) {
-		signal = combineSignals([options.signal, timeoutSignal]);
+		const combined = combineSignals([options.signal, timeoutSignal]);
+		signal = combined.signal;
+		cleanup = combined.cleanup;
 	} else {
 		signal = timeoutSignal;
 	}
 
 	const fetchFn = options.fetch || globalThis.fetch;
 
-	let response;
 	try {
-		response = await fetchFn(url, { signal });
-	} catch (fetchErr) {
-		if (fetchErr.name === "AbortError" && options.signal?.aborted) {
-			throw fetchErr;
-		}
-		throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", fetchErr);
-	}
-
-	if (!response.ok) {
-		let errBody = null;
+		let response;
 		try {
-			errBody = await response.json();
-		} catch {
-			// Non-JSON response
+			response = await fetchFn(url, { signal });
+		} catch (fetchErr) {
+			if (fetchErr.name === "AbortError" && options.signal?.aborted) {
+				throw fetchErr;
+			}
+			throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", fetchErr);
 		}
 
-		const errMsg = String(errBody?.error ?? errBody?.message ?? "").toLowerCase();
-		if (
-			(response.status === 400 || response.status === 404) &&
-			(errMsg.includes("invalid system") ||
-				errMsg.includes("not found") ||
-				errMsg.includes("unknown system") ||
-				errMsg.includes("no route"))
-		) {
+		if (!response.ok) {
+			let errBody = null;
+			try {
+				errBody = await response.json();
+			} catch {
+				// Non-JSON response
+			}
+
+			const errMsg = String(errBody?.error ?? errBody?.message ?? "").toLowerCase();
+			if (
+				(response.status === 400 || response.status === 404) &&
+				(errMsg.includes("invalid system") ||
+					errMsg.includes("not found") ||
+					errMsg.includes("unknown system") ||
+					errMsg.includes("no route"))
+			) {
+				throw new RouteNotFoundError("No route found avoiding specified systems");
+			}
+
+			throw new RouteUnavailableError(
+				"Route lookup unavailable — manual entry enabled",
+				new Error(`HTTP ${response.status}: ${JSON.stringify(errBody)}`),
+			);
+		}
+
+		let data;
+		try {
+			data = await response.json();
+		} catch (jsonErr) {
+			if (jsonErr.name === "AbortError" && options.signal?.aborted) {
+				throw jsonErr;
+			}
+			throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", jsonErr);
+		}
+		const directSystems = data?.routes?.direct;
+
+		if (!Array.isArray(directSystems) || directSystems.length === 0) {
 			throw new RouteNotFoundError("No route found avoiding specified systems");
 		}
 
-		throw new RouteUnavailableError(
-			"Route lookup unavailable — manual entry enabled",
-			new Error(`HTTP ${response.status}: ${JSON.stringify(errBody)}`),
-		);
+		const { highSecJumps, dangerousJumps } = classifyJumps(directSystems);
+
+		return {
+			summary: data.summary,
+			routes: data.routes,
+			systems: directSystems,
+			highSecJumps,
+			dangerousJumps,
+			totalJumps: highSecJumps + dangerousJumps,
+		};
+	} finally {
+		cleanup();
 	}
-
-	let data;
-	try {
-		data = await response.json();
-	} catch (jsonErr) {
-		if (jsonErr.name === "AbortError" && options.signal?.aborted) {
-			throw jsonErr;
-		}
-		throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", jsonErr);
-	}
-	const directSystems = data?.routes?.direct;
-
-	if (!Array.isArray(directSystems) || directSystems.length === 0) {
-		throw new RouteNotFoundError("No route found avoiding specified systems");
-	}
-
-	const { highSecJumps, dangerousJumps } = classifyJumps(directSystems);
-
-	return {
-		summary: data.summary,
-		routes: data.routes,
-		systems: directSystems,
-		highSecJumps,
-		dangerousJumps,
-		totalJumps: highSecJumps + dangerousJumps,
-	};
 }
