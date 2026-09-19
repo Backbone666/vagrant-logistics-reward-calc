@@ -1,24 +1,67 @@
-name: CI
+name: CI/CD
 
 on:
   push:
     branches: [ gh-pages ]
   pull_request:
     branches: [ gh-pages ]
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
   verify:
+    name: Lint & Test Verification
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
+
       - name: Install dependencies
         run: npm ci
-      - name: Run linter
-        run: npm run lint
-      - name: Run tests
-        run: npm run test
+
+      - name: Run verification checks
+        run: npm run check
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: verify
+    if: github.ref == 'refs/heads/gh-pages' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify static root assets
+        run: |
+          for file in CNAME robots.txt sitemap.xml llms.txt; do
+            if [ ! -s "$file" ]; then
+              echo "Error: Required asset '$file' is missing or empty." >&2
+              exit 1
+            fi
+          done
+          echo "All required root assets verified."
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
