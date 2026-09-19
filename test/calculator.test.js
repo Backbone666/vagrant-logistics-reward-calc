@@ -422,6 +422,9 @@ test("Sub-unit: parseNum handles number format cleanups", () => {
 	assert.equal(parseNum(123.45), 123.45);
 	assert.equal(parseNum(""), 0);
 	assert.equal(parseNum(null), 0);
+	assert.equal(parseNum(undefined), 0);
+	assert.equal(parseNum("abc"), 0);
+	assert.equal(parseNum(Number.NaN), 0);
 });
 
 test("Sub-unit: Input Validation and Redirect Paths", () => {
