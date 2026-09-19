@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.1](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.0.0...v1.0.1) (2026-09-19)
+
+
+### Bug Fixes
+
+* **route-service:** clean up abort listeners in combineSignals fallback ([e5a5fb2](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/e5a5fb275c30c9ff348df993bd2ee638e912642f))
+* **route-service:** clean up fallback signal listeners on completion and neutralize disabled button hover ([e5c9062](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/e5c9062dc605d3bb8999e4e8d7f9041457b166d5))
+
+
+### Performance Improvements
+
+* **app:** streamline jump parsing in updateAll ([57e7676](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/57e7676c7a43ae0976e393d805c2192cab985c9c))
+
 ## 1.0.0 (2026-09-19)
 
 
