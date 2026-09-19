@@ -321,8 +321,6 @@ function updateAll() {
 	});
 }
 
-export const calculateRewards = updateAll;
-
 function setRouteStatus(type, message) {
 	if (!routeStatus) return;
 	routeStatus.className = "route-status";
