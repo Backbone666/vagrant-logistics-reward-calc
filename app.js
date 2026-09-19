@@ -221,18 +221,10 @@ function renderBreakdown(details) {
 			(details.redirectTarget === "Risako Hirano" || details.redirectTarget === "Executive Review")
 		) {
 			copyBtn.disabled = false;
-			copyBtn.style.opacity = "1";
-			copyBtn.style.cursor = "pointer";
 			copyQuoteBtn.disabled = false;
-			copyQuoteBtn.style.opacity = "1";
-			copyQuoteBtn.style.cursor = "pointer";
 		} else {
 			copyBtn.disabled = true;
-			copyBtn.style.opacity = "0.5";
-			copyBtn.style.cursor = "not-allowed";
 			copyQuoteBtn.disabled = true;
-			copyQuoteBtn.style.opacity = "0.5";
-			copyQuoteBtn.style.cursor = "not-allowed";
 		}
 	} else {
 		feeBreakdown.classList.remove("placeholder-active");
@@ -255,11 +247,7 @@ function renderBreakdown(details) {
 		}
 
 		copyBtn.disabled = false;
-		copyBtn.style.opacity = "1";
-		copyBtn.style.cursor = "pointer";
 		copyQuoteBtn.disabled = false;
-		copyQuoteBtn.style.opacity = "1";
-		copyQuoteBtn.style.cursor = "pointer";
 	}
 }
 

@@ -791,6 +791,12 @@ input[type="text"]:focus {
 	border-color: #27ae60;
 }
 
+.btn-copy:disabled,
+.btn-quote:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
 .btn-copy.copy-failed,
 .btn-mini-copy.copy-failed {
 	border-color: var(--warning-amber);
