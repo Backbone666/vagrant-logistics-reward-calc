@@ -328,7 +328,77 @@ test("Sub-unit: calcRewardDetails computes structured breakdown", () => {
 	);
 	assert.equal(details.isRedirect, false);
 	assert.equal(details.serviceClass, "highsec_services.blockade_runner_dst");
+	assert.equal(details.serviceName, "BR / DST Highsec Standard");
+	assert.equal(details.distanceLabel, "Distance Jump Fee:");
 	assert.equal(details.total, 27000000);
+	assert.equal(details.finalTotal, 27000000);
+});
+
+test("Sub-unit: Encapsulated service metadata and final total floor", () => {
+	// Highsec Freighter
+	const freighterDetails = calcRewardDetails(
+		{ volume: 500000, highsecJumps: 10, dangerousJumps: 0, collateral: 1000000000 },
+		config,
+	);
+	assert.equal(freighterDetails.serviceName, "Freighter / Bowhead / Avalanche");
+	assert.equal(freighterDetails.distanceLabel, "Distance Jump Fee:");
+	assert.equal(freighterDetails.finalTotal, 17500000);
+	assert.ok(freighterDetails.finalTotal >= 1000000);
+
+	// Dangerous Stargate BR
+	const stargateBr = calcRewardDetails(
+		{ volume: 10000, highsecJumps: 0, dangerousJumps: 10, collateral: 500000000 },
+		config,
+	);
+	assert.equal(stargateBr.serviceName, "Blockade Runner");
+	assert.equal(stargateBr.distanceLabel, "Distance Jump Fee:");
+	assert.equal(stargateBr.finalTotal, 30000000);
+
+	// Dangerous Stargate DST
+	const stargateDst = calcRewardDetails(
+		{ volume: 50000, highsecJumps: 0, dangerousJumps: 10, collateral: 2000000000 },
+		config,
+	);
+	assert.equal(stargateDst.serviceName, "Deep Space Transport");
+	assert.equal(stargateDst.distanceLabel, "Distance Jump Fee:");
+	assert.equal(stargateDst.finalTotal, 76000000);
+
+	// Jump Freighter
+	const jfDetails = calcRewardDetails(
+		{ volume: 200000, highsecJumps: 0, dangerousJumps: 10, collateral: 2000000000 },
+		config,
+	);
+	assert.equal(jfDetails.serviceName, "Jump Freighter");
+	assert.equal(jfDetails.distanceLabel, "Distance Cyno Fee:");
+	assert.equal(jfDetails.finalTotal, 506000000);
+
+	// Enforce 1,000,000 ISK floor when total is less than 1,000,000
+	const lowConfig = JSON.parse(JSON.stringify(config));
+	lowConfig.highsec_services.blockade_runner_dst.base_rate_per_jump = 100;
+	lowConfig.highsec_services.blockade_runner_dst.minimum_contract_fee = 100;
+	const lowResult = calcRewardDetails(
+		{ volume: 1000, highsecJumps: 1, dangerousJumps: 0, collateral: 0 },
+		lowConfig,
+	);
+	assert.equal(lowResult.total, 100);
+	assert.equal(lowResult.finalTotal, 1000000);
+
+	// Redirect cases still preserve serviceName and distanceLabel
+	const subcapRedirect = calcRewardDetails(
+		{ volume: 50000, highsecJumps: 10, collateral: "11,000,000,000" },
+		config,
+	);
+	assert.equal(subcapRedirect.isRedirect, true);
+	assert.equal(subcapRedirect.serviceName, "BR / DST Highsec Standard");
+	assert.equal(subcapRedirect.distanceLabel, "Distance Jump Fee:");
+
+	const jfRedirect = calcRewardDetails(
+		{ volume: 200000, dangerousJumps: 10, collateral: "51,000,000,000" },
+		config,
+	);
+	assert.equal(jfRedirect.isRedirect, true);
+	assert.equal(jfRedirect.serviceName, "Jump Freighter");
+	assert.equal(jfRedirect.distanceLabel, "Distance Cyno Fee:");
 });
 
 test("Sub-unit: parseNum handles number format cleanups", () => {
