@@ -22,6 +22,7 @@ const bdSecurity = document.getElementById("bd_security");
 const bdRushRow = document.getElementById("bd_rush_row");
 const bdRush = document.getElementById("bd_rush");
 const configWarning = document.getElementById("config-warning");
+const calcCard = document.querySelector(".calculator-card");
 const presetBtns = document.querySelectorAll(".preset-btn");
 const miniCopyBtns = document.querySelectorAll(".btn-mini-copy");
 const toFormatNumberInputs = document.querySelectorAll(".to_format_number");
@@ -286,7 +287,6 @@ function updateAll() {
 	const options = getFormInputs();
 	syncUrlParams(options);
 
-	const calcCard = document.querySelector(".calculator-card");
 	if (calcCard) {
 		const isDangerous = (parseNum(options.dangerousJumps) || 0) > 0 || options.forceJF;
 		if (isDangerous) {
