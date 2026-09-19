@@ -317,22 +317,54 @@ function updateAll() {
 	});
 }
 
+async function copyTextToClipboard(text) {
+	if (navigator.clipboard?.writeText) {
+		try {
+			await navigator.clipboard.writeText(text);
+			return true;
+		} catch (e) {
+			console.warn("navigator.clipboard.writeText failed, attempting fallback:", e);
+		}
+	}
+
+	try {
+		const textArea = document.createElement("textarea");
+		textArea.value = text;
+		textArea.style.position = "fixed";
+		textArea.style.left = "-9999px";
+		textArea.style.top = "0";
+		textArea.setAttribute("readonly", "");
+		document.body.appendChild(textArea);
+		textArea.focus();
+		textArea.select();
+		const successful = document.execCommand("copy");
+		document.body.removeChild(textArea);
+		return successful;
+	} catch (fallbackErr) {
+		console.error("Fallback clipboard copy failed:", fallbackErr);
+		return false;
+	}
+}
+
+function triggerCopyFeedback(btn, success, successText, duration = 2000) {
+	const originalText = btn.getAttribute("data-original-text") || btn.textContent;
+	btn.setAttribute("data-original-text", originalText);
+	btn.textContent = success ? successText : "Copy Failed!";
+	btn.classList.toggle("copied", success);
+	btn.classList.toggle("copy-failed", !success);
+
+	setTimeout(() => {
+		btn.textContent = originalText;
+		btn.classList.remove("copied", "copy-failed");
+	}, duration);
+}
+
 // Mini copy buttons
 miniCopyBtns.forEach((btn) => {
 	btn.addEventListener("click", async () => {
 		const val = btn.getAttribute("data-copy");
-		try {
-			await navigator.clipboard.writeText(val);
-			const originalText = btn.textContent;
-			btn.textContent = "Copied!";
-			btn.classList.add("copied");
-			setTimeout(() => {
-				btn.textContent = originalText;
-				btn.classList.remove("copied");
-			}, 1500);
-		} catch (err) {
-			console.error("Failed to copy: ", err);
-		}
+		const success = await copyTextToClipboard(val);
+		triggerCopyFeedback(btn, success, "Copied!", 1500);
 	});
 });
 
@@ -372,7 +404,6 @@ presetBtns.forEach((btn) => {
 
 copyBtn.addEventListener("click", async () => {
 	let textToCopy = "";
-	const originalText = copyBtn.textContent;
 
 	if (currentReward === "Risako Hirano" || currentReward === "Executive Review") {
 		textToCopy = currentReward;
@@ -381,25 +412,16 @@ copyBtn.addEventListener("click", async () => {
 	}
 
 	if (textToCopy) {
-		try {
-			await navigator.clipboard.writeText(textToCopy);
-			copyBtn.textContent =
-				currentReward === "Risako Hirano" || currentReward === "Executive Review"
-					? "Name Copied!"
-					: "Reward Copied!";
-			copyBtn.classList.add("copied");
-			setTimeout(() => {
-				copyBtn.textContent = originalText;
-				copyBtn.classList.remove("copied");
-			}, 2000);
-		} catch (err) {
-			console.error("Failed to copy: ", err);
-		}
+		const success = await copyTextToClipboard(textToCopy);
+		const label =
+			currentReward === "Risako Hirano" || currentReward === "Executive Review"
+				? "Name Copied!"
+				: "Reward Copied!";
+		triggerCopyFeedback(copyBtn, success, label);
 	}
 });
 
 copyQuoteBtn.addEventListener("click", async () => {
-	const originalText = copyQuoteBtn.textContent;
 	const details = lastDetails;
 	if (!details || details.error) return;
 
@@ -427,17 +449,8 @@ copyQuoteBtn.addEventListener("click", async () => {
 		`Link: ${window.location.href}`,
 	].join("\n");
 
-	try {
-		await navigator.clipboard.writeText(template);
-		copyQuoteBtn.textContent = "Quote Copied!";
-		copyQuoteBtn.classList.add("copied");
-		setTimeout(() => {
-			copyQuoteBtn.textContent = originalText;
-			copyQuoteBtn.classList.remove("copied");
-		}, 2000);
-	} catch (err) {
-		console.error("Failed to copy quote: ", err);
-	}
+	const success = await copyTextToClipboard(template);
+	triggerCopyFeedback(copyQuoteBtn, success, "Quote Copied!");
 });
 
 clearBtn.addEventListener("click", () => {
