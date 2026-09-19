@@ -95,6 +95,11 @@ function calcStargateRouteReward({
 		multiplier: 1.0,
 		surcharge: 0,
 		serviceClass,
+		serviceName: service.hull_class || "Standard Sub-Capital",
+		distanceLabel: serviceClass?.includes("jump_freighter")
+			? "Distance Cyno Fee:"
+			: "Distance Jump Fee:",
+		finalTotal: Math.max(1_000_000, Math.ceil(total)),
 	};
 }
 
@@ -147,6 +152,11 @@ function calcHighsecReward({
 		multiplier,
 		surcharge,
 		serviceClass,
+		serviceName: service.hull_class || "Standard Sub-Capital",
+		distanceLabel: serviceClass?.includes("jump_freighter")
+			? "Distance Cyno Fee:"
+			: "Distance Jump Fee:",
+		finalTotal: Math.max(1_000_000, Math.ceil(total)),
 	};
 }
 
@@ -193,6 +203,11 @@ function calcJumpFreighterReward({
 		multiplier: 1.0,
 		surcharge: 0,
 		serviceClass,
+		serviceName: service.hull_class || "Standard Sub-Capital",
+		distanceLabel: serviceClass?.includes("jump_freighter")
+			? "Distance Cyno Fee:"
+			: "Distance Jump Fee:",
+		finalTotal: Math.max(1_000_000, Math.ceil(total)),
 	};
 }
 export function calcRewardDetails(options, configOpt) {
