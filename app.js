@@ -1,4 +1,5 @@
 import { calcRewardDetails, parseNum } from "./calculator.js";
+import { fetchEveRoute, RouteNotFoundError } from "./route-service.js";
 
 const collateralInput = document.getElementById("collateral");
 const highsecJumpsInput = document.getElementById("highsec_jumps");
@@ -6,6 +7,9 @@ const dangerousJumpsInput = document.getElementById("dangerous_jumps");
 const volumeInput = document.getElementById("volume");
 const rushCheckbox = document.getElementById("rush");
 const forceJfCheckbox = document.getElementById("force_jf");
+const originInput = document.getElementById("origin_system");
+const destinationInput = document.getElementById("destination_system");
+const routeStatus = document.getElementById("route-status");
 
 const rewardOutput = document.getElementById("reward_output");
 const rewardIpjOutput = document.getElementById("reward_ipj_output");
@@ -317,6 +321,89 @@ function updateAll() {
 	});
 }
 
+export const calculateRewards = updateAll;
+
+function setRouteStatus(type, message) {
+	if (!routeStatus) return;
+	routeStatus.className = "route-status";
+	if (!message) {
+		routeStatus.textContent = "";
+		return;
+	}
+	if (type === "loading") {
+		routeStatus.classList.add("loading");
+		routeStatus.innerHTML = `<span class="route-spinner" aria-hidden="true"></span><span>${message}</span>`;
+	} else {
+		if (type) routeStatus.classList.add(type);
+		routeStatus.textContent = message;
+	}
+}
+
+let routeDebounceTimer = null;
+let routeAbortController = null;
+
+function handleRouteInputChange() {
+	if (routeAbortController) {
+		routeAbortController.abort();
+		routeAbortController = null;
+	}
+	if (routeDebounceTimer) {
+		clearTimeout(routeDebounceTimer);
+		routeDebounceTimer = null;
+	}
+
+	const origin = originInput?.value?.trim() || "";
+	const destination = destinationInput?.value?.trim() || "";
+
+	if (!origin || !destination) {
+		setRouteStatus("", "");
+		return;
+	}
+
+	if (origin.toLowerCase() === destination.toLowerCase()) {
+		highsecJumpsInput.value = "0";
+		dangerousJumpsInput.value = "0";
+		setRouteStatus("", "");
+		updateAll();
+		return;
+	}
+
+	routeDebounceTimer = setTimeout(async () => {
+		routeDebounceTimer = null;
+		const controller = new AbortController();
+		routeAbortController = controller;
+
+		setRouteStatus("loading", "Calculating route...");
+
+		try {
+			const result = await fetchEveRoute(origin, destination, {
+				signal: controller.signal,
+			});
+
+			if (controller.signal.aborted) return;
+
+			highsecJumpsInput.value = formatNumber(result.highSecJumps, false);
+			dangerousJumpsInput.value = formatNumber(result.dangerousJumps, false);
+			setRouteStatus("", "");
+			updateAll();
+		} catch (err) {
+			if (controller.signal.aborted || err.name === "AbortError") {
+				return;
+			}
+			if (err instanceof RouteNotFoundError || err.code === "NO_ROUTE") {
+				setRouteStatus("warning", "No route found avoiding specified systems");
+			} else {
+				console.warn("Route lookup unavailable:", err);
+				setRouteStatus("warning", "Route lookup unavailable — manual entry enabled");
+			}
+		} finally {
+			if (routeAbortController === controller) {
+				routeAbortController = null;
+			}
+		}
+	}, 350);
+}
+
 async function copyTextToClipboard(text) {
 	if (navigator.clipboard?.writeText) {
 		try {
@@ -390,6 +477,13 @@ toChangeElements.forEach((el) => {
 	el.addEventListener("change", updateAll);
 });
 
+if (originInput) {
+	originInput.addEventListener("input", handleRouteInputChange);
+}
+if (destinationInput) {
+	destinationInput.addEventListener("input", handleRouteInputChange);
+}
+
 presetBtns.forEach((btn) => {
 	btn.addEventListener("click", () => {
 		presetBtns.forEach((b) => {
@@ -454,6 +548,18 @@ copyQuoteBtn.addEventListener("click", async () => {
 });
 
 clearBtn.addEventListener("click", () => {
+	if (routeDebounceTimer) {
+		clearTimeout(routeDebounceTimer);
+		routeDebounceTimer = null;
+	}
+	if (routeAbortController) {
+		routeAbortController.abort();
+		routeAbortController = null;
+	}
+	if (originInput) originInput.value = "";
+	if (destinationInput) destinationInput.value = "";
+	setRouteStatus("", "");
+
 	collateralInput.value = "";
 	highsecJumpsInput.value = "";
 	dangerousJumpsInput.value = "";
