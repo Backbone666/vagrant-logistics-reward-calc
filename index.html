@@ -178,6 +178,7 @@
               <label for="collateral">Collateral (ISK)</label>
               <input
                 id="collateral"
+                name="collateral"
                 type="text"
                 inputmode="decimal"
                 placeholder="0"
@@ -200,6 +201,7 @@
                 <label for="highsec_jumps">Highsec Jumps</label>
                 <input
                   id="highsec_jumps"
+                  name="highsec_jumps"
                   type="text"
                   inputmode="numeric"
                   placeholder="0"
@@ -211,6 +213,7 @@
                 <label for="dangerous_jumps">Dangerous Jumps</label>
                 <input
                   id="dangerous_jumps"
+                  name="dangerous_jumps"
                   type="text"
                   inputmode="numeric"
                   placeholder="0"
@@ -224,6 +227,7 @@
               <label for="volume">Volume (m³)</label>
               <input
                 id="volume"
+                name="volume"
                 type="text"
                 inputmode="decimal"
                 placeholder="0"
@@ -245,19 +249,19 @@
 
             <div class="checkbox-group">
               <label class="checkbox-item">
-                <input type="checkbox" id="rush" class="to_change" />
+                <input type="checkbox" id="rush" name="rush" class="to_change" />
                 <span class="checkbox-custom"></span>
                 Rush Service
               </label>
               <label class="checkbox-item">
-                <input type="checkbox" id="force_jf" class="to_change" />
+                <input type="checkbox" id="force_jf" name="force_jf" class="to_change" />
                 <span class="checkbox-custom"></span>
                 Force Jump Freighter (JF)
               </label>
             </div>
           </section>
 
-          <section class="result-area" aria-live="polite">
+          <section class="result-area" aria-live="polite" aria-atomic="true">
             <div class="reward-display">
               <div class="reward-label" id="reward-label">Estimated Reward</div>
               <div id="reward_output" class="reward-value" aria-labelledby="reward-label">0 ISK</div>
