@@ -258,3 +258,153 @@ test("fetchEveRoute: live verification for Jita to Amarr avoids Ahbazon", async 
 		t.skip(`Network unavailable for live route test: ${err.message}`);
 	}
 });
+
+test("buildRouteUrl: handles string avoidance parameter", () => {
+	const urlStr = buildRouteUrl("Jita", "Amarr", { avoid: "Tama,Rancer" });
+	const parsed = new URL(urlStr);
+	assert.equal(parsed.searchParams.get("avoid"), "Tama,Rancer");
+});
+
+test("fetchEveRoute: throws RouteUnavailableError on malformed JSON response", async () => {
+	const mockFetch = async () => ({
+		ok: true,
+		status: 200,
+		json: async () => {
+			throw new SyntaxError("Unexpected token < in JSON at position 0");
+		},
+	});
+
+	await assert.rejects(
+		async () => {
+			await fetchEveRoute("Jita", "Amarr", { fetch: mockFetch });
+		},
+		(err) => {
+			assert(err instanceof RouteUnavailableError);
+			assert.equal(err.code, "UNAVAILABLE");
+			assert(err.cause instanceof SyntaxError);
+			return true;
+		},
+	);
+});
+
+test("fetchEveRoute: handles non-JSON response in error body gracefully", async () => {
+	const mockFetch = async () => ({
+		ok: false,
+		status: 502,
+		json: async () => {
+			throw new SyntaxError("Bad Gateway HTML");
+		},
+	});
+
+	await assert.rejects(
+		async () => {
+			await fetchEveRoute("Jita", "Amarr", { fetch: mockFetch });
+		},
+		(err) => {
+			assert(err instanceof RouteUnavailableError);
+			assert.equal(err.code, "UNAVAILABLE");
+			return true;
+		},
+	);
+});
+
+test("fetchEveRoute: fallback signal combination when AbortSignal.any is undefined", async () => {
+	const originalAny = AbortSignal.any;
+	AbortSignal.any = undefined;
+
+	try {
+		const controller = new AbortController();
+		const mockResponse = {
+			summary: { start: "Jita", end: "Amarr" },
+			routes: {
+				direct: [
+					{ name: "Jita", security: 0.95 },
+					{ name: "Amarr", security: 1.0 },
+				],
+			},
+		};
+		const mockFetch = async (_url, { signal } = {}) => {
+			if (signal?.aborted) {
+				const err = new Error("This operation was aborted");
+				err.name = "AbortError";
+				throw err;
+			}
+			return {
+				ok: true,
+				status: 200,
+				json: async () => mockResponse,
+			};
+		};
+
+		const result = await fetchEveRoute("Jita", "Amarr", {
+			signal: controller.signal,
+			fetch: mockFetch,
+		});
+		assert.equal(result.totalJumps, 1);
+		assert.equal(result.highSecJumps, 1);
+
+		// Now test aborting the controller with the fallback
+		const abortController = new AbortController();
+		abortController.abort();
+		await assert.rejects(
+			async () => {
+				await fetchEveRoute("Jita", "Amarr", {
+					signal: abortController.signal,
+					fetch: mockFetch,
+				});
+			},
+			(err) => {
+				assert.equal(err.name, "AbortError");
+				return true;
+			},
+		);
+	} finally {
+		AbortSignal.any = originalAny;
+	}
+});
+
+test("fetchEveRoute: throws RouteNotFoundError on alternative not-found error body", async () => {
+	const mockFetch = async () => ({
+		ok: false,
+		status: 400,
+		json: async () => ({ message: "System not found" }),
+	});
+
+	await assert.rejects(
+		async () => {
+			await fetchEveRoute("NonExistent", "Amarr", { fetch: mockFetch });
+		},
+		(err) => {
+			assert(err instanceof RouteNotFoundError);
+			assert.equal(err.code, "NO_ROUTE");
+			return true;
+		},
+	);
+});
+
+test("fetchEveRoute: rethrows AbortError when signal is aborted during json body read", async () => {
+	const controller = new AbortController();
+	const mockFetch = async () => ({
+		ok: true,
+		status: 200,
+		json: async () => {
+			controller.abort();
+			const abortErr = new Error("The operation was aborted");
+			abortErr.name = "AbortError";
+			throw abortErr;
+		},
+	});
+
+	await assert.rejects(
+		async () => {
+			await fetchEveRoute("Jita", "Amarr", {
+				signal: controller.signal,
+				fetch: mockFetch,
+			});
+		},
+		(err) => {
+			assert.equal(err.name, "AbortError");
+			return true;
+		},
+	);
+});

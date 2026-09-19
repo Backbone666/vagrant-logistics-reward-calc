@@ -92,6 +92,28 @@ export function buildRouteUrl(origin, destination, options = {}) {
 }
 
 /**
+ * Combine multiple abort signals with fallback for runtimes lacking AbortSignal.any.
+ *
+ * @param {Array<AbortSignal>} signals
+ * @returns {AbortSignal}
+ */
+function combineSignals(signals) {
+	if (typeof AbortSignal.any === "function") {
+		return AbortSignal.any(signals);
+	}
+	const controller = new AbortController();
+	for (const sig of signals) {
+		if (!sig) continue;
+		if (sig.aborted) {
+			controller.abort(sig.reason);
+			return sig;
+		}
+		sig.addEventListener("abort", () => controller.abort(sig.reason), { once: true });
+	}
+	return controller.signal;
+}
+
+/**
  * Fetch shortest path between origin and destination systems.
  *
  * @param {string} origin
@@ -146,7 +168,7 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 
 	let signal;
 	if (options.signal) {
-		signal = AbortSignal.any([options.signal, timeoutSignal]);
+		signal = combineSignals([options.signal, timeoutSignal]);
 	} else {
 		signal = timeoutSignal;
 	}
@@ -171,7 +193,14 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 			// Non-JSON response
 		}
 
-		if (response.status === 400 && errBody?.error?.toLowerCase().includes("invalid system")) {
+		const errMsg = String(errBody?.error ?? errBody?.message ?? "").toLowerCase();
+		if (
+			(response.status === 400 || response.status === 404) &&
+			(errMsg.includes("invalid system") ||
+				errMsg.includes("not found") ||
+				errMsg.includes("unknown system") ||
+				errMsg.includes("no route"))
+		) {
 			throw new RouteNotFoundError("No route found avoiding specified systems");
 		}
 
@@ -181,7 +210,15 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 		);
 	}
 
-	const data = await response.json();
+	let data;
+	try {
+		data = await response.json();
+	} catch (jsonErr) {
+		if (jsonErr.name === "AbortError" && options.signal?.aborted) {
+			throw jsonErr;
+		}
+		throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", jsonErr);
+	}
 	const directSystems = data?.routes?.direct;
 
 	if (!Array.isArray(directSystems) || directSystems.length === 0) {

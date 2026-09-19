@@ -342,15 +342,22 @@ function setRouteStatus(type, message) {
 let routeDebounceTimer = null;
 let routeAbortController = null;
 
-function handleRouteInputChange() {
-	if (routeAbortController) {
-		routeAbortController.abort();
-		routeAbortController = null;
-	}
+function cancelPendingRouteLookup() {
 	if (routeDebounceTimer) {
 		clearTimeout(routeDebounceTimer);
 		routeDebounceTimer = null;
 	}
+	if (routeAbortController) {
+		routeAbortController.abort();
+		routeAbortController = null;
+	}
+	if (routeStatus?.classList.contains("loading")) {
+		setRouteStatus("", "");
+	}
+}
+
+function handleRouteInputChange() {
+	cancelPendingRouteLookup();
 
 	const origin = originInput?.value?.trim() || "";
 	const destination = destinationInput?.value?.trim() || "";
@@ -458,6 +465,10 @@ miniCopyBtns.forEach((btn) => {
 // Live formatting as user types
 toFormatNumberInputs.forEach((input) => {
 	input.addEventListener("input", (e) => {
+		if (e.target === highsecJumpsInput || e.target === dangerousJumpsInput) {
+			cancelPendingRouteLookup();
+		}
+
 		const start = e.target.selectionStart;
 		const end = e.target.selectionEnd;
 		const oldLen = e.target.value.length;
@@ -548,14 +559,7 @@ copyQuoteBtn.addEventListener("click", async () => {
 });
 
 clearBtn.addEventListener("click", () => {
-	if (routeDebounceTimer) {
-		clearTimeout(routeDebounceTimer);
-		routeDebounceTimer = null;
-	}
-	if (routeAbortController) {
-		routeAbortController.abort();
-		routeAbortController = null;
-	}
+	cancelPendingRouteLookup();
 	if (originInput) originInput.value = "";
 	if (destinationInput) destinationInput.value = "";
 	setRouteStatus("", "");
