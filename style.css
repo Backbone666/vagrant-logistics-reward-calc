@@ -98,6 +98,7 @@ body::after {
 	left: -5%;
 	width: 110%;
 	height: 110%;
+	aspect-ratio: 16 / 10;
 	background: url("LW9R6.webp") no-repeat center center;
 	background-size: cover;
 	z-index: -2;
@@ -282,6 +283,8 @@ h2 {
 .footer-logo {
 	width: 24px;
 	height: 24px;
+	aspect-ratio: 1 / 1;
+	object-fit: contain;
 	filter: drop-shadow(0 0 5px var(--primary-gold-glow));
 }
 
