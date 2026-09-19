@@ -363,6 +363,54 @@ test("fetchEveRoute: fallback signal combination when AbortSignal.any is undefin
 	}
 });
 
+test("fetchEveRoute: cleans up signal listeners in fallback mode on successful completion", async () => {
+	const originalAny = AbortSignal.any;
+	try {
+		AbortSignal.any = undefined;
+		const controller = new AbortController();
+		let added = 0;
+		let removed = 0;
+		const origAdd = controller.signal.addEventListener;
+		const origRemove = controller.signal.removeEventListener;
+		controller.signal.addEventListener = function (...args) {
+			added++;
+			return origAdd.apply(this, args);
+		};
+		controller.signal.removeEventListener = function (...args) {
+			removed++;
+			return origRemove.apply(this, args);
+		};
+
+		const mockFetch = async () => ({
+			ok: true,
+			status: 200,
+			json: async () => ({
+				summary: {},
+				routes: {
+					direct: [
+						{ name: "Jita", security: 1.0 },
+						{ name: "Amarr", security: 1.0 },
+					],
+				},
+			}),
+		});
+
+		await fetchEveRoute("Jita", "Amarr", {
+			signal: controller.signal,
+			fetch: mockFetch,
+		});
+
+		assert(added > 0, "Expected abort listener to be added to controller.signal");
+		assert.equal(
+			removed,
+			added,
+			"Expected all added abort listeners to be removed upon completion",
+		);
+	} finally {
+		AbortSignal.any = originalAny;
+	}
+});
+
 test("fetchEveRoute: throws RouteNotFoundError on alternative not-found error body", async () => {
 	const mockFetch = async () => ({
 		ok: false,
