@@ -50,7 +50,7 @@ const FALLBACK_CONFIG = {
 			],
 		},
 		freighter_standard: {
-			hull_class: "Freighter Standard",
+			hull_class: "Freighter / Bowhead / Avalanche",
 			base_rate_per_jump: 1750000,
 			minimum_contract_fee: 10000000,
 			collateral_brackets: [
@@ -62,21 +62,21 @@ const FALLBACK_CONFIG = {
 	},
 	dangerous_space_services: {
 		blockade_runner_stargate: {
-			hull_class: "BR Dangerous Stargate",
+			hull_class: "Blockade Runner",
 			base_rate_isk: 10000000,
 			base_rate_per_jump_dangerous: 2000000,
 			base_rate_per_jump_highsec: 1500000,
 			max_collateral_isk: 5000000000,
 		},
 		scouted_dst_stargate: {
-			hull_class: "DST Dangerous Stargate (Scouted)",
+			hull_class: "Deep Space Transport",
 			base_rate_isk: 20000000,
 			base_rate_per_jump_dangerous: 5000000,
 			base_rate_per_jump_highsec: 2000000,
 			max_collateral_isk: 3000000000,
 		},
 		jump_freighter_standard: {
-			hull_class: "Jump Freighter Standard",
+			hull_class: "Jump Freighter",
 			base_rate_isk: 150000000,
 			cyno_jump_fee_isk: 35000000,
 			max_collateral_isk: 50000000000,

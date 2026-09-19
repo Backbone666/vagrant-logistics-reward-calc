@@ -392,6 +392,22 @@ test("Sub-unit: Encapsulated service metadata and final total floor", () => {
 	assert.equal(subcapRedirect.serviceName, "BR / DST Highsec Standard");
 	assert.equal(subcapRedirect.distanceLabel, "Distance Jump Fee:");
 
+	const stargateBrRedirect = calcRewardDetails(
+		{ volume: 10000, dangerousJumps: 10, collateral: "6,000,000,000" },
+		config,
+	);
+	assert.equal(stargateBrRedirect.isRedirect, true);
+	assert.equal(stargateBrRedirect.serviceName, "Blockade Runner");
+	assert.equal(stargateBrRedirect.distanceLabel, "Distance Jump Fee:");
+
+	const stargateDstRedirect = calcRewardDetails(
+		{ volume: 50000, dangerousJumps: 10, collateral: "4,000,000,000" },
+		config,
+	);
+	assert.equal(stargateDstRedirect.isRedirect, true);
+	assert.equal(stargateDstRedirect.serviceName, "Deep Space Transport");
+	assert.equal(stargateDstRedirect.distanceLabel, "Distance Jump Fee:");
+
 	const jfRedirect = calcRewardDetails(
 		{ volume: 200000, dangerousJumps: 10, collateral: "51,000,000,000" },
 		config,
@@ -414,14 +430,23 @@ test("Sub-unit: Input Validation and Redirect Paths", () => {
 	assert.deepEqual(missingConfig, {
 		error: true,
 		message: "Configuration not loaded",
+		serviceName: "—",
+		distanceLabel: "Distance Jump Fee:",
+		finalTotal: 0,
 	});
 
 	// Zero/Negative Volume/Jumps
 	const zeroVol = calcRewardDetails({ volume: 0, highsecJumps: 10 }, config);
 	assert.equal(zeroVol.error, true);
+	assert.equal(zeroVol.serviceName, "—");
+	assert.equal(zeroVol.distanceLabel, "Distance Jump Fee:");
+	assert.equal(zeroVol.finalTotal, 0);
 
 	const zeroJumps = calcRewardDetails({ volume: 100, highsecJumps: 0, dangerousJumps: 0 }, config);
 	assert.equal(zeroJumps.error, true);
+	assert.equal(zeroJumps.serviceName, "—");
+	assert.equal(zeroJumps.distanceLabel, "Distance Jump Fee:");
+	assert.equal(zeroJumps.finalTotal, 0);
 
 	const calcZeroReturn = calcReward({ volume: 0 }, config);
 	assert.equal(calcZeroReturn, 0);
@@ -429,6 +454,9 @@ test("Sub-unit: Input Validation and Redirect Paths", () => {
 	// Volume Limit Error Object
 	const volLimitErr = calcRewardDetails({ volume: 1200000, highsecJumps: 10 }, config);
 	assert.equal(volLimitErr.error, true);
+	assert.equal(volLimitErr.serviceName, "—");
+	assert.equal(volLimitErr.distanceLabel, "Distance Jump Fee:");
+	assert.equal(volLimitErr.finalTotal, 0);
 
 	// Subcapital Route Collateral Overflow (>5B)
 	const highsecBrDstCollateral = calcReward(

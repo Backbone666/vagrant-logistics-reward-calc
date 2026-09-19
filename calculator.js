@@ -210,6 +210,16 @@ function calcJumpFreighterReward({
 		finalTotal: Math.max(1_000_000, Math.ceil(total)),
 	};
 }
+function createErrorResult(message) {
+	return {
+		error: true,
+		message,
+		serviceName: "—",
+		distanceLabel: "Distance Jump Fee:",
+		finalTotal: 0,
+	};
+}
+
 export function calcRewardDetails(options, configOpt) {
 	const {
 		volume,
@@ -224,7 +234,7 @@ export function calcRewardDetails(options, configOpt) {
 	const config = inlineConfig || configOpt;
 
 	if (!config) {
-		return { error: true, message: "Configuration not loaded" };
+		return createErrorResult("Configuration not loaded");
 	}
 
 	const parsedVolume = parseNum(volume);
@@ -239,7 +249,7 @@ export function calcRewardDetails(options, configOpt) {
 		parsedDangerousJumps < 0 ||
 		(parsedHighsecJumps === 0 && parsedDangerousJumps === 0)
 	) {
-		return { error: true, message: "Invalid volume, jumps, or collateral" };
+		return createErrorResult("Invalid volume, jumps, or collateral");
 	}
 
 	// 1. Service Classification
@@ -253,10 +263,9 @@ export function calcRewardDetails(options, configOpt) {
 
 	if (serviceClass === "volume_limit_exceeded") {
 		const maxVol = routeSecurity === "highsec" ? "1,125,000" : "360,000";
-		return {
-			error: true,
-			message: `Cargo volume exceeds maximum limits. Please split the cargo into multiple contracts. Max volume is ${maxVol} m³.`,
-		};
+		return createErrorResult(
+			`Cargo volume exceeds maximum limits. Please split the cargo into multiple contracts. Max volume is ${maxVol} m³.`,
+		);
 	}
 
 	// Extract config groups
@@ -325,7 +334,7 @@ export function calcRewardDetails(options, configOpt) {
 		});
 	}
 
-	return { error: true, message: "Unknown service class classification" };
+	return createErrorResult("Unknown service class classification");
 }
 
 export function calcReward(options, config) {
