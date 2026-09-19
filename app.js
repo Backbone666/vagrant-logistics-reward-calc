@@ -289,30 +289,37 @@ function renderReward(reward, rawJumps) {
 	}
 }
 
+const scheduleFrame =
+	typeof requestAnimationFrame === "function" ? requestAnimationFrame : (cb) => cb();
+
+let renderRafId = null;
+let lastDetails = null;
+
 function updateAll() {
 	if (!config) return;
 
 	const options = getFormInputs();
 	debouncedSyncUrlParams(options);
 
-	if (calcCard) {
-		const isDangerous = (parseNum(options.dangerousJumps) || 0) > 0 || options.forceJF;
-		if (isDangerous) {
-			calcCard.classList.add("route-dangerous");
-		} else {
-			calcCard.classList.remove("route-dangerous");
-		}
-	}
-
+	const isDangerous = (parseNum(options.dangerousJumps) || 0) > 0 || options.forceJF;
 	const details = calcRewardDetails({ ...options, config });
+	lastDetails = details;
+
 	const reward = details.error ? 0 : details.isRedirect ? details.redirectTarget : details.total;
 	currentReward = reward;
-
 	const rawJumps = parseNum(options.highsecJumps) + parseNum(options.dangerousJumps) || 1;
 
-	renderBreakdown(details);
-	syncPresets(options.volume);
-	renderReward(reward, rawJumps);
+	if (renderRafId && typeof cancelAnimationFrame === "function") {
+		cancelAnimationFrame(renderRafId);
+	}
+	renderRafId = scheduleFrame(() => {
+		if (calcCard) {
+			calcCard.classList.toggle("route-dangerous", isDangerous);
+		}
+		renderBreakdown(details);
+		syncPresets(options.volume);
+		renderReward(reward, rawJumps);
+	});
 }
 
 // Mini copy buttons
@@ -398,17 +405,8 @@ copyBtn.addEventListener("click", async () => {
 
 copyQuoteBtn.addEventListener("click", async () => {
 	const originalText = copyQuoteBtn.textContent;
-	const details = calcRewardDetails({
-		volume: volumeInput.value,
-		collateral: collateralInput.value,
-		highsecJumps: highsecJumpsInput.value,
-		dangerousJumps: dangerousJumpsInput.value,
-		rush: rushCheckbox.checked,
-		forceJF: forceJfCheckbox.checked,
-		config,
-	});
-
-	if (details.error) return;
+	const details = lastDetails;
+	if (!details || details.error) return;
 
 	let detailsText = "";
 	if (details.isRedirect) {
