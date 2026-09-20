@@ -215,6 +215,15 @@ export function attachSystemAutocomplete(inputEl, listEl, options = {}) {
 			if (activeIndex >= 0 && activeIndex < currentMatches.length) {
 				e.preventDefault();
 				selectOption(currentMatches[activeIndex]);
+			} else {
+				const query = inputEl.value.trim().toLowerCase();
+				const exactMatch = currentMatches.find((m) => m.toLowerCase() === query);
+				if (exactMatch) {
+					e.preventDefault();
+					selectOption(exactMatch);
+				} else {
+					closeDropdown();
+				}
 			}
 		} else if (e.key === "Escape") {
 			e.preventDefault();

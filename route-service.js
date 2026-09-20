@@ -131,10 +131,23 @@ export function buildRouteUrl(origin, destination, options = {}) {
 	url.searchParams.set("end", destination.trim());
 	url.searchParams.set("pref", pref);
 
+	const originClean = origin.trim().toLowerCase();
+	const destClean = destination.trim().toLowerCase();
+	let avoidList = [];
 	if (Array.isArray(avoid) && avoid.length > 0) {
-		url.searchParams.set("avoid", avoid.join(","));
+		avoidList = avoid;
 	} else if (typeof avoid === "string" && avoid.trim()) {
-		url.searchParams.set("avoid", avoid.trim());
+		avoidList = avoid
+			.split(",")
+			.map((s) => s.trim())
+			.filter(Boolean);
+	}
+
+	const filteredAvoid = avoidList.filter(
+		(name) => name.toLowerCase() !== originClean && name.toLowerCase() !== destClean,
+	);
+	if (filteredAvoid.length > 0) {
+		url.searchParams.set("avoid", filteredAvoid.join(","));
 	}
 
 	return url.toString();
@@ -306,7 +319,9 @@ export async function fetchEsiRoute(origin, destination, options = {}) {
 	let avoidIds = [];
 	if (avoidNames.length > 0) {
 		const avoidMap = await resolveSystemIdsBatch(avoidNames, options);
-		avoidIds = avoidNames.map((n) => avoidMap.get(n)).filter(Boolean);
+		avoidIds = avoidNames
+			.map((n) => avoidMap.get(n))
+			.filter((id) => Boolean(id) && id !== originId && id !== destId);
 	}
 
 	let esiUrl = `https://esi.evetech.net/latest/route/${originId}/${destId}/?flag=shortest`;

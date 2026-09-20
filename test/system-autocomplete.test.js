@@ -274,3 +274,97 @@ test("attachSystemAutocomplete: keyboard ArrowDown and Enter selects option and 
 		globalThis.document = prevDoc;
 	}
 });
+
+test("attachSystemAutocomplete: pressing Enter with activeIndex === -1 selects exact match and dismisses dropdown", async () => {
+	const prevDoc = globalThis.document;
+	globalThis.document = {
+		createElement: (tag) => new MockElement(tag),
+	};
+
+	try {
+		const inputEl = new MockElement("input", "test-exact");
+		const listEl = new MockElement("ul", "test-exact-list");
+		listEl.classList.add("hidden");
+
+		let selectedSystem = null;
+		attachSystemAutocomplete(inputEl, listEl, {
+			loadData: async () => SAMPLE_SYSTEMS,
+			onSelect: (name) => {
+				selectedSystem = name;
+			},
+		});
+
+		// User types lowercase "jita"
+		inputEl.value = "jita";
+		inputEl.dispatchEvent(new Event("input"));
+		await new Promise((r) => setTimeout(r, 10));
+
+		assert.equal(listEl.classList.contains("hidden"), false);
+
+		// Press Enter without ArrowDown
+		let defaultPrevented = false;
+		inputEl.dispatchEvent({
+			type: "keydown",
+			key: "Enter",
+			preventDefault: () => {
+				defaultPrevented = true;
+			},
+		});
+		await new Promise((r) => setTimeout(r, 10));
+
+		assert.equal(defaultPrevented, true);
+		assert.equal(inputEl.value, "Jita");
+		assert.equal(selectedSystem, "Jita");
+		assert.equal(listEl.classList.contains("hidden"), true);
+		assert.equal(inputEl.getAttribute("aria-expanded"), "false");
+	} finally {
+		globalThis.document = prevDoc;
+	}
+});
+
+test("attachSystemAutocomplete: pressing Enter with partial match dismisses dropdown without selection", async () => {
+	const prevDoc = globalThis.document;
+	globalThis.document = {
+		createElement: (tag) => new MockElement(tag),
+	};
+
+	try {
+		const inputEl = new MockElement("input", "test-partial");
+		const listEl = new MockElement("ul", "test-partial-list");
+		listEl.classList.add("hidden");
+
+		let selectedSystem = null;
+		attachSystemAutocomplete(inputEl, listEl, {
+			loadData: async () => SAMPLE_SYSTEMS,
+			onSelect: (name) => {
+				selectedSystem = name;
+			},
+		});
+
+		// User types partial "Jit"
+		inputEl.value = "Jit";
+		inputEl.dispatchEvent(new Event("input"));
+		await new Promise((r) => setTimeout(r, 10));
+
+		assert.equal(listEl.classList.contains("hidden"), false);
+
+		// Press Enter without ArrowDown
+		let defaultPrevented = false;
+		inputEl.dispatchEvent({
+			type: "keydown",
+			key: "Enter",
+			preventDefault: () => {
+				defaultPrevented = true;
+			},
+		});
+		await new Promise((r) => setTimeout(r, 10));
+
+		assert.equal(defaultPrevented, false);
+		assert.equal(inputEl.value, "Jit");
+		assert.equal(selectedSystem, null);
+		assert.equal(listEl.classList.contains("hidden"), true);
+		assert.equal(inputEl.getAttribute("aria-expanded"), "false");
+	} finally {
+		globalThis.document = prevDoc;
+	}
+});

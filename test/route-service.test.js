@@ -803,3 +803,45 @@ test("fetchEveRoute: throws RouteUnavailableError when both EVE TT and CCP ESI f
 		},
 	);
 });
+
+test("buildRouteUrl: filters origin and destination from avoid list", () => {
+	const urlStr = buildRouteUrl("Jita", "Ahbazon");
+	const parsed = new URL(urlStr);
+	const avoid = parsed.searchParams.get("avoid").split(",");
+	assert.equal(avoid.includes("Ahbazon"), false);
+	assert.equal(avoid.includes("Tama"), true);
+	assert.equal(avoid.includes("Zarzakh"), true);
+});
+
+test("fetchEsiRoute: filters destination from avoidIds so ESI does not 404 on avoided systems", async () => {
+	let capturedUrl = "";
+	const mockFetch = async (url) => {
+		capturedUrl = url;
+		if (url.includes("/route/")) {
+			return {
+				ok: true,
+				status: 200,
+				json: async () => [
+					30000142, // Jita
+					30000144, // Perimeter
+					30005196, // Ahbazon
+				],
+			};
+		}
+		throw new Error(`Unexpected URL: ${url}`);
+	};
+
+	const highSecSet = new Set([30000142, 30000144]);
+	const result = await fetchEsiRoute("Jita", "Ahbazon", {
+		fetch: mockFetch,
+		highSecSet,
+	});
+
+	assert.equal(result.totalJumps, 2);
+	assert.equal(result.highSecJumps, 1);
+	assert.equal(result.dangerousJumps, 1);
+	// Verify that Ahbazon's system ID (30005196) was NOT included in the avoid query param
+	const parsedUrl = new URL(capturedUrl);
+	const avoidParam = parsedUrl.searchParams.get("avoid") || "";
+	assert.equal(avoidParam.includes("30005196"), false);
+});
