@@ -3,7 +3,11 @@
  * Interacts with the TT Route API (https://eve-route.vercel.app/api/route).
  */
 
-export const MANDATORY_AVOID_LIST = Object.freeze([
+export const HIGH_SEC_SECURITY_THRESHOLD = 0.45;
+export const DEFAULT_ROUTE_TIMEOUT_MS = 5000;
+export const MAX_SYSTEM_NAME_LENGTH = 50;
+
+export const DEFAULT_MANDATORY_AVOID_LIST = Object.freeze([
 	"Zarzakh",
 	"Ahbazon",
 	"Rancer",
@@ -12,6 +16,16 @@ export const MANDATORY_AVOID_LIST = Object.freeze([
 	"Tama",
 	"Aunenen",
 ]);
+
+// Backwards-compatible alias
+export const MANDATORY_AVOID_LIST = DEFAULT_MANDATORY_AVOID_LIST;
+
+export function resolveAvoidList(configAvoidList) {
+	if (Array.isArray(configAvoidList) && configAvoidList.length > 0) {
+		return Object.freeze([...configAvoidList]);
+	}
+	return DEFAULT_MANDATORY_AVOID_LIST;
+}
 
 export const EVE_ROUTE_BASE_URL = "https://eve-route.vercel.app";
 
@@ -54,7 +68,7 @@ export function classifyJumps(routeSystems) {
 	for (let i = 1; i < routeSystems.length; i++) {
 		const system = routeSystems[i];
 		const sec = Number(system?.security ?? 0);
-		if (sec >= 0.45) {
+		if (sec >= HIGH_SEC_SECURITY_THRESHOLD) {
 			highSecJumps++;
 		} else {
 			dangerousJumps++;
@@ -179,7 +193,7 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 	}
 
 	const url = buildRouteUrl(trimmedOrigin, trimmedDestination, options);
-	const timeoutMs = options.timeout ?? 5000;
+	const timeoutMs = options.timeout ?? DEFAULT_ROUTE_TIMEOUT_MS;
 	const timeoutSignal = AbortSignal.timeout(timeoutMs);
 
 	let signal;

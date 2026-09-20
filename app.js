@@ -1,5 +1,5 @@
 import { calcRewardDetails, parseNum } from "./calculator.js";
-import { fetchEveRoute, RouteNotFoundError } from "./route-service.js";
+import { fetchEveRoute, RouteNotFoundError, resolveAvoidList } from "./route-service.js";
 
 const collateralInput = document.getElementById("collateral");
 const highsecJumpsInput = document.getElementById("highsec_jumps");
@@ -155,6 +155,8 @@ function syncUrlParams(options) {
 		v: options.volume.replace(/,/g, ""),
 		r: options.rush ? "1" : "",
 		jf: options.forceJF ? "1" : "",
+		from: options.origin || "",
+		to: options.destination || "",
 	};
 
 	for (const [key, val] of Object.entries(params)) {
@@ -190,6 +192,8 @@ function getFormInputs() {
 		dangerousJumps: dangerousJumpsInput.value,
 		rush: rushCheckbox.checked,
 		forceJF: forceJfCheckbox.checked,
+		origin: originInput?.value?.trim().slice(0, 50) || "",
+		destination: destinationInput?.value?.trim().slice(0, 50) || "",
 	};
 }
 
@@ -330,6 +334,8 @@ function setRouteStatus(type, message) {
 let routeDebounceTimer = null;
 let routeAbortController = null;
 
+const ROUTE_DEBOUNCE_MS = 350;
+
 function cancelPendingRouteLookup() {
 	if (routeDebounceTimer) {
 		clearTimeout(routeDebounceTimer);
@@ -371,8 +377,10 @@ function handleRouteInputChange() {
 		setRouteStatus("loading", "Calculating route...");
 
 		try {
+			const avoid = resolveAvoidList(config?.mandatory_avoid_systems);
 			const result = await fetchEveRoute(origin, destination, {
 				signal: controller.signal,
+				avoid,
 			});
 
 			if (controller.signal.aborted) return;
@@ -396,7 +404,7 @@ function handleRouteInputChange() {
 				routeAbortController = null;
 			}
 		}
-	}, 350);
+	}, ROUTE_DEBOUNCE_MS);
 }
 
 async function copyTextToClipboard(text) {
@@ -531,12 +539,19 @@ copyQuoteBtn.addEventListener("click", async () => {
 		detailsText = `${formatNumber(details.finalTotal)} ISK`;
 	}
 
+	const originVal = originInput?.value?.trim();
+	const destVal = destinationInput?.value?.trim();
+	const routeLabel =
+		originVal && destVal
+			? `Route: ${originVal} → ${destVal} (${highsecJumpsInput.value || 0} HighSec / ${dangerousJumpsInput.value || 0} Dangerous Jumps)`
+			: `Route: ${highsecJumpsInput.value || 0} HighSec / ${dangerousJumpsInput.value || 0} Dangerous Jumps`;
+
 	const template = [
 		"Vagrant Logistics Courier Quote",
 		"------------------------------",
 		`Volume: ${volumeInput.value || 0} m³`,
 		`Collateral: ${collateralInput.value || 0} ISK`,
-		`Route: ${highsecJumpsInput.value || 0} HighSec / ${dangerousJumpsInput.value || 0} Dangerous Jumps`,
+		routeLabel,
 		`Rush Service: ${rushCheckbox.checked ? "Yes" : "No"}`,
 		`Estimated Reward: ${detailsText}`,
 		`Link: ${window.location.href}`,
@@ -593,6 +608,22 @@ function initParamsFromUrl() {
 		}
 		if (urlParams.get("r") === "1") rushCheckbox.checked = true;
 		if (urlParams.get("jf") === "1") forceJfCheckbox.checked = true;
+
+		if (urlParams.has("from") && originInput) {
+			originInput.value = urlParams.get("from").trim().slice(0, 50);
+		}
+		if (urlParams.has("to") && destinationInput) {
+			destinationInput.value = urlParams.get("to").trim().slice(0, 50);
+		}
+
+		if (
+			(urlParams.has("from") || urlParams.has("to")) &&
+			!urlParams.has("hj") &&
+			!urlParams.has("dj") &&
+			typeof handleRouteInputChange === "function"
+		) {
+			handleRouteInputChange();
+		}
 	} catch (err) {
 		console.warn("Failed to parse URL query parameters defensively:", err);
 	}
