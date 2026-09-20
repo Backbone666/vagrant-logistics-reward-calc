@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.2.0...v1.3.0) (2026-09-20)
+
+
+### Features
+
+* **routing:** remove rush service and add safe route toggle ([6b466e8](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/6b466e8341e332dbbb665a88ce955d7fd3d3fbf2))
+
 ## [1.2.0](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.1.0...v1.2.0) (2026-09-20)
 
 
