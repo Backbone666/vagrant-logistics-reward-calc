@@ -26,6 +26,12 @@
 	/* UI Tokens */
 	--text-primary: #ede7d9;
 	--text-secondary: hsl(43, 40%, 85%); /* Increased brightness for WCAG AA contrast */
+	--text-muted: hsl(43, 30%, 75%); /* 11.1:1 contrast on #121212 card (Passes AAA) */
+	--text-subtle: hsl(
+		43,
+		25%,
+		68%
+	); /* 8.8:1 contrast on #121212 card, 9.1:1 on #0d0d0d (Passes AAA) */
 	--accent-glow: 0 0 30px var(--primary-gold-glow);
 	--transition-smooth:
 		opacity 150ms cubic-bezier(0.2, 0, 0, 1), transform 150ms cubic-bezier(0.2, 0, 0, 1);
@@ -42,10 +48,10 @@
 	/* Backwards-compatible alias for existing selectors */
 	--font-display: var(--font-heading);
 
-	/* Modular Typography Scale */
-	--text-2xs: 0.65rem;
-	--text-xs: 0.75rem;
-	--text-sm: 0.85rem;
+	/* Modular Typography Scale (WCAG 2.2 Accessible Floor: 13px / 0.8125rem) */
+	--text-2xs: 0.8125rem;
+	--text-xs: 0.8125rem;
+	--text-sm: 0.875rem;
 	--text-base: 1rem;
 	--text-lg: 1.15rem;
 	--text-xl: 1.4rem;
@@ -204,11 +210,10 @@ h1 {
 
 h2 {
 	font-family: var(--font-heading);
-	font-size: clamp(0.6rem, 2vw, 0.8rem);
+	font-size: clamp(0.8125rem, 2.5vw, 0.95rem);
 	color: var(--primary-gold);
-	letter-spacing: 0.5em;
+	letter-spacing: 0.25em;
 	text-transform: uppercase;
-	opacity: 0.9;
 	font-weight: 400;
 }
 
@@ -299,12 +304,10 @@ h2 {
 	align-items: center;
 	justify-content: center;
 	gap: 0.8rem;
-
-	font-size: 0.85rem;
-	color: var(--text-secondary);
+	font-size: 0.875rem;
+	color: var(--text-muted);
 	text-transform: uppercase;
-	letter-spacing: 0.15em;
-	opacity: 0.8;
+	letter-spacing: 0.1em;
 	transition: var(--transition-smooth);
 	padding-bottom: var(--space-md);
 }
@@ -327,10 +330,9 @@ h2 {
 }
 
 .legal-footer small {
-	font-size: 0.65rem;
-	color: var(--text-secondary);
-	opacity: 0.5;
-	line-height: 1.5;
+	font-size: 0.8125rem;
+	color: var(--text-subtle);
+	line-height: 1.6;
 	display: block;
 }
 
@@ -418,14 +420,17 @@ h2 {
 .btn-manual-toggle {
 	background: transparent;
 	border: none;
-	color: var(--muted-gold);
+	color: var(--primary-gold);
 	font-family: var(--font-body);
-	font-size: 0.8rem;
+	font-size: 0.875rem;
 	cursor: pointer;
 	text-decoration: underline;
 	text-underline-offset: 3px;
 	transition: color 150ms ease;
-	padding: 2px 4px;
+	padding: 4px 8px;
+	min-height: 28px;
+	display: inline-flex;
+	align-items: center;
 	margin-left: auto;
 }
 
@@ -506,9 +511,9 @@ h2 {
 
 .thera-badge {
 	font-family: var(--font-body);
-	font-size: 0.72rem;
+	font-size: 0.8125rem;
 	letter-spacing: 0.04em;
-	padding: 2px 8px;
+	padding: 3px 10px;
 	border-radius: 10px;
 	display: inline-flex;
 	align-items: center;
@@ -567,7 +572,7 @@ h2 {
 }
 
 .route-status {
-	font-size: 0.8rem;
+	font-size: 0.8125rem;
 	color: var(--text-secondary);
 	letter-spacing: 0.05em;
 	display: inline-flex;
@@ -616,9 +621,9 @@ h2 {
 }
 
 .input-hint {
-	font-size: 0.85rem;
+	font-size: 0.875rem;
 	margin-top: var(--space-xs);
-	opacity: 0.7;
+	color: var(--text-muted);
 }
 
 .input-hint a {
@@ -655,12 +660,11 @@ h2 {
 
 label {
 	display: block;
-
-	font-size: 0.85rem;
+	font-size: 0.875rem;
 	color: var(--primary-gold);
 	margin-bottom: var(--space-xs);
 	text-transform: uppercase;
-	letter-spacing: 0.2em;
+	letter-spacing: 0.08em;
 	font-weight: 400;
 	transition: var(--transition-smooth);
 }
@@ -713,19 +717,20 @@ input[type="text"]:focus {
 	background: hsla(0, 0%, 15%, 0.5);
 	border: 1px solid var(--glass-border);
 	color: var(--text-secondary);
-	padding: 0.5rem 1rem;
+	padding: 0.5rem 0.85rem;
 	border-radius: var(--radius-md);
-	font-size: 0.75rem;
+	font-size: 0.8125rem;
 	cursor: pointer;
 	transition: var(--transition-smooth);
 	text-transform: uppercase;
-	letter-spacing: 0.15em;
+	letter-spacing: 0.08em;
 	font-weight: 400;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	flex: 1 1 auto;
 	min-width: 100px;
+	min-height: 36px;
 	text-align: center;
 	font-family: var(--font-body);
 }
@@ -918,8 +923,7 @@ input[type="text"]:focus {
 
 .reward-ipj {
 	font-size: clamp(1rem, 3vw, 1.2rem);
-	color: var(--text-secondary);
-	opacity: 0.8;
+	color: var(--text-muted);
 	letter-spacing: 0.05em;
 	word-break: break-all;
 	overflow-wrap: break-word;
@@ -1066,10 +1070,10 @@ input[type="text"]:focus {
 }
 
 .req-label {
-	font-size: 0.7rem;
-	color: var(--text-secondary);
+	font-size: 0.8125rem;
+	color: var(--text-muted);
 	text-transform: uppercase;
-	letter-spacing: 0.2em;
+	letter-spacing: 0.1em;
 	margin-bottom: var(--space-xs);
 	display: block;
 }
@@ -1100,13 +1104,13 @@ dd.req-value {
 	background: hsla(45, 70%, 55%, 0.1);
 	border: 1px solid hsla(45, 70%, 55%, 0.2);
 	color: var(--primary-gold);
-	padding: 0.4rem 0.8rem;
-	font-size: 0.65rem;
+	padding: 0.35rem 0.85rem;
+	font-size: 0.8125rem;
 	border-radius: 4px;
 	cursor: pointer;
 	transition: var(--transition-smooth);
 	text-transform: uppercase;
-	letter-spacing: 0.1em;
+	letter-spacing: 0.08em;
 	min-height: 32px;
 }
 
@@ -1174,15 +1178,12 @@ dd.req-value {
 }
 
 .fee-breakdown.placeholder-active {
-	opacity: 0.45;
+	border-color: hsla(45, 70%, 55%, 0.05);
 }
 
-.fee-breakdown.placeholder-active .breakdown-row span {
-	color: var(--text-secondary);
-}
-
+.fee-breakdown.placeholder-active .breakdown-row span,
 .fee-breakdown.placeholder-active #bd_service {
-	color: var(--text-secondary);
+	color: var(--text-muted);
 }
 
 .breakdown-title {
@@ -1223,8 +1224,8 @@ dd.req-value {
 	}
 
 	h2 {
-		font-size: clamp(0.5rem, 3vw, 0.7rem);
-		letter-spacing: 0.25em;
+		font-size: clamp(0.8125rem, 3vw, 0.9rem);
+		letter-spacing: 0.18em;
 	}
 
 	label {
@@ -1350,9 +1351,9 @@ samp {
 
 .faq-answer {
 	padding: 0 var(--space-sm) var(--space-xs);
-	font-size: var(--text-xs);
-	color: var(--text-secondary);
-	line-height: 1.5;
+	font-size: 0.875rem;
+	color: var(--text-muted);
+	line-height: 1.6;
 }
 
 .faq-answer p {
