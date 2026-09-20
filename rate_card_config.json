@@ -69,5 +69,9 @@
 		"Siseide",
 		"Tama",
 		"Aunenen"
-	]
+	],
+	"routing": {
+		"eve_route_api_url": "https://eve-route.vercel.app/api/route",
+		"cors_proxy_gateway": "https://api.allorigins.win/raw?url="
+	}
 }

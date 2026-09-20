@@ -28,6 +28,7 @@ export function resolveAvoidList(configAvoidList) {
 }
 
 export const EVE_ROUTE_BASE_URL = "https://eve-route.vercel.app";
+export const DEFAULT_CORS_PROXY_GATEWAY = "https://api.allorigins.win/raw?url=";
 
 export class RouteNotFoundError extends Error {
 	constructor(message = "No route found avoiding specified systems") {
@@ -144,6 +145,50 @@ function combineSignals(signals) {
 }
 
 /**
+ * Attempt to fetch a resource directly; if blocked by CORS (TypeError)
+ * or network error, transparently fetch via the client-side CORS gateway.
+ *
+ * @param {string} targetUrl
+ * @param {object} [options]
+ * @returns {Promise<Response>}
+ */
+export async function fetchWithCorsFallback(targetUrl, options = {}) {
+	const signal = options.signal;
+	const fetchFn = options.fetch || globalThis.fetch;
+	const proxyGateway =
+		options.corsProxyGateway !== undefined ? options.corsProxyGateway : DEFAULT_CORS_PROXY_GATEWAY;
+
+	try {
+		const response = await fetchFn(targetUrl, { signal });
+		return response;
+	} catch (err) {
+		if (err.name === "AbortError" && signal?.aborted) {
+			throw err;
+		}
+
+		// If direct fetch failed (e.g. browser CORS TypeError: NetworkError),
+		// retry transparently via the CORS edge gateway if configured
+		if (proxyGateway) {
+			const proxiedUrl = `${proxyGateway}${encodeURIComponent(targetUrl)}`;
+			try {
+				const proxyResponse = await fetchFn(proxiedUrl, { signal });
+				return proxyResponse;
+			} catch (proxyErr) {
+				if (proxyErr.name === "AbortError" && signal?.aborted) {
+					throw proxyErr;
+				}
+				throw new RouteUnavailableError(
+					"Route lookup unavailable — manual entry enabled",
+					proxyErr,
+				);
+			}
+		}
+
+		throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", err);
+	}
+}
+
+/**
  * Fetch shortest path between origin and destination systems.
  *
  * @param {string} origin
@@ -211,9 +256,16 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 	try {
 		let response;
 		try {
-			response = await fetchFn(url, { signal });
+			response = await fetchWithCorsFallback(url, {
+				signal,
+				fetch: fetchFn,
+				corsProxyGateway: options.corsProxyGateway,
+			});
 		} catch (fetchErr) {
 			if (fetchErr.name === "AbortError" && options.signal?.aborted) {
+				throw fetchErr;
+			}
+			if (fetchErr instanceof RouteUnavailableError) {
 				throw fetchErr;
 			}
 			throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", fetchErr);
