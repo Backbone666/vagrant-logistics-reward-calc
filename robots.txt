@@ -1,15 +1,10 @@
 User-agent: *
 Allow: /
 Disallow: /test/
-Disallow: /plans/
-Disallow: /conductor/
+Disallow: /scripts/
 Disallow: /node_modules/
-Disallow: /.agents/
-Disallow: /.Jules/
-Disallow: /.fallow/
-Disallow: /.superpowers/
 
-# AI crawlers — allowed to increase citation in AI answer engines
+# AI Answer Engine Crawlers — Allowed for citation & answer synthesis
 User-agent: GPTBot
 Allow: /
 
