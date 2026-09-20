@@ -41,14 +41,22 @@ function findCollateralBracket(service, parsedCollateral) {
 	return brackets.find((b) => parsedCollateral <= b.max_collateral_isk);
 }
 
-function calcCollateralSurcharge(parsedCollateral) {
-	if (parsedCollateral > 1_000_000_000 && parsedCollateral <= 3_000_000_000) {
-		return parsedCollateral * 0.003;
-	}
-	if (parsedCollateral > 3_000_000_000) {
-		return parsedCollateral * 0.005;
-	}
-	return 0;
+function calcBrCollateralSurcharge(parsedCollateral) {
+	if (parsedCollateral <= 1_000_000_000) return 0;
+	if (parsedCollateral <= 3_000_000_000) return parsedCollateral * 0.002;
+	return parsedCollateral * 0.004;
+}
+
+function calcDstCollateralSurcharge(parsedCollateral) {
+	if (parsedCollateral <= 1_000_000_000) return 0;
+	if (parsedCollateral <= 3_000_000_000) return parsedCollateral * 0.003;
+	return parsedCollateral * 0.005;
+}
+
+function calcJfCollateralSurcharge(parsedCollateral) {
+	if (parsedCollateral <= 2_000_000_000) return 0;
+	if (parsedCollateral <= 10_000_000_000) return parsedCollateral * 0.004;
+	return parsedCollateral * 0.006;
 }
 
 function calcStargateRouteReward({
@@ -60,7 +68,7 @@ function calcStargateRouteReward({
 	maxCollateral,
 }) {
 	let isRedirect = false;
-	if (parsedCollateral > (service.max_collateral_isk || maxCollateral)) {
+	if (parsedCollateral > (service.max_collateral_isk || maxCollateral || 5_000_000_000)) {
 		isRedirect = true;
 	}
 
@@ -72,7 +80,11 @@ function calcStargateRouteReward({
 
 	let collateralFee = 0;
 	if (!isRedirect) {
-		collateralFee = calcCollateralSurcharge(parsedCollateral);
+		if (serviceClass?.includes("blockade_runner")) {
+			collateralFee = calcBrCollateralSurcharge(parsedCollateral);
+		} else {
+			collateralFee = calcDstCollateralSurcharge(parsedCollateral);
+		}
 	}
 
 	const total = baseRate + distanceFee + collateralFee;
@@ -159,7 +171,7 @@ function calcJumpFreighterReward({
 
 	let collateralFee = 0;
 	if (!isRedirect) {
-		collateralFee = calcCollateralSurcharge(parsedCollateral);
+		collateralFee = calcJfCollateralSurcharge(parsedCollateral);
 	}
 
 	const total = baseFee + distanceFee + collateralFee;
@@ -280,7 +292,7 @@ export function calcRewardDetails(options, configOpt) {
 			parsedDangerousJumps,
 			parsedCollateral,
 			serviceClass,
-			maxCollateral: 3_000_000_000,
+			maxCollateral: 5_000_000_000,
 		});
 	}
 

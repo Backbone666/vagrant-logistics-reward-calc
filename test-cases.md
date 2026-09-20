@@ -27,18 +27,18 @@ Authoritative documentation of core test scenarios implemented in the automated 
 
 ### Test 4: Blockade Runner Low-Sec (Covert Route)
 - **Inputs**: Volume `10,000 m³`, High-Sec Jumps `0`, Dangerous Jumps `10`, Collateral `500,000,000 ISK`
-- **Calculation**: $10,000,000\text{ (Base)} + (10 \times 2,000,000) + 0\text{ (Collateral } \le 1\text{B)} = 30,000,000\text{ ISK}$
-- **Expected Reward**: **30,000,000 ISK**
+- **Calculation**: $10,000,000\text{ (Base)} + (10 \times 1,800,000) + 0\text{ (Collateral } \le 1\text{B)} = \mathbf{28,000,000\text{ ISK}}$
+- **Expected Reward**: **28,000,000 ISK**
 
 ### Test 5: Scouted DST Low-Sec (Mid-Volume Dangerous Route)
 - **Inputs**: Volume `50,000 m³`, High-Sec Jumps `0`, Dangerous Jumps `10`, Collateral `2,000,000,000 ISK`
-- **Calculation**: $20,000,000\text{ (Base)} + (10 \times 5,000,000) + (2,000,000,000 \times 0.003) = 20\text{M} + 50\text{M} + 6\text{M} = 76,000,000\text{ ISK}$
-- **Expected Reward**: **76,000,000 ISK**
+- **Calculation**: $20,000,000\text{ (Base)} + (10 \times 4,500,000) + (2,000,000,000 \times 0.003) = 20\text{M} + 45\text{M} + 6\text{M} = \mathbf{71,000,000\text{ ISK}}$
+- **Expected Reward**: **71,000,000 ISK**
 
 ### Test 6: Jump Freighter Standard (Cyno Navigation)
 - **Inputs**: Volume `200,000 m³`, High-Sec Jumps `0`, Dangerous Jumps `10`, Collateral `2,000,000,000 ISK`
-- **Calculation**: $150,000,000\text{ (Base)} + (10 \times 35,000,000) + (2,000,000,000 \times 0.003) = 150\text{M} + 350\text{M} + 6\text{M} = 506,000,000\text{ ISK}$
-- **Expected Reward**: **506,000,000 ISK**
+- **Calculation**: $160,000,000\text{ (Base)} + (10 \times 40,000,000) + 0\text{ (Collateral } \le 2\text{B)} = 160\text{M} + 400\text{M} = \mathbf{560,000,000\text{ ISK}}$
+- **Expected Reward**: **560,000,000 ISK**
 
 ---
 
@@ -48,7 +48,7 @@ Authoritative documentation of core test scenarios implemented in the automated 
 - **High-Sec Subcapital** $> 10\text{B ISK}$: Returns `"Risako Hirano"` for executive quote.
 - **High-Sec Freighter** $> 5\text{B ISK}$: Returns `"Risako Hirano"`.
 - **Dangerous Blockade Runner** $> 5\text{B ISK}$: Returns `"Risako Hirano"`.
-- **Dangerous Scouted DST** $> 3\text{B ISK}$: Returns `"Risako Hirano"`.
+- **Dangerous Scouted DST** $> 5\text{B ISK}$: Returns `"Risako Hirano"`.
 - **Jump Freighter** $> 50\text{B ISK}$: Returns `"Executive Review"`.
 
 ### Test 8: Route Safety Preferences

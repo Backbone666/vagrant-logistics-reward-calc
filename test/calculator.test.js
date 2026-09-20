@@ -56,7 +56,7 @@ test("Test 4: BR Lowsec (Volume 10k, HS Jumps 0, Dangerous Jumps 10, Collateral 
 		},
 		config,
 	);
-	assert.equal(result, 30_000_000);
+	assert.equal(result, 28_000_000);
 });
 
 test("Test 5: DST Lowsec (Volume 50k, HS Jumps 0, Dangerous Jumps 10, Collateral 2B)", () => {
@@ -69,7 +69,7 @@ test("Test 5: DST Lowsec (Volume 50k, HS Jumps 0, Dangerous Jumps 10, Collateral
 		},
 		config,
 	);
-	assert.equal(result, 76_000_000);
+	assert.equal(result, 71_000_000);
 });
 
 test("Test 6: Jump Freighter (Volume 200k, HS Jumps 0, Dangerous Jumps 10, Collateral 2B)", () => {
@@ -82,7 +82,7 @@ test("Test 6: Jump Freighter (Volume 200k, HS Jumps 0, Dangerous Jumps 10, Colla
 		},
 		config,
 	);
-	assert.equal(result, 506_000_000);
+	assert.equal(result, 560_000_000);
 });
 
 test("Test 8: Highsec Sub-Capital > 10B Collateral Redirect", () => {
@@ -108,8 +108,8 @@ test("Test 9: Jump Freighter Standard Calculation", () => {
 		},
 		config,
 	);
-	// 150M Base + 350M Jump + 6M Collateral = 506M
-	assert.equal(result, 506_000_000);
+	// 160M Base + 400M Jump + 0 Collateral (<=2B) = 560M
+	assert.equal(result, 560_000_000);
 });
 
 test("Test 10: Highsec Freighter > 5B Collateral Redirect", () => {
@@ -345,7 +345,7 @@ test("Sub-unit: Encapsulated service metadata and final total floor", () => {
 	);
 	assert.equal(stargateBr.serviceName, "Blockade Runner");
 	assert.equal(stargateBr.distanceLabel, "Distance Jump Fee:");
-	assert.equal(stargateBr.finalTotal, 30000000);
+	assert.equal(stargateBr.finalTotal, 28000000);
 
 	// Dangerous Stargate DST
 	const stargateDst = calcRewardDetails(
@@ -354,7 +354,7 @@ test("Sub-unit: Encapsulated service metadata and final total floor", () => {
 	);
 	assert.equal(stargateDst.serviceName, "Deep Space Transport");
 	assert.equal(stargateDst.distanceLabel, "Distance Jump Fee:");
-	assert.equal(stargateDst.finalTotal, 76000000);
+	assert.equal(stargateDst.finalTotal, 71000000);
 
 	// Jump Freighter
 	const jfDetails = calcRewardDetails(
@@ -363,7 +363,7 @@ test("Sub-unit: Encapsulated service metadata and final total floor", () => {
 	);
 	assert.equal(jfDetails.serviceName, "Jump Freighter");
 	assert.equal(jfDetails.distanceLabel, "Distance Cyno Fee:");
-	assert.equal(jfDetails.finalTotal, 506000000);
+	assert.equal(jfDetails.finalTotal, 560000000);
 
 	// Enforce 1,000,000 ISK floor when total is less than 1,000,000
 	const lowConfig = JSON.parse(JSON.stringify(config));
@@ -394,7 +394,7 @@ test("Sub-unit: Encapsulated service metadata and final total floor", () => {
 	assert.equal(stargateBrRedirect.distanceLabel, "Distance Jump Fee:");
 
 	const stargateDstRedirect = calcRewardDetails(
-		{ volume: 50000, dangerousJumps: 10, collateral: "4,000,000,000" },
+		{ volume: 50000, dangerousJumps: 10, collateral: "6,000,000,000" },
 		config,
 	);
 	assert.equal(stargateDstRedirect.isRedirect, true);
@@ -468,7 +468,7 @@ test("Sub-unit: Input Validation and Redirect Paths", () => {
 	assert.equal(lowsecBrCollateral, "Risako Hirano");
 
 	const lowsecDstCollateral = calcReward(
-		{ volume: 50000, dangerousJumps: 10, collateral: "4,000,000,000" },
+		{ volume: 50000, dangerousJumps: 10, collateral: "5,000,000,001" },
 		config,
 	);
 	assert.equal(lowsecDstCollateral, "Risako Hirano");
@@ -492,19 +492,20 @@ test("Sub-unit: Pricing Modifiers (Minimum Fees & Surcharges)", () => {
 
 	const lsStargateBase = calcReward({ volume: 10000, dangerousJumps: 1, collateral: 0 }, config);
 
-	// High-value Collateral (>3B) Surcharge for Stargate/JF Routes
+	// High-value Collateral (>3B) Surcharge for BR Stargate (4B * 0.004 = 16M)
 	const lsBrCollateralSurcharge = calcReward(
 		{ volume: 10000, dangerousJumps: 1, collateral: "4,000,000,000" },
 		config,
 	);
-	assert.equal(lsBrCollateralSurcharge, lsStargateBase + 20000000);
+	assert.equal(lsBrCollateralSurcharge, lsStargateBase + 16000000);
 
 	const jfBase = calcReward({ volume: 200000, dangerousJumps: 1, collateral: 0 }, config);
+	// High-value Collateral (2B-10B) Surcharge for JF Routes (4B * 0.004 = 16M)
 	const jfCollateralSurcharge = calcReward(
 		{ volume: 200000, dangerousJumps: 1, collateral: "4,000,000,000" },
 		config,
 	);
-	assert.equal(jfCollateralSurcharge, jfBase + 20000000);
+	assert.equal(jfCollateralSurcharge, jfBase + 16000000);
 });
 
 test("Test 10: Negative jumps return error", () => {
@@ -586,4 +587,57 @@ test("Test 15: Over maximum JF collateral (>50B) redirects to Executive Review",
 		config,
 	);
 	assert.equal(result, "Executive Review");
+});
+
+test("Test 16: Scouted DST accepts up to 5B collateral with 0.5% surcharge", () => {
+	const result = calcReward(
+		{
+			volume: "50,000",
+			highsecJumps: "0",
+			dangerousJumps: "10",
+			collateral: "5,000,000,000",
+		},
+		config,
+	);
+	// 20M Base + (10 * 4.5M) + (5B * 0.005 = 25M) = 90M ISK
+	assert.equal(result, 90_000_000);
+});
+
+test("Test 17: Jump Freighter Multi-Tier Collateral Brackets (Free <=2B, 0.4% 2B-10B, 0.6% 10B-50B)", () => {
+	// 1 cyno hop = 160M + 40M = 200M base
+	// Tier 1: <= 2B collateral -> 0 surcharge
+	const jfTier1 = calcReward(
+		{
+			volume: "300,000",
+			highsecJumps: "0",
+			dangerousJumps: "1",
+			collateral: "2,000,000,000",
+		},
+		config,
+	);
+	assert.equal(jfTier1, 200_000_000);
+
+	// Tier 2: 10B collateral -> 10B * 0.004 = 40M surcharge -> 240M
+	const jfTier2 = calcReward(
+		{
+			volume: "300,000",
+			highsecJumps: "0",
+			dangerousJumps: "1",
+			collateral: "10,000,000,000",
+		},
+		config,
+	);
+	assert.equal(jfTier2, 240_000_000);
+
+	// Tier 3: 30B collateral -> 30B * 0.006 = 180M surcharge -> 380M (4 cyno hops = 160M + 160M + 180M = 500M)
+	const jfTier3 = calcReward(
+		{
+			volume: "340,000",
+			highsecJumps: "0",
+			dangerousJumps: "4",
+			collateral: "30,000,000,000",
+		},
+		config,
+	);
+	assert.equal(jfTier3, 500_000_000);
 });

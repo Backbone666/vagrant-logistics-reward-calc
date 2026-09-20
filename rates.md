@@ -44,45 +44,56 @@ $$\text{Reward} = \max\left(10,000,000,\, \text{Jumps} \times 1,750,000 \times \
 
 Activated when a route traverses one or more dangerous systems ($\text{security} < 0.45$) or when "Force Jump Freighter" is toggled.
 
+Activated when a route traverses one or more dangerous systems ($\text{security} < 0.45$) or when "Force Jump Freighter" is toggled.
+
 ### Collateral Risk Premiums (Dangerous Routes)
-- $\le 1.0\text{ Billion ISK}$: $0\text{ ISK}$ ($0\%$)
-- $1.0\text{B} < \text{Collateral} \le 3.0\text{ Billion ISK}$: $0.3\%$ of collateral ($\text{Collateral} \times 0.003$)
-- $> 3.0\text{ Billion ISK}$: $0.5\%$ of collateral ($\text{Collateral} \times 0.005$)
+- **Blockade Runner**:
+  - $\le 1.0\text{ Billion ISK}$: $0\text{ ISK}$ ($0\%$)
+  - $1.0\text{B} < \text{Collateral} \le 3.0\text{ Billion ISK}$: $0.2\%$ of collateral ($\text{Collateral} \times 0.002$)
+  - $3.0\text{B} < \text{Collateral} \le 5.0\text{ Billion ISK}$: $0.4\%$ of collateral ($\text{Collateral} \times 0.004$)
+- **Scouted Deep Space Transport**:
+  - $\le 1.0\text{ Billion ISK}$: $0\text{ ISK}$ ($0\%$)
+  - $1.0\text{B} < \text{Collateral} \le 3.0\text{ Billion ISK}$: $0.3\%$ of collateral ($\text{Collateral} \times 0.003$)
+  - $3.0\text{B} < \text{Collateral} \le 5.0\text{ Billion ISK}$: $0.5\%$ of collateral ($\text{Collateral} \times 0.005$)
+- **Jump Freighter**:
+  - $\le 2.0\text{ Billion ISK}$: $0\text{ ISK}$ ($0\%$)
+  - $2.0\text{B} < \text{Collateral} \le 10.0\text{ Billion ISK}$: $0.4\%$ of collateral ($\text{Collateral} \times 0.004$)
+  - $10.0\text{B} < \text{Collateral} \le 50.0\text{ Billion ISK}$: $0.6\%$ of collateral ($\text{Collateral} \times 0.006$)
 
 ---
 
 ### A. Blockade Runner (Covert Stargate Route)
 - **Volume Limit**: $\le 12,500\text{ m}^3$
 - **Base Fee**: $10,000,000\text{ ISK}$
-- **Dangerous Jump Rate**: $2,000,000\text{ ISK per jump}$
-- **High-Sec Jump Rate**: $1,500,000\text{ ISK per jump}$
+- **Dangerous Jump Rate**: $1,800,000\text{ ISK per jump}$
+- **High-Sec Jump Rate**: $1,200,000\text{ ISK per jump}$
 - **Max Collateral**: $5,000,000,000\text{ ISK}$ ($> 5\text{B}$ redirects to **Risako Hirano**)
 
-$$\text{Reward} = 10,000,000 + (\text{Dangerous Jumps} \times 2,000,000) + (\text{High-Sec Jumps} \times 1,500,000) + \text{Collateral Premium}$$
+$$\text{Reward} = 10,000,000 + (\text{Dangerous Jumps} \times 1,800,000) + (\text{High-Sec Jumps} \times 1,200,000) + \text{Collateral Premium}$$
 
 ---
 
 ### B. Scouted Deep Space Transport (DST Stargate Route)
 - **Volume Limit**: $\le 62,500\text{ m}^3$
 - **Base Fee**: $20,000,000\text{ ISK}$
-- **Dangerous Jump Rate**: $5,000,000\text{ ISK per jump}$
-- **High-Sec Jump Rate**: $2,000,000\text{ ISK per jump}$
-- **Max Collateral**: $3,000,000,000\text{ ISK}$ ($> 3\text{B}$ redirects to **Risako Hirano**)
+- **Dangerous Jump Rate**: $4,500,000\text{ ISK per jump}$
+- **High-Sec Jump Rate**: $1,500,000\text{ ISK per jump}$
+- **Max Collateral**: $5,000,000,000\text{ ISK}$ ($> 5\text{B}$ redirects to **Risako Hirano**)
 
-$$\text{Reward} = 20,000,000 + (\text{Dangerous Jumps} \times 5,000,000) + (\text{High-Sec Jumps} \times 2,000,000) + \text{Collateral Premium}$$
+$$\text{Reward} = 20,000,000 + (\text{Dangerous Jumps} \times 4,500,000) + (\text{High-Sec Jumps} \times 1,500,000) + \text{Collateral Premium}$$
 
-*Strategic Note*: Major competitors (PushX, Black Frog) do not offer subcapital dangerous space hauling, forcing customers with $15,000\text{--}62,500\text{ m}^3$ into expensive Jump Freighter minimums ($1.2\text{B}+\text{ ISK}$). Our Scouted DST service captures $100\%$ of this high-margin market.
+*Strategic Note*: Major competitors (PushX, Black Frog) do not offer subcapital dangerous space hauling, forcing customers with $12,501\text{--}62,500\text{ m}^3$ into expensive Jump Freighter minimums ($300\text{M}\text{--}1.2\text{B}+\text{ ISK}$). Our Scouted DST service captures $100\%$ of this high-margin market.
 
 ---
 
 ### C. Jump Freighter Standard (Cyno Navigation)
 - **Hull Classes**: Ark, Rhea, Anshar, Nomad.
 - **Volume Limit**: $\le 360,000\text{ m}^3$ (or any volume when "Force Jump Freighter" is active)
-- **Base Fee**: $150,000,000\text{ ISK}$
-- **Cyno Jump Rate**: $35,000,000\text{ ISK per jump}$
+- **Base Fee**: $160,000,000\text{ ISK}$
+- **Cyno Jump Rate**: $40,000,000\text{ ISK per jump}$
 - **Max Collateral**: $50,000,000,000\text{ ISK}$ ($> 50\text{B}$ redirects to **Executive Review**)
 
-$$\text{Reward} = 150,000,000 + (\text{Cyno Jumps} \times 35,000,000) + \text{Collateral Premium}$$
+$$\text{Reward} = 160,000,000 + (\text{Cyno Jumps} \times 40,000,000) + \text{Collateral Premium}$$
 
 ---
 
@@ -111,11 +122,23 @@ By corporate directive, all automated routing calculations enforce avoidance of 
 
 ## 4. Market Competitive Benchmarking
 
-| Service Scenario | Vagrant Logistics | PushX | Market Delta | Strategic Position |
+| Service Scenario | Vagrant Logistics | PushX | Black Frog / DSHX | Market Position |
 |---|---|---|---|---|
-| **BR High-Sec** (10k m³, 10J, 500M) | **15.0M ISK** | 16.5M ISK | $-9\%$ | Undercuts market standard for rapid subcap hauls |
-| **DST High-Sec** (50k m³, 10J, 2B) | **27.0M ISK** | ~33.0M ISK | $-18\%$ | Aggressive bulk pricing via DST efficiency |
-| **Freighter High-Sec** (500k m³, 10J, 1B) | **17.5M ISK** | 24.75M ISK | $-29\%$ | High volume leader for hub-to-hub freight |
-| **BR Low-Sec** (10k m³, 10J Dangerous, 500M) | **30.0M ISK** | ~37.5M ISK | $-20\%$ | Cost-effective covert deliveries |
-| **DST Low-Sec** (50k m³, 10J Dangerous, 2B) | **76.0M ISK** | 1,200.0M ISK (Forced JF) | **$-94\%$** | **Uncontested market dominance in mid-size dangerous hauling** |
-| **JF Low/Null** (200k m³, 10 Cyno Jumps, 2B) | **506.0M ISK** | 1,200.0M ISK | $-58\%$ | Competitively aligned with Black Frog (~300–500M) |
+| **BR High-Sec** (10k m³, 10J, 500M) | **15.0M ISK** | 16.5M ISK | ~20.0M ISK | Undercuts market standard for rapid subcap hauls ($-9\%$) |
+| **DST High-Sec** (50k m³, 10J, 2B) | **27.0M ISK** | ~33.0M ISK | ~40.0M ISK | Aggressive bulk pricing via DST efficiency ($-18\%$) |
+| **Freighter High-Sec** (500k m³, 10J, 1B) | **17.5M ISK** | 24.75M ISK | ~30.0M ISK | High volume leader for hub-to-hub freight ($-29\%$) |
+| **BR Low-Sec** (10k m³, 10J Dangerous, 500M) | **28.0M ISK** | ~37.5M–45.0M ISK | ~50.0M ISK | **$-25\%\text{ to } -38\%$ vs PushX** |
+| **DST Low-Sec Gate Pipe** (55k m³, 1 HS, 4 LS, 2.5B) | **47.0M ISK** | 300.0M (Forced JF) | 84.0M (DSHX) | **Dominates subcap void ($-84\%$ vs PushX, $-44\%$ vs DSHX)** |
+| **DST High-Value Sprint** (40k m³, 2 HS, 4 LS, 5.0B) | **66.0M ISK** | 300.0M (Forced JF) | 136.0M (DSHX) | **$-78\%$ vs PushX, $-51\%$ vs DSHX (accepted up to 5B)** |
+| **DST Standard 10J Dangerous** (50k m³, 10 LS, 2.0B) | **71.0M ISK** | 1,200.0M (Forced JF) | 86.0M (DSHX) | **$-94\%$ vs PushX, $-17\%$ vs DSHX** |
+| **JF Short Lowsec Hop** (320k m³, 1 Cyno Hop, 10B) | **240.0M ISK** | 350.0M ISK | 320.0M (BF) | **$-31\%$ vs PushX, $-25\%$ vs Black Frog** |
+| **JF Deep NPC Null Run** (300k m³, 3 Cyno Hops, 15B) | **370.0M ISK** | 600.0M ISK | 480.0M (BF) / 520M (DSHX) | **$-38\%$ vs PushX, $-23\%$ vs Black Frog** |
+| **JF High-Collateral Sov Keepstar** (340k m³, 4 Hops, 30B) | **500.0M ISK** | 950.0M ISK | 820.0M (BF) / Rejected (DSHX) | **$-47\%$ vs PushX, $-39\%$ vs Black Frog** |
+
+---
+
+## 5. Operational Governance & SLA Terms for Dangerous Space
+
+- **Time to Accept**: **7 Days** (allows haulers to monitor intelligence channels, avoid gate camps, and wait out hostile fleet spikes safely).
+- **Time to Complete**: **3 Days** for Low-Sec stargate runs; **7 Days** for deep Null-Sec or multi-cyno routes.
+- **Structure & Docking Terms**: Deliveries to player-owned Upwell structures require verified corporate Access Control List (ACL) docking permissions. Revoked access or unanchoring structures relieve contractor liability.
