@@ -4,7 +4,7 @@
  */
 
 export const HIGH_SEC_SECURITY_THRESHOLD = 0.45;
-export const DEFAULT_ROUTE_TIMEOUT_MS = 5000;
+export const DEFAULT_ROUTE_TIMEOUT_MS = 12000;
 export const MAX_SYSTEM_NAME_LENGTH = 50;
 
 export const DEFAULT_MANDATORY_AVOID_LIST = Object.freeze([
@@ -28,12 +28,13 @@ export function resolveAvoidList(configAvoidList) {
 }
 
 export const EVE_ROUTE_BASE_URL = "https://eve-route.vercel.app";
-export const DEFAULT_CORS_PROXY_GATEWAY = "https://api.allorigins.win/raw?url=";
+export const DEFAULT_CORS_PROXY_GATEWAY = "https://api.cors.lol/?url=";
 export const DEFAULT_CORS_PROXY_GATEWAYS = Object.freeze([
+	"https://api.cors.lol/?url=",
 	"https://api.allorigins.win/raw?url=",
-	"https://api.codetabs.com/v1/proxy/?quest=",
+	"https://api.allorigins.win/get?url=",
 ]);
-export const DEFAULT_PROXY_TIMEOUT_MS = 2500;
+export const DEFAULT_PROXY_TIMEOUT_MS = 6000;
 
 export const TRADE_HUB_IDS = Object.freeze({
 	jita: 30000142,
@@ -409,17 +410,33 @@ export async function fetchWithCorsFallback(targetUrl, options = {}) {
 	}
 	const proxyTimeoutMs = options.proxyTimeoutMs || DEFAULT_PROXY_TIMEOUT_MS;
 
-	try {
-		const response = await fetchFn(targetUrl, { signal });
-		if (response.ok) {
-			return response;
-		}
-		if (![408, 429, 502, 503, 504].includes(response.status) || proxyGateways.length === 0) {
-			return response;
-		}
-	} catch (err) {
-		if (err.name === "AbortError" && signal?.aborted) {
-			throw err;
+	const isBrowser =
+		typeof window !== "undefined" && window.location && typeof window.location.origin === "string";
+	const isSameOrigin =
+		isBrowser &&
+		(() => {
+			try {
+				return new URL(targetUrl).origin === window.location.origin;
+			} catch {
+				return false;
+			}
+		})();
+	const shouldAttemptDirect =
+		!isBrowser || isSameOrigin || Boolean(options.allowDirectBrowserFetch);
+
+	if (shouldAttemptDirect) {
+		try {
+			const response = await fetchFn(targetUrl, { signal });
+			if (response.ok) {
+				return response;
+			}
+			if (![408, 429, 502, 503, 504].includes(response.status) || proxyGateways.length === 0) {
+				return response;
+			}
+		} catch (err) {
+			if (err.name === "AbortError" && signal?.aborted) {
+				throw err;
+			}
 		}
 	}
 
@@ -443,6 +460,35 @@ export async function fetchWithCorsFallback(targetUrl, options = {}) {
 		try {
 			const proxyResponse = await fetchFn(proxiedUrl, { signal: combined.signal });
 			if (proxyResponse.ok) {
+				if (gateway.includes("/get?")) {
+					try {
+						const clone =
+							typeof proxyResponse.clone === "function" ? proxyResponse.clone() : proxyResponse;
+						const wrapper = await clone.json();
+						if (wrapper && typeof wrapper === "object" && typeof wrapper.contents === "string") {
+							const status = wrapper.status?.http_code || 200;
+							if (status >= 200 && status < 300) {
+								if (typeof Response === "function") {
+									return new Response(wrapper.contents, {
+										status,
+										statusText: "OK",
+										headers: { "Content-Type": "application/json" },
+									});
+								}
+								return {
+									ok: true,
+									status,
+									json: async () => JSON.parse(wrapper.contents),
+									text: async () => wrapper.contents,
+								};
+							}
+							lastError = new Error(`Wrapped upstream proxy returned HTTP ${status}`);
+							continue;
+						}
+					} catch {
+						// Not a JSON wrapper, fall through to return proxyResponse
+					}
+				}
 				return proxyResponse;
 			}
 			lastError = new Error(`Proxy ${gateway} returned HTTP ${proxyResponse.status}`);
@@ -621,7 +667,10 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 		const directSystems = data?.routes?.direct;
 
 		if (!Array.isArray(directSystems) || directSystems.length === 0) {
-			throw new RouteNotFoundError("No route found avoiding specified systems");
+			if (data && typeof data === "object" && "routes" in data) {
+				throw new RouteNotFoundError("No route found avoiding specified systems");
+			}
+			return await runEsiFallback(new Error("Malformed route payload from EVE TT"));
 		}
 
 		const { highSecJumps, dangerousJumps } = classifyJumps(directSystems);

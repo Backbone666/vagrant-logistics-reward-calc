@@ -68,14 +68,15 @@
 		"Aunenen"
 	],
 	"routing": {
-		"primary_engine": "esi",
+		"primary_engine": "eve-route",
 		"eve_route_api_url": "https://eve-route.vercel.app/api/route",
-		"cors_proxy_gateway": "https://api.allorigins.win/raw?url=",
+		"cors_proxy_gateway": "https://api.cors.lol/?url=",
 		"cors_proxy_gateways": [
+			"https://api.cors.lol/?url=",
 			"https://api.allorigins.win/raw?url=",
-			"https://api.codetabs.com/v1/proxy/?quest="
+			"https://api.allorigins.win/get?url="
 		],
-		"proxy_timeout_ms": 2500,
+		"proxy_timeout_ms": 6000,
 		"esi_fallback_enabled": true
 	}
 }

@@ -25,8 +25,8 @@ import {
 
 test("route-service constants: threshold and defaults match specs", () => {
 	assert.equal(HIGH_SEC_SECURITY_THRESHOLD, 0.45);
-	assert.equal(DEFAULT_ROUTE_TIMEOUT_MS, 5000);
-	assert.equal(DEFAULT_PROXY_TIMEOUT_MS, 2500);
+	assert.equal(DEFAULT_ROUTE_TIMEOUT_MS, 12000);
+	assert.equal(DEFAULT_PROXY_TIMEOUT_MS, 6000);
 	assert.equal(MAX_SYSTEM_NAME_LENGTH, 50);
 	assert.deepEqual(MANDATORY_AVOID_LIST, DEFAULT_MANDATORY_AVOID_LIST);
 	assert.ok(DEFAULT_CORS_PROXY_GATEWAYS.length >= 2);
@@ -1056,4 +1056,156 @@ test("fetchEveRoute: falls back to EVE TT when primaryEngine='esi' and ESI encou
 	assert.equal(result.highSecJumps, 2);
 	assert.equal(result.dangerousJumps, 0);
 	assert.equal(result.totalJumps, 2);
+});
+
+test("fetchWithCorsFallback: unwraps { contents: string } from /get? JSON envelope proxy", async () => {
+	const calledUrls = [];
+	const innerPayload = {
+		summary: { start: "Jita", end: "Amarr", directJumps: 2 },
+		routes: {
+			direct: [
+				{ name: "Jita", security: 0.95 },
+				{ name: "Perimeter", security: 0.95 },
+				{ name: "Amarr", security: 1.0 },
+			],
+		},
+	};
+
+	const mockFetch = async (url) => {
+		calledUrls.push(url);
+		if (url.includes("/get?")) {
+			return {
+				ok: true,
+				status: 200,
+				json: async () => ({
+					contents: JSON.stringify(innerPayload),
+					status: { http_code: 200 },
+				}),
+			};
+		}
+		throw new TypeError("Direct fetch blocked");
+	};
+
+	const targetUrl = "https://eve-route.vercel.app/api/route?start=Jita&end=Amarr";
+	const res = await fetchWithCorsFallback(targetUrl, {
+		fetch: mockFetch,
+		corsProxyGateways: ["https://api.allorigins.win/get?url="],
+	});
+
+	assert.equal(res.ok, true);
+	assert.equal(res.status, 200);
+	const data = await res.json();
+	assert.deepEqual(data, innerPayload);
+});
+
+test("fetchWithCorsFallback: bypasses direct fetch in simulated browser environment", async () => {
+	const calledUrls = [];
+	const mockFetch = async (url) => {
+		calledUrls.push(url);
+		return {
+			ok: true,
+			status: 200,
+			json: async () => ({ proxied: true }),
+		};
+	};
+
+	const originalWindow = globalThis.window;
+	try {
+		// Simulate browser environment with different origin
+		globalThis.window = {
+			location: { origin: "https://vglgi.backb0ne.cloud" },
+		};
+
+		const targetUrl = "https://eve-route.vercel.app/api/route?start=Jita&end=Amarr";
+		const res = await fetchWithCorsFallback(targetUrl, {
+			fetch: mockFetch,
+			corsProxyGateways: ["https://api.cors.lol/?url="],
+		});
+
+		assert.equal(res.ok, true);
+		// In browser, direct fetch to different origin must be skipped
+		assert.equal(calledUrls.length, 1);
+		assert.ok(calledUrls[0].includes("api.cors.lol"));
+		assert.ok(!calledUrls.includes(targetUrl));
+	} finally {
+		if (originalWindow === undefined) {
+			delete globalThis.window;
+		} else {
+			globalThis.window = originalWindow;
+		}
+	}
+});
+
+test("fetchWithCorsFallback: allows direct fetch in browser when allowDirectBrowserFetch is true", async () => {
+	const calledUrls = [];
+	const mockFetch = async (url) => {
+		calledUrls.push(url);
+		if (url.startsWith("https://eve-route.vercel.app")) {
+			throw new TypeError("Direct CORS blocked");
+		}
+		return {
+			ok: true,
+			status: 200,
+			json: async () => ({ proxied: true }),
+		};
+	};
+
+	const originalWindow = globalThis.window;
+	try {
+		globalThis.window = {
+			location: { origin: "https://vglgi.backb0ne.cloud" },
+		};
+
+		const targetUrl = "https://eve-route.vercel.app/api/route?start=Jita&end=Amarr";
+		const res = await fetchWithCorsFallback(targetUrl, {
+			fetch: mockFetch,
+			allowDirectBrowserFetch: true,
+			corsProxyGateways: ["https://api.cors.lol/?url="],
+		});
+
+		assert.equal(res.ok, true);
+		assert.equal(calledUrls.length, 2);
+		assert.equal(calledUrls[0], targetUrl);
+		assert.ok(calledUrls[1].includes("api.cors.lol"));
+	} finally {
+		if (originalWindow === undefined) {
+			delete globalThis.window;
+		} else {
+			globalThis.window = originalWindow;
+		}
+	}
+});
+
+test("fetchEveRoute: falls back to ESI when proxy returns 200 with non-route body", async () => {
+	let esiCalled = false;
+	const mockFetch = async (url) => {
+		if (url.includes("cors.lol")) {
+			// Proxy returns 200 with rate limit or non-route message
+			return {
+				ok: true,
+				status: 200,
+				json: async () => ({ error: "Rate limit exceeded" }),
+			};
+		}
+		if (url.includes("esi.evetech.net")) {
+			esiCalled = true;
+			return {
+				ok: true,
+				status: 200,
+				json: async () => [30000142, 30002187],
+			};
+		}
+		throw new TypeError("Direct blocked");
+	};
+
+	const highSecSet = new Set([30000142, 30002187]);
+	const result = await fetchEveRoute("Jita", "Amarr", {
+		fetch: mockFetch,
+		corsProxyGateways: ["https://api.cors.lol/?url="],
+		highSecSet,
+	});
+
+	assert.equal(esiCalled, true);
+	assert.equal(result.highSecJumps, 1);
+	assert.equal(result.totalJumps, 1);
 });
