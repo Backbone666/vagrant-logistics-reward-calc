@@ -1,5 +1,10 @@
 import { calcRewardDetails, parseNum } from "./calculator.js";
-import { fetchEveRoute, RouteNotFoundError, resolveAvoidList } from "./route-service.js";
+import {
+	fetchEveRoute,
+	RouteNotFoundError,
+	resolveAvoidList,
+	selectRouteForVolume,
+} from "./route-service.js";
 import { attachSystemAutocomplete, isKnownSystem, loadSystemsData } from "./system-autocomplete.js";
 
 const collateralInput = document.getElementById("collateral");
@@ -15,6 +20,7 @@ const destinationInput = document.getElementById("destination_system");
 const originList = document.getElementById("origin_system_list");
 const destinationList = document.getElementById("destination_system_list");
 const routeStatus = document.getElementById("route-status");
+const theraBadge = document.getElementById("thera-badge");
 
 const rewardOutput = document.getElementById("reward_output");
 const rewardIpjOutput = document.getElementById("reward_ipj_output");
@@ -37,6 +43,7 @@ const toChangeElements = document.querySelectorAll(".to_change");
 
 let currentReward = 0;
 let config = null;
+let lastRouteResult = null;
 
 const FALLBACK_CONFIG = {
 	highsec_services: {
@@ -365,6 +372,40 @@ if (toggleManualJumpsBtn) {
 	});
 }
 
+function updateTheraBadge(selection) {
+	if (!theraBadge) return;
+	if (!selection || !selection.hasTheraShortcut || !lastRouteResult?.thera) {
+		theraBadge.className = "thera-badge hidden";
+		theraBadge.textContent = "";
+		theraBadge.removeAttribute("title");
+		return;
+	}
+
+	const theraJumps = lastRouteResult.thera.totalJumps;
+	const directJumps = lastRouteResult.direct?.totalJumps ?? 0;
+
+	if (selection.routeUsed === "thera") {
+		theraBadge.className = "thera-badge thera-active";
+		theraBadge.textContent = `⚡ Via Thera (${theraJumps} jumps)`;
+		theraBadge.title = `Thera wormhole shortcut active (${theraJumps} jumps vs ${directJumps} stargate jumps). Supported for Blockade Runners (≤ 12,500 m³).`;
+	} else {
+		theraBadge.className = "thera-badge thera-available";
+		theraBadge.textContent = `🌀 Thera shortcut: ${theraJumps}j (BR only)`;
+		theraBadge.title = `A ${theraJumps}-jump Thera wormhole shortcut exists for Blockade Runners (≤ 12,500 m³). Stargate route (${directJumps} jumps) required for larger hulls.`;
+	}
+}
+
+export function applyRouteSelection() {
+	if (!lastRouteResult) return;
+	const selection = selectRouteForVolume(lastRouteResult, volumeInput?.value);
+	if (!selection.selectedRoute) return;
+
+	highsecJumpsInput.value = formatNumber(selection.selectedRoute.highSecJumps, false);
+	dangerousJumpsInput.value = formatNumber(selection.selectedRoute.dangerousJumps, false);
+	updateTheraBadge(selection);
+	updateAll();
+}
+
 function handleRouteInputChange() {
 	cancelPendingRouteLookup();
 
@@ -372,11 +413,15 @@ function handleRouteInputChange() {
 	const destination = destinationInput?.value?.trim() || "";
 
 	if (!origin || !destination) {
+		lastRouteResult = null;
+		updateTheraBadge(null);
 		setRouteStatus("", "");
 		return;
 	}
 
 	if (origin.toLowerCase() === destination.toLowerCase()) {
+		lastRouteResult = null;
+		updateTheraBadge(null);
 		highsecJumpsInput.value = "0";
 		dangerousJumpsInput.value = "0";
 		setRouteStatus("", "");
@@ -400,6 +445,7 @@ function handleRouteInputChange() {
 				avoid,
 				safeRoute: isSafe,
 				pref: isSafe ? "safest" : "shortest",
+				volume: volumeInput?.value,
 				primaryEngine: routing?.primary_engine || "eve-route",
 				corsProxyGateway: routing?.cors_proxy_gateway,
 				corsProxyGateways: routing?.cors_proxy_gateways,
@@ -409,14 +455,15 @@ function handleRouteInputChange() {
 
 			if (controller.signal.aborted) return;
 
-			highsecJumpsInput.value = formatNumber(result.highSecJumps, false);
-			dangerousJumpsInput.value = formatNumber(result.dangerousJumps, false);
+			lastRouteResult = result;
 			setRouteStatus("", "");
-			updateAll();
+			applyRouteSelection();
 		} catch (err) {
 			if (controller.signal.aborted || err.name === "AbortError") {
 				return;
 			}
+			lastRouteResult = null;
+			updateTheraBadge(null);
 			if (err instanceof RouteNotFoundError || err.code === "NO_ROUTE") {
 				setRouteStatus("warning", "No route found avoiding specified systems");
 				setManualJumpVisibility(true);
@@ -513,6 +560,8 @@ toFormatNumberInputs.forEach((input) => {
 	input.addEventListener("input", (e) => {
 		if (e.target === highsecJumpsInput || e.target === dangerousJumpsInput) {
 			cancelPendingRouteLookup();
+			lastRouteResult = null;
+			updateTheraBadge(null);
 		}
 
 		const start = e.target.selectionStart;
@@ -526,7 +575,12 @@ toFormatNumberInputs.forEach((input) => {
 		const delta = newLen - oldLen;
 
 		e.target.setSelectionRange(start + delta, end + delta);
-		updateAll();
+
+		if (e.target === volumeInput && lastRouteResult) {
+			applyRouteSelection();
+		} else {
+			updateAll();
+		}
 	});
 });
 
@@ -569,7 +623,11 @@ presetBtns.forEach((btn) => {
 		btn.classList.add("active");
 
 		volumeInput.value = formatNumber(btn.getAttribute("data-val"));
-		updateAll();
+		if (lastRouteResult) {
+			applyRouteSelection();
+		} else {
+			updateAll();
+		}
 	});
 });
 
@@ -611,9 +669,10 @@ copyQuoteBtn.addEventListener("click", async () => {
 
 	const originVal = originInput?.value?.trim();
 	const destVal = destinationInput?.value?.trim();
+	const viaTheraTag = lastRouteResult?.routeUsed === "thera" ? " [via Thera]" : "";
 	const routeLabel =
 		originVal && destVal
-			? `Route: ${originVal} → ${destVal} (${highsecJumpsInput.value || 0} HighSec / ${dangerousJumpsInput.value || 0} Dangerous Jumps)`
+			? `Route: ${originVal} → ${destVal}${viaTheraTag} (${highsecJumpsInput.value || 0} HighSec / ${dangerousJumpsInput.value || 0} Dangerous Jumps)`
 			: `Route: ${highsecJumpsInput.value || 0} HighSec / ${dangerousJumpsInput.value || 0} Dangerous Jumps`;
 
 	const template = [
@@ -644,6 +703,8 @@ if (safeRouteCheckbox) {
 
 clearBtn.addEventListener("click", () => {
 	cancelPendingRouteLookup();
+	lastRouteResult = null;
+	updateTheraBadge(null);
 	if (originInput) originInput.value = "";
 	if (destinationInput) destinationInput.value = "";
 	setRouteStatus("", "");

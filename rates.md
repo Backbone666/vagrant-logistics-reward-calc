@@ -102,6 +102,10 @@ By corporate directive, all automated routing calculations enforce avoidance of 
 - `Tama`
 - `Aunenen`
 
+### Thera Wormhole Routing (Blockade Runners)
+- **Blockade Runners ($\le 12,500\text{ m}^3$)**: May utilize active Thera wormhole shortcuts when fewer total jumps exist than stargate direct paths.
+- **Bulk & Heavy Transport ($> 12,500\text{ m}^3$)**: Deep Space Transports, Freighters, and Jump Freighters strictly adhere to permanent stargates (`routes.direct`) due to mass limits, wormhole collapse hazards, and cyno mechanics.
+
 ---
 
 ## 4. Market Competitive Benchmarking

@@ -36,6 +36,65 @@ export const DEFAULT_CORS_PROXY_GATEWAYS = Object.freeze([
 ]);
 export const DEFAULT_PROXY_TIMEOUT_MS = 4000;
 
+export const BLOCKADE_RUNNER_MAX_VOLUME = 12500;
+
+/**
+ * Select the appropriate route (Thera wormhole vs Direct stargate) based on volume.
+ * Blockade runners (<= 12,500 m³) use Thera wormholes if a shorter route exists.
+ * Bulk transport (> 12,500 m³) strictly uses stargate direct routing.
+ * When volume is omitted/undefined, defaults to stargate direct routing.
+ *
+ * @param {object} routeResult
+ * @param {number|string} [volume]
+ * @returns {{
+ *   selectedRoute: object,
+ *   routeUsed: "thera" | "direct",
+ *   isBlockadeRunner: boolean,
+ *   hasTheraShortcut: boolean
+ * }}
+ */
+export function selectRouteForVolume(routeResult, volume) {
+	if (!routeResult) {
+		return {
+			selectedRoute: null,
+			routeUsed: "direct",
+			isBlockadeRunner: false,
+			hasTheraShortcut: false,
+		};
+	}
+
+	const hasTheraShortcut = Boolean(
+		routeResult.hasTheraShortcut ||
+			(routeResult.thera &&
+				routeResult.direct &&
+				routeResult.thera.totalJumps < routeResult.direct.totalJumps),
+	);
+
+	if (volume === undefined || volume === null) {
+		return {
+			selectedRoute: routeResult.direct || routeResult,
+			routeUsed: "direct",
+			isBlockadeRunner: false,
+			hasTheraShortcut,
+		};
+	}
+
+	const parsedVolume =
+		typeof volume === "number" ? volume : parseFloat(String(volume || 0).replace(/,/g, "")) || 0;
+	const isBlockadeRunner = parsedVolume <= BLOCKADE_RUNNER_MAX_VOLUME;
+
+	const useThera = isBlockadeRunner && hasTheraShortcut && Boolean(routeResult.thera);
+	const selectedRoute = useThera ? routeResult.thera : routeResult.direct || routeResult;
+	const routeUsed = useThera ? "thera" : "direct";
+
+	return {
+		selectedRoute,
+		routeUsed,
+		isBlockadeRunner,
+		hasTheraShortcut,
+	};
+}
+
 /**
  * Format a proxied URL based on whether the gateway uses query parameters or path prefix.
  *
@@ -392,6 +451,13 @@ export async function fetchEsiRoute(origin, destination, options = {}) {
 		security: highSecSet.has(id) ? 1.0 : 0.0,
 	}));
 
+	const directInfo = {
+		systems: systemsArray,
+		highSecJumps,
+		dangerousJumps,
+		totalJumps,
+	};
+
 	return {
 		summary: {
 			start: trimmedOrigin,
@@ -400,6 +466,10 @@ export async function fetchEsiRoute(origin, destination, options = {}) {
 			directJumps: totalJumps,
 		},
 		routes: { direct: systemsArray },
+		direct: directInfo,
+		thera: null,
+		hasTheraShortcut: false,
+		routeUsed: "direct",
 		systems: systemsArray,
 		highSecJumps,
 		dangerousJumps,
@@ -553,6 +623,12 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 
 	// Identical systems require 0 jumps without a network request
 	if (trimmedOrigin.toLowerCase() === trimmedDestination.toLowerCase()) {
+		const directInfo = {
+			systems: [{ name: trimmedOrigin, security: 1.0 }],
+			highSecJumps: 0,
+			dangerousJumps: 0,
+			totalJumps: 0,
+		};
 		return {
 			summary: {
 				start: trimmedOrigin,
@@ -565,7 +641,11 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 			routes: {
 				direct: [{ name: trimmedOrigin, security: 1.0 }],
 			},
-			systems: [{ name: trimmedOrigin, security: 1.0 }],
+			direct: directInfo,
+			thera: null,
+			hasTheraShortcut: false,
+			routeUsed: "direct",
+			systems: directInfo.systems,
 			highSecJumps: 0,
 			dangerousJumps: 0,
 			totalJumps: 0,
@@ -704,15 +784,51 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 			return await runEsiFallback(new Error("Malformed route payload from EVE TT"));
 		}
 
-		const { highSecJumps, dangerousJumps } = classifyJumps(directSystems);
+		const directClass = classifyJumps(directSystems);
+		const directTotal = directClass.highSecJumps + directClass.dangerousJumps;
+		const directInfo = {
+			systems: directSystems,
+			highSecJumps: directClass.highSecJumps,
+			dangerousJumps: directClass.dangerousJumps,
+			totalJumps: directTotal,
+		};
+
+		const theraSystems = data?.routes?.thera;
+		let theraInfo = null;
+		let hasTheraShortcut = false;
+
+		if (Array.isArray(theraSystems) && theraSystems.length > 0) {
+			const theraClass = classifyJumps(theraSystems);
+			const theraTotal = theraClass.highSecJumps + theraClass.dangerousJumps;
+			theraInfo = {
+				systems: theraSystems,
+				highSecJumps: theraClass.highSecJumps,
+				dangerousJumps: theraClass.dangerousJumps,
+				totalJumps: theraTotal,
+			};
+			if (theraTotal < directTotal) {
+				hasTheraShortcut = true;
+			}
+		}
+
+		const routeSelection = selectRouteForVolume(
+			{ direct: directInfo, thera: theraInfo, hasTheraShortcut },
+			options.volume,
+		);
+
+		const selectedRoute = routeSelection.selectedRoute || directInfo;
 
 		return {
 			summary: data.summary,
 			routes: data.routes,
-			systems: directSystems,
-			highSecJumps,
-			dangerousJumps,
-			totalJumps: highSecJumps + dangerousJumps,
+			direct: directInfo,
+			thera: theraInfo,
+			hasTheraShortcut,
+			routeUsed: routeSelection.routeUsed,
+			systems: selectedRoute.systems,
+			highSecJumps: selectedRoute.highSecJumps,
+			dangerousJumps: selectedRoute.dangerousJumps,
+			totalJumps: selectedRoute.totalJumps,
 		};
 	} finally {
 		cleanup();

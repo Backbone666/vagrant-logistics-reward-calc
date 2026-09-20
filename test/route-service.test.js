@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+	BLOCKADE_RUNNER_MAX_VOLUME,
 	buildProxiedUrl,
 	buildRouteUrl,
 	classifyJumps,
@@ -21,6 +22,7 @@ import {
 	RouteUnavailableError,
 	resolveAvoidList,
 	resolveSystemIdsBatch,
+	selectRouteForVolume,
 	TRADE_HUB_IDS,
 } from "../route-service.js";
 
@@ -28,6 +30,7 @@ test("route-service constants: threshold and defaults match specs", () => {
 	assert.equal(HIGH_SEC_SECURITY_THRESHOLD, 0.45);
 	assert.equal(DEFAULT_ROUTE_TIMEOUT_MS, 10000);
 	assert.equal(DEFAULT_PROXY_TIMEOUT_MS, 4000);
+	assert.equal(BLOCKADE_RUNNER_MAX_VOLUME, 12500);
 	assert.equal(MAX_SYSTEM_NAME_LENGTH, 50);
 	assert.deepEqual(MANDATORY_AVOID_LIST, DEFAULT_MANDATORY_AVOID_LIST);
 	assert.ok(DEFAULT_CORS_PROXY_GATEWAYS.length >= 2);
@@ -1267,4 +1270,118 @@ test("fetchEveRoute: decoupled ESI fallback succeeds even when proxy times out",
 	assert.equal(esiCalled, true);
 	assert.equal(result.highSecJumps, 1);
 	assert.equal(result.totalJumps, 1);
+});
+
+test("selectRouteForVolume: selects Thera for Blockade Runner (<= 12.5k) and Direct for bulk (> 12.5k)", () => {
+	const mockResult = {
+		hasTheraShortcut: true,
+		direct: { highSecJumps: 23, dangerousJumps: 1, totalJumps: 24 },
+		thera: { highSecJumps: 20, dangerousJumps: 2, totalJumps: 22 },
+	};
+
+	// Volume <= 12500 (Blockade Runner) -> selects Thera
+	const brSelection = selectRouteForVolume(mockResult, 10000);
+	assert.equal(brSelection.routeUsed, "thera");
+	assert.equal(brSelection.isBlockadeRunner, true);
+	assert.equal(brSelection.hasTheraShortcut, true);
+	assert.equal(brSelection.selectedRoute.totalJumps, 22);
+
+	// Boundary: exact 12,500 m³ -> selects Thera
+	const exactBr = selectRouteForVolume(mockResult, "12,500");
+	assert.equal(exactBr.routeUsed, "thera");
+	assert.equal(exactBr.selectedRoute.totalJumps, 22);
+
+	// Volume 0 -> considered <= 12500 -> selects Thera
+	const zeroVol = selectRouteForVolume(mockResult, 0);
+	assert.equal(zeroVol.routeUsed, "thera");
+	assert.equal(zeroVol.selectedRoute.totalJumps, 22);
+
+	// Bulk transport: 12,501 m³ -> strictly selects Direct stargate
+	const overBr = selectRouteForVolume(mockResult, 12501);
+	assert.equal(overBr.routeUsed, "direct");
+	assert.equal(overBr.isBlockadeRunner, false);
+	assert.equal(overBr.selectedRoute.totalJumps, 24);
+
+	// DST preset: 62,500 m³ -> strictly selects Direct
+	const dst = selectRouteForVolume(mockResult, "62,500");
+	assert.equal(dst.routeUsed, "direct");
+	assert.equal(dst.selectedRoute.totalJumps, 24);
+
+	// Freighter preset: 950,000 m³ -> strictly selects Direct
+	const freighter = selectRouteForVolume(mockResult, "950,000");
+	assert.equal(freighter.routeUsed, "direct");
+	assert.equal(freighter.selectedRoute.totalJumps, 24);
+
+	// Undefined/null volume -> defaults to Direct
+	const noVol = selectRouteForVolume(mockResult, undefined);
+	assert.equal(noVol.routeUsed, "direct");
+	assert.equal(noVol.selectedRoute.totalJumps, 24);
+
+	// Null routeResult
+	const nullResult = selectRouteForVolume(null, 10000);
+	assert.equal(nullResult.selectedRoute, null);
+	assert.equal(nullResult.routeUsed, "direct");
+});
+
+test("selectRouteForVolume: selects Direct when no Thera shortcut exists", () => {
+	const mockResultNoShortcut = {
+		hasTheraShortcut: false,
+		direct: { highSecJumps: 1, dangerousJumps: 0, totalJumps: 1 },
+		thera: { highSecJumps: 25, dangerousJumps: 2, totalJumps: 27 },
+	};
+
+	const br = selectRouteForVolume(mockResultNoShortcut, 10000);
+	assert.equal(br.routeUsed, "direct");
+	assert.equal(br.hasTheraShortcut, false);
+	assert.equal(br.selectedRoute.totalJumps, 1);
+});
+
+test("fetchEveRoute: returns both direct and thera with correct volume selection", async () => {
+	const mockResponse = {
+		summary: {
+			start: "Jita",
+			end: "Amarr",
+			pref: "shortest",
+			directJumps: 2,
+			theraJumps: 1,
+			recommended: "thera",
+		},
+		routes: {
+			direct: [
+				{ name: "Jita", security: 0.95 },
+				{ name: "Vecamia", security: 0.44 },
+				{ name: "Amarr", security: 1.0 },
+			],
+			thera: [
+				{ name: "Jita", security: 0.95 },
+				{ name: "Amarr", security: 1.0 },
+			],
+		},
+	};
+
+	const mockFetch = async () => ({
+		ok: true,
+		status: 200,
+		json: async () => mockResponse,
+	});
+
+	// Blockade Runner volume (<= 12,500) uses Thera
+	const brResult = await fetchEveRoute("Jita", "Amarr", { fetch: mockFetch, volume: 10000 });
+	assert.equal(brResult.routeUsed, "thera");
+	assert.equal(brResult.hasTheraShortcut, true);
+	assert.equal(brResult.totalJumps, 1);
+	assert.equal(brResult.direct.totalJumps, 2);
+	assert.equal(brResult.thera.totalJumps, 1);
+
+	// Bulk volume (> 12,500) strictly uses Direct stargates
+	const bulkResult = await fetchEveRoute("Jita", "Amarr", { fetch: mockFetch, volume: 62500 });
+	assert.equal(bulkResult.routeUsed, "direct");
+	assert.equal(bulkResult.hasTheraShortcut, true);
+	assert.equal(bulkResult.totalJumps, 2);
+
+	// Omitted volume defaults to Direct stargates
+	const defaultResult = await fetchEveRoute("Jita", "Amarr", { fetch: mockFetch });
+	assert.equal(defaultResult.routeUsed, "direct");
+	assert.equal(defaultResult.hasTheraShortcut, true);
+	assert.equal(defaultResult.totalJumps, 2);
 });

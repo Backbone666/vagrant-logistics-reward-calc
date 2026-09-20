@@ -497,6 +497,47 @@ h2 {
 	border-left-color: var(--warning-amber);
 }
 
+.route-status-group {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+.thera-badge {
+	font-family: var(--font-body);
+	font-size: 0.72rem;
+	letter-spacing: 0.04em;
+	padding: 2px 8px;
+	border-radius: 10px;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-variant-numeric: tabular-nums;
+	transition:
+		background-color 150ms ease,
+		border-color 150ms ease,
+		color 150ms ease;
+	user-select: none;
+	line-height: 1.3;
+}
+
+.thera-badge.thera-active {
+	background: hsla(45, 85%, 50%, 0.15);
+	border: 1px solid hsla(45, 80%, 55%, 0.4);
+	color: var(--bright-gold);
+}
+
+.thera-badge.thera-available {
+	background: hsla(0, 0%, 50%, 0.1);
+	border: 1px solid hsla(45, 30%, 50%, 0.25);
+	color: var(--muted-gold);
+}
+
+.thera-badge.hidden {
+	display: none;
+}
+
 .route-status {
 	font-size: 0.8rem;
 	color: var(--text-secondary);
