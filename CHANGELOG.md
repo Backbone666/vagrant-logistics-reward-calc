@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.3.0...v1.3.1) (2026-09-20)
+
+
+### Bug Fixes
+
+* **route:** define routing config reference in handleRouteInputChange ([913ccd4](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/913ccd41c220abd471b7f708b7d89970a0b60feb))
+
 ## [1.3.0](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.2.0...v1.3.0) (2026-09-20)
 
 
