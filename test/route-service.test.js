@@ -15,6 +15,7 @@ import {
 	fetchEveRoute,
 	fetchWithCorsFallback,
 	HIGH_SEC_SECURITY_THRESHOLD,
+	JUMP_FREIGHTER_MAX_VOLUME,
 	loadHighSecSystems,
 	MANDATORY_AVOID_LIST,
 	MAX_SYSTEM_NAME_LENGTH,
@@ -31,6 +32,7 @@ test("route-service constants: threshold and defaults match specs", () => {
 	assert.equal(DEFAULT_ROUTE_TIMEOUT_MS, 10000);
 	assert.equal(DEFAULT_PROXY_TIMEOUT_MS, 4000);
 	assert.equal(BLOCKADE_RUNNER_MAX_VOLUME, 12500);
+	assert.equal(JUMP_FREIGHTER_MAX_VOLUME, 360000);
 	assert.equal(MAX_SYSTEM_NAME_LENGTH, 50);
 	assert.deepEqual(MANDATORY_AVOID_LIST, DEFAULT_MANDATORY_AVOID_LIST);
 	assert.ok(DEFAULT_CORS_PROXY_GATEWAYS.length >= 2);

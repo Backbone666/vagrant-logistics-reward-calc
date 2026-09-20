@@ -538,6 +538,34 @@ h2 {
 	display: none;
 }
 
+.route-jumps-summary {
+	font-family: var(--font-body);
+	font-size: 0.8125rem;
+	letter-spacing: 0.04em;
+	padding: 3px 9px;
+	border-radius: 10px;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-variant-numeric: tabular-nums;
+	background: hsla(45, 60%, 25%, 0.25);
+	border: 1px solid hsla(45, 70%, 55%, 0.35);
+	color: var(--bright-gold);
+	line-height: 1.3;
+	user-select: none;
+	transition: opacity 150ms ease;
+}
+
+.route-jumps-summary.has-dangerous {
+	border-color: hsla(28, 90%, 55%, 0.4);
+	color: hsl(28, 100%, 75%);
+	background: hsla(28, 80%, 20%, 0.25);
+}
+
+.route-jumps-summary.hidden {
+	display: none;
+}
+
 .route-status {
 	font-size: 0.8rem;
 	color: var(--text-secondary);
@@ -759,6 +787,22 @@ input[type="text"]:focus {
 
 .checkbox-item:hover {
 	color: var(--text-primary);
+}
+
+.checkbox-item.locked {
+	opacity: 0.85;
+	cursor: not-allowed;
+}
+
+.checkbox-item.locked input {
+	cursor: not-allowed;
+}
+
+.checkbox-item.locked::after {
+	content: "🔒 (Locked: Freighter)";
+	font-size: 0.8125rem;
+	color: var(--muted-gold);
+	margin-left: 6px;
 }
 
 .checkbox-item input {

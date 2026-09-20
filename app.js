@@ -1,6 +1,7 @@
 import { calcRewardDetails, parseNum } from "./calculator.js";
 import {
 	fetchEveRoute,
+	JUMP_FREIGHTER_MAX_VOLUME,
 	RouteNotFoundError,
 	resolveAvoidList,
 	selectRouteForVolume,
@@ -20,6 +21,7 @@ const destinationInput = document.getElementById("destination_system");
 const originList = document.getElementById("origin_system_list");
 const destinationList = document.getElementById("destination_system_list");
 const routeStatus = document.getElementById("route-status");
+const routeJumpsSummary = document.getElementById("route-jumps-summary");
 const theraBadge = document.getElementById("thera-badge");
 
 const rewardOutput = document.getElementById("reward_output");
@@ -191,13 +193,56 @@ function debouncedSyncUrlParams(options) {
 	}, 200);
 }
 
+function updateRouteJumpsSummary(highSecJumps, dangerousJumps) {
+	if (!routeJumpsSummary) return;
+	const hs = parseNum(highSecJumps) || 0;
+	const dang = parseNum(dangerousJumps) || 0;
+	const origin = originInput?.value?.trim() || "";
+	const dest = destinationInput?.value?.trim() || "";
+
+	if (hs === 0 && dang === 0 && !origin && !dest) {
+		routeJumpsSummary.classList.add("hidden");
+		routeJumpsSummary.textContent = "";
+		routeJumpsSummary.classList.remove("has-dangerous");
+		return;
+	}
+
+	const total = hs + dang;
+	if (dang > 0) {
+		routeJumpsSummary.textContent = `${total} Jumps (${hs} HS / ${dang} Dangerous)`;
+		routeJumpsSummary.classList.add("has-dangerous");
+	} else {
+		routeJumpsSummary.textContent = `${total} Jumps (${total} HighSec)`;
+		routeJumpsSummary.classList.remove("has-dangerous");
+	}
+	routeJumpsSummary.classList.remove("hidden");
+}
+
+function syncSafeRouteLock(volume) {
+	if (!safeRouteCheckbox) return;
+	const parsedVolume = parseNum(volume);
+	const isOverJfVolume = parsedVolume > JUMP_FREIGHTER_MAX_VOLUME;
+
+	if (isOverJfVolume) {
+		safeRouteCheckbox.checked = true;
+		safeRouteCheckbox.disabled = true;
+		safeRouteCheckbox.parentElement?.classList.add("locked");
+		safeRouteCheckbox.title =
+			"Safe Route (High-Sec only) enforced: Volume exceeds Jump Freighter capacity (360,000 m³). Freighters cannot traverse dangerous space.";
+	} else {
+		safeRouteCheckbox.disabled = false;
+		safeRouteCheckbox.parentElement?.classList.remove("locked");
+		safeRouteCheckbox.removeAttribute("title");
+	}
+}
+
 function getFormInputs() {
 	return {
 		volume: volumeInput.value,
 		collateral: collateralInput.value,
 		highsecJumps: highsecJumpsInput.value,
 		dangerousJumps: dangerousJumpsInput.value,
-		safeRoute: safeRouteCheckbox ? safeRouteCheckbox.checked : true,
+		safeRoute: safeRouteCheckbox ? safeRouteCheckbox.checked : false,
 		forceJF: forceJfCheckbox.checked,
 		origin: originInput?.value?.trim().slice(0, 50) || "",
 		destination: destinationInput?.value?.trim().slice(0, 50) || "",
@@ -403,6 +448,10 @@ export function applyRouteSelection() {
 	highsecJumpsInput.value = formatNumber(selection.selectedRoute.highSecJumps, false);
 	dangerousJumpsInput.value = formatNumber(selection.selectedRoute.dangerousJumps, false);
 	updateTheraBadge(selection);
+	updateRouteJumpsSummary(
+		selection.selectedRoute.highSecJumps,
+		selection.selectedRoute.dangerousJumps,
+	);
 	updateAll();
 }
 
@@ -415,6 +464,7 @@ function handleRouteInputChange() {
 	if (!origin || !destination) {
 		lastRouteResult = null;
 		updateTheraBadge(null);
+		updateRouteJumpsSummary(0, 0);
 		setRouteStatus("", "");
 		return;
 	}
@@ -424,6 +474,7 @@ function handleRouteInputChange() {
 		updateTheraBadge(null);
 		highsecJumpsInput.value = "0";
 		dangerousJumpsInput.value = "0";
+		updateRouteJumpsSummary(0, 0);
 		setRouteStatus("", "");
 		updateAll();
 		return;
@@ -439,7 +490,7 @@ function handleRouteInputChange() {
 		try {
 			const avoid = resolveAvoidList(config?.mandatory_avoid_systems);
 			const routing = config?.routing;
-			const isSafe = safeRouteCheckbox ? safeRouteCheckbox.checked : true;
+			const isSafe = safeRouteCheckbox ? safeRouteCheckbox.checked : false;
 			const result = await fetchEveRoute(origin, destination, {
 				signal: controller.signal,
 				avoid,
@@ -562,6 +613,7 @@ toFormatNumberInputs.forEach((input) => {
 			cancelPendingRouteLookup();
 			lastRouteResult = null;
 			updateTheraBadge(null);
+			updateRouteJumpsSummary(highsecJumpsInput.value, dangerousJumpsInput.value);
 		}
 
 		const start = e.target.selectionStart;
@@ -576,8 +628,25 @@ toFormatNumberInputs.forEach((input) => {
 
 		e.target.setSelectionRange(start + delta, end + delta);
 
-		if (e.target === volumeInput && lastRouteResult) {
-			applyRouteSelection();
+		if (e.target === volumeInput) {
+			const wasOverJf = safeRouteCheckbox?.disabled;
+			syncSafeRouteLock(e.target.value);
+			const isNowOverJf = safeRouteCheckbox?.disabled;
+			const origin = originInput?.value?.trim() || "";
+			const dest = destinationInput?.value?.trim() || "";
+			if (
+				!wasOverJf &&
+				isNowOverJf &&
+				origin &&
+				dest &&
+				typeof checkAndTriggerRouteLookup === "function"
+			) {
+				checkAndTriggerRouteLookup();
+			} else if (lastRouteResult) {
+				applyRouteSelection();
+			} else {
+				updateAll();
+			}
 		} else {
 			updateAll();
 		}
@@ -592,6 +661,7 @@ function handleSystemInputChange(e) {
 	const val = e.target.value.trim();
 	if (!val) {
 		setRouteStatus("", "");
+		updateRouteJumpsSummary(0, 0);
 	}
 	syncUrlParams(getFormInputs());
 }
@@ -623,7 +693,20 @@ presetBtns.forEach((btn) => {
 		btn.classList.add("active");
 
 		volumeInput.value = formatNumber(btn.getAttribute("data-val"));
-		if (lastRouteResult) {
+		const wasOverJf = safeRouteCheckbox?.disabled;
+		syncSafeRouteLock(volumeInput.value);
+		const isNowOverJf = safeRouteCheckbox?.disabled;
+		const origin = originInput?.value?.trim() || "";
+		const dest = destinationInput?.value?.trim() || "";
+		if (
+			!wasOverJf &&
+			isNowOverJf &&
+			origin &&
+			dest &&
+			typeof checkAndTriggerRouteLookup === "function"
+		) {
+			checkAndTriggerRouteLookup();
+		} else if (lastRouteResult) {
 			applyRouteSelection();
 		} else {
 			updateAll();
@@ -705,6 +788,7 @@ clearBtn.addEventListener("click", () => {
 	cancelPendingRouteLookup();
 	lastRouteResult = null;
 	updateTheraBadge(null);
+	updateRouteJumpsSummary(0, 0);
 	if (originInput) originInput.value = "";
 	if (destinationInput) destinationInput.value = "";
 	setRouteStatus("", "");
@@ -713,7 +797,12 @@ clearBtn.addEventListener("click", () => {
 	highsecJumpsInput.value = "";
 	dangerousJumpsInput.value = "";
 	volumeInput.value = "";
-	if (safeRouteCheckbox) safeRouteCheckbox.checked = true;
+	if (safeRouteCheckbox) {
+		safeRouteCheckbox.checked = false;
+		safeRouteCheckbox.disabled = false;
+		safeRouteCheckbox.parentElement?.classList.remove("locked");
+		safeRouteCheckbox.removeAttribute("title");
+	}
 	forceJfCheckbox.checked = false;
 	setManualJumpVisibility(false);
 	updateAll();
@@ -756,12 +845,9 @@ function initParamsFromUrl() {
 			volumeInput.value = clampInputVal(urlParams.get("v"), 0, 1_500_000, true);
 		}
 		if (safeRouteCheckbox) {
-			if (urlParams.get("sr") === "0") {
-				safeRouteCheckbox.checked = false;
-			} else if (urlParams.get("sr") === "1") {
-				safeRouteCheckbox.checked = true;
-			}
+			safeRouteCheckbox.checked = urlParams.get("sr") === "1";
 		}
+		syncSafeRouteLock(volumeInput?.value);
 		if (urlParams.get("jf") === "1") forceJfCheckbox.checked = true;
 
 		if (urlParams.has("from") && originInput) {
@@ -769,6 +855,10 @@ function initParamsFromUrl() {
 		}
 		if (urlParams.has("to") && destinationInput) {
 			destinationInput.value = urlParams.get("to").trim().slice(0, 50);
+		}
+
+		if (highsecJumpsInput.value || dangerousJumpsInput.value) {
+			updateRouteJumpsSummary(highsecJumpsInput.value, dangerousJumpsInput.value);
 		}
 
 		if (

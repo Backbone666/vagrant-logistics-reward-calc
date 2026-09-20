@@ -37,6 +37,7 @@ export const DEFAULT_CORS_PROXY_GATEWAYS = Object.freeze([
 export const DEFAULT_PROXY_TIMEOUT_MS = 4000;
 
 export const BLOCKADE_RUNNER_MAX_VOLUME = 12500;
+export const JUMP_FREIGHTER_MAX_VOLUME = 360000;
 
 /**
  * Select the appropriate route (Thera wormhole vs Direct stargate) based on volume.

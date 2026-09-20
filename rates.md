@@ -89,8 +89,9 @@ $$\text{Reward} = 150,000,000 + (\text{Cyno Jumps} \times 35,000,000) + \text{Co
 ## 3. Operational Modifiers & System Avoidance
 
 ### Route Safety Preferences
+- **Default Routing**: Automated route calculations default to **Shortest Route** (`pref=shortest` / `flag=shortest`) to minimise jump counts while enforcing corporate mandatory system avoidance.
 - **Safe Route (Prefer Highsec)**: Prioritises High-Sec travel (0.5+ security) and bypasses dangerous Low-Sec/Null-Sec stargates whenever a viable empire connection exists (`pref=safest` / `flag=secure`).
-- **Shortest Route**: Computes the fewest total jumps between origin and destination, enforcing only corporate mandatory system avoidance (`pref=shortest` / `flag=shortest`).
+- **Freighter Safety Lock**: Any cargo volume exceeding Jump Freighter limits ($> 360,000\text{ m}^3$) automatically locks the routing engine into **Safe Route (Prefer Highsec)** (`safe_route` checked and disabled). Standard Freighters lack jump drives and cannot safely navigate dangerous lowsec/nullsec stargates.
 
 ### Mandatory Avoidance Systems
 By corporate directive, all automated routing calculations enforce avoidance of critical choke points and hazard systems:
