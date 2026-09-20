@@ -1,21 +1,26 @@
-implementation_plan.md
-rates.md
-
-# Gemini & Agent configs
+# Local AI Coding Agents & Meta Artifacts (Strictly Local)
 .gemini/
+gemini.md
+GEMINI.md
 .agents/
+skills-lock.json
 .Jules/
+.superpowers/
 /docs/superpowers
 /plans
-/.superpowers
+advisor-plans/
+conductor/
+.fallow/
+.fallowrc.json
+.brooks-lint*
+llms.txt
+llms-full.txt
+learning_proposal.md
+release_please_installation_plan.md
 gha-creds-*.json
+*.agent
 
-# Node.js and dependencies
+# Node.js and Dependencies
 node_modules/
 pnpm-lock.yaml
 pnpm-workspace.yaml
-skills-lock.json
-
-# Local workspace directories
-conductor/
-.fallow/
