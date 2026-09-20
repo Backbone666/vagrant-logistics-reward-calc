@@ -1,6 +1,6 @@
 import { calcRewardDetails, parseNum } from "./calculator.js";
 import { fetchEveRoute, RouteNotFoundError, resolveAvoidList } from "./route-service.js";
-import { attachSystemAutocomplete } from "./system-autocomplete.js";
+import { attachSystemAutocomplete, isKnownSystem, loadSystemsData } from "./system-autocomplete.js";
 
 const collateralInput = document.getElementById("collateral");
 const highsecJumpsInput = document.getElementById("highsec_jumps");
@@ -436,6 +436,30 @@ function handleRouteInputChange() {
 	}, ROUTE_DEBOUNCE_MS);
 }
 
+export async function checkAndTriggerRouteLookup() {
+	const origin = originInput?.value?.trim() || "";
+	const destination = destinationInput?.value?.trim() || "";
+
+	if (!origin || !destination) {
+		setRouteStatus("", "");
+		return;
+	}
+
+	const systems = await loadSystemsData();
+	if (systems && systems.length > 0) {
+		if (!isKnownSystem(origin, systems) || !isKnownSystem(destination, systems)) {
+			return;
+		}
+
+		const matchOrigin = systems.find((s) => s.toLowerCase() === origin.toLowerCase());
+		const matchDest = systems.find((s) => s.toLowerCase() === destination.toLowerCase());
+		if (matchOrigin && originInput.value !== matchOrigin) originInput.value = matchOrigin;
+		if (matchDest && destinationInput.value !== matchDest) destinationInput.value = matchDest;
+	}
+
+	handleRouteInputChange();
+}
+
 async function copyTextToClipboard(text) {
 	if (navigator.clipboard?.writeText) {
 		try {
@@ -513,11 +537,31 @@ toChangeElements.forEach((el) => {
 	el.addEventListener("change", updateAll);
 });
 
+function handleSystemInputChange(e) {
+	const val = e.target.value.trim();
+	if (!val) {
+		setRouteStatus("", "");
+	}
+	syncUrlParams(getFormInputs());
+}
+
 if (originInput) {
-	originInput.addEventListener("input", handleRouteInputChange);
+	originInput.addEventListener("input", handleSystemInputChange);
+	originInput.addEventListener("change", () => checkAndTriggerRouteLookup());
+	originInput.addEventListener("keydown", (e) => {
+		if (e.key === "Enter") {
+			checkAndTriggerRouteLookup();
+		}
+	});
 }
 if (destinationInput) {
-	destinationInput.addEventListener("input", handleRouteInputChange);
+	destinationInput.addEventListener("input", handleSystemInputChange);
+	destinationInput.addEventListener("change", () => checkAndTriggerRouteLookup());
+	destinationInput.addEventListener("keydown", (e) => {
+		if (e.key === "Enter") {
+			checkAndTriggerRouteLookup();
+		}
+	});
 }
 
 presetBtns.forEach((btn) => {
@@ -653,12 +697,13 @@ function initParamsFromUrl() {
 		}
 
 		if (
-			(urlParams.has("from") || urlParams.has("to")) &&
+			urlParams.has("from") &&
+			urlParams.has("to") &&
 			!urlParams.has("hj") &&
 			!urlParams.has("dj") &&
-			typeof handleRouteInputChange === "function"
+			typeof checkAndTriggerRouteLookup === "function"
 		) {
-			handleRouteInputChange();
+			checkAndTriggerRouteLookup();
 		}
 	} catch (err) {
 		console.warn("Failed to parse URL query parameters defensively:", err);
@@ -667,10 +712,14 @@ function initParamsFromUrl() {
 
 // Attach autocomplete to origin and destination inputs
 if (originInput && originList) {
-	attachSystemAutocomplete(originInput, originList);
+	attachSystemAutocomplete(originInput, originList, {
+		onSelect: () => checkAndTriggerRouteLookup(),
+	});
 }
 if (destinationInput && destinationList) {
-	attachSystemAutocomplete(destinationInput, destinationList);
+	attachSystemAutocomplete(destinationInput, destinationList, {
+		onSelect: () => checkAndTriggerRouteLookup(),
+	});
 }
 
 // Load config dynamically on startup

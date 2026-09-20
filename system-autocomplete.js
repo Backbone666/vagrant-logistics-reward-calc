@@ -47,6 +47,22 @@ export function findMatchingSystems(query, systems, limit = 8) {
 	return results;
 }
 
+/**
+ * Check if a solar system name exists in the systems dataset (case-insensitive exact match).
+ *
+ * @param {string} name
+ * @param {string[]} systems
+ * @returns {boolean}
+ */
+export function isKnownSystem(name, systems) {
+	if (!name || typeof name !== "string" || !Array.isArray(systems)) {
+		return false;
+	}
+	const clean = name.trim().toLowerCase();
+	if (!clean) return false;
+	return systems.some((s) => typeof s === "string" && s.toLowerCase() === clean);
+}
+
 let cachedSystems = null;
 let systemsFetchPromise = null;
 
@@ -124,10 +140,14 @@ export function attachSystemAutocomplete(inputEl, listEl, options = {}) {
 		activeIndex = index;
 	}
 
+	let isSelecting = false;
+
 	function selectOption(systemName) {
+		isSelecting = true;
 		inputEl.value = systemName;
 		closeDropdown();
 		inputEl.dispatchEvent(new Event("input", { bubbles: true }));
+		inputEl.dispatchEvent(new Event("change", { bubbles: true }));
 		if (typeof options.onSelect === "function") {
 			options.onSelect(systemName);
 		}
@@ -171,6 +191,10 @@ export function attachSystemAutocomplete(inputEl, listEl, options = {}) {
 	}
 
 	inputEl.addEventListener("input", () => {
+		if (isSelecting) {
+			isSelecting = false;
+			return;
+		}
 		renderSuggestions();
 	});
 
