@@ -111,6 +111,13 @@ The brand aims for a "Gold Standard" of professional hauling services. It reflec
 - **Static Root Asset Guard**: Root files (`CNAME`, `robots.txt`, `sitemap.xml`, `llms.txt`) are protected invariants. Never delete, rename, or truncate them during refactoring or clean-up tasks.
 - **Automated Releases**: The repository uses `googleapis/release-please-action` on `gh-pages`. All commits must strictly adhere to Conventional Commits format (`feat:`, `fix:`, `perf:`, `chore:`, `ci:`).
 
+## Frontend & Routing Architecture Invariants
+
+- **Progressive Disclosure of Low-Level Inputs**: When high-level automation is active (e.g. Origin/Destination system routing), low-level jump counters (`.jumps-grid`) must remain hidden by default. Only reveal them when route lookup fails, when the user explicitly clicks the manual toggle, or when jump overrides are supplied in the URL (`?hj=&dj=`).
+- **Zero-Infrastructure Browser-Direct Fallback**: Public web routing must not single-point-of-fail on third-party proxies. Always provide a transparent fallback directly to CCP Games' official ESI API (with native CORS) so the calculator continues functioning in all browsers without backend infrastructure.
+- **Hot-Path Synchronous Iteration**: Never await inside route traversal loops. Pre-load reference datasets into an in-memory `Set` once, and execute O(1) synchronous membership tests during path iteration.
+- **URL State Completeness & Defensive Bounding**: All system text inputs must be constrained with `maxlength="50"` and JS slicing (`.trim().slice(0, 50)`). Any user input that affects the quote must be bidirectionally synchronized with URL search parameters (`?from=&to=`) and clipboard export templates.
+
 ---
 
 _Documented by Gemini - 2026-03-13_
