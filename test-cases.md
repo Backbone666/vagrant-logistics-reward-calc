@@ -1,88 +1,74 @@
-# Rate Calculator Test Cases
+# Vagrant Logistics — Authoritative Test Case Reference
 
-## Test Scenarios (Based on New Rates)
+Authoritative documentation of core test scenarios implemented in the automated test suite (`test/calculator.test.js`, `test/route-service.test.js`, `test/system-autocomplete.test.js`).
 
-### Highsec Tests
+---
 
-**Test 1: BR Highsec (Small Package)**
+## 1. High-Sec Test Scenarios
 
-- Volume: 10,000 m³
-- Jumps: 10
-- Collateral: 500M ISK
-- Expected: 4.5M minimum + (10 \* 1.5M) \* 1.0 (brackets) = **15M ISK**
+### Test 1: BR / DST High-Sec Standard (Small Volume, Baseline Collateral)
+- **Inputs**: Volume `10,000 m³`, High-Sec Jumps `10`, Dangerous Jumps `0`, Collateral `500,000,000 ISK`
+- **Calculation**: $\max(4,500,000,\, 10 \times 1,500,000 \times 1.0) = 15,000,000\text{ ISK}$
+- **Expected Reward**: **15,000,000 ISK**
 
-**Test 2: DST Highsec (Medium Package)**
+### Test 2: BR / DST High-Sec with Collateral Multiplier (1.5B–2.0B Tier)
+- **Inputs**: Volume `50,000 m³`, High-Sec Jumps `10`, Dangerous Jumps `0`, Collateral `2,000,000,000 ISK`
+- **Calculation**: $\max(4,500,000,\, 10 \times 1,500,000 \times 1.8) = 27,000,000\text{ ISK}$
+- **Expected Reward**: **27,000,000 ISK**
 
-- Volume: 50,000 m³
-- Jumps: 10
-- Collateral: 500M ISK
-- Expected: 15M + (10 \* 1.5M) \* 1.0 (brackets) = **15M ISK**
+### Test 3: Freighter High-Sec Standard (Bulk Volume)
+- **Inputs**: Volume `500,000 m³`, High-Sec Jumps `10`, Dangerous Jumps `0`, Collateral `1,000,000,000 ISK`
+- **Calculation**: $\max(10,000,000,\, 10 \times 1,750,000 \times 1.0) = 17,500,000\text{ ISK}$
+- **Expected Reward**: **17,500,000 ISK**
 
-**Test 3: Freighter Highsec (Large Package)**
+---
 
-- Volume: 500,000 m³
-- Jumps: 10
-- Collateral: 1B ISK
-- Expected: 17.5M + (10 \* 1.75M) \* 1.0 (brackets) = **17.5M ISK**
+## 2. Dangerous Space Test Scenarios
 
-**Test 4: DST Highsec with Collateral (1-3B tier)**
+### Test 4: Blockade Runner Low-Sec (Covert Route)
+- **Inputs**: Volume `10,000 m³`, High-Sec Jumps `0`, Dangerous Jumps `10`, Collateral `500,000,000 ISK`
+- **Calculation**: $10,000,000\text{ (Base)} + (10 \times 2,000,000) + 0\text{ (Collateral } \le 1\text{B)} = 30,000,000\text{ ISK}$
+- **Expected Reward**: **30,000,000 ISK**
 
-- Volume: 50,000 m³
-- Jumps: 10
-- Collateral: 2B ISK
-- Expected: 15M + (10 \* 1.5M) \* 1.8 (brackets) = **27M ISK**
+### Test 5: Scouted DST Low-Sec (Mid-Volume Dangerous Route)
+- **Inputs**: Volume `50,000 m³`, High-Sec Jumps `0`, Dangerous Jumps `10`, Collateral `2,000,000,000 ISK`
+- **Calculation**: $20,000,000\text{ (Base)} + (10 \times 5,000,000) + (2,000,000,000 \times 0.003) = 20\text{M} + 50\text{M} + 6\text{M} = 76,000,000\text{ ISK}$
+- **Expected Reward**: **76,000,000 ISK**
 
-**Test 5: DST Highsec with Collateral (3-5B tier)**
+### Test 6: Jump Freighter Standard (Cyno Navigation)
+- **Inputs**: Volume `200,000 m³`, High-Sec Jumps `0`, Dangerous Jumps `10`, Collateral `2,000,000,000 ISK`
+- **Calculation**: $150,000,000\text{ (Base)} + (10 \times 35,000,000) + (2,000,000,000 \times 0.003) = 150\text{M} + 350\text{M} + 6\text{M} = 506,000,000\text{ ISK}$
+- **Expected Reward**: **506,000,000 ISK**
 
-- Volume: 50,000 m³
-- Jumps: 10
-- Collateral: 4B ISK
-- Expected: 15M + (10 \* 1.5M) \* 4.0 (brackets) = **60M ISK**
+---
 
-### Low/Null Tests
+## 3. Thresholds & Redirect Scenarios
 
-**Test 6: BR Lowsec**
+### Test 7: Collateral Cap Redirects
+- **High-Sec Subcapital** $> 10\text{B ISK}$: Returns `"Risako Hirano"` for executive quote.
+- **High-Sec Freighter** $> 5\text{B ISK}$: Returns `"Risako Hirano"`.
+- **Dangerous Blockade Runner** $> 5\text{B ISK}$: Returns `"Risako Hirano"`.
+- **Dangerous Scouted DST** $> 3\text{B ISK}$: Returns `"Risako Hirano"`.
+- **Jump Freighter** $> 50\text{B ISK}$: Returns `"Executive Review"`.
 
-- Volume: 10,000 m³
-- Jumps: 10
-- Collateral: 500M ISK
-- Dangerous: ✓
-- Expected: 10M + (10 \* 2M) = **30M ISK**
+### Test 8: Rush Delivery Surcharges
+- **Subcapital Rush Service** (`rush === true`): $+45,000,000\text{ ISK}$ flat surcharge added to computed reward.
+- **Jump Freighter Rush Service** (`rush === true`): $+150,000,000\text{ ISK}$ flat surcharge added to computed reward.
 
-**Test 7: DST Lowsec (Our Competitive Advantage)**
+---
 
-- Volume: 50,000 m³
-- Jumps: 10
-- Collateral: 2B ISK
-- Dangerous: ✓
-- Expected: 20M + (10 _ 5M) + (2B _ 0.3%) = 20M + 50M + 6M = **76M ISK**
-- Compare to PushX: Would force JF at ~1.2B ISK
+## 4. Test Execution Guide
 
-**Test 8: JF (CORRECTED PRICING)**
+All scenarios above are automated in Node.js test files:
+- `test/calculator.test.js`: Comprehensive pricing math, bracket verification, edge-case coverage.
+- `test/route-service.test.js`: Route serialization, multi-tier CORS gateway failover, CCP ESI direct routing, jump classification.
+- `test/system-autocomplete.test.js`: Combobox accessibility, dropdown dismissals, in-memory prefix search.
 
-- Volume: 200,000 m³
-- Jumps: 10
-- Collateral: 2B ISK
-- Dangerous: ✓
-- Expected: 150M + (10 _ 35M) + (2B _ 0.3%) = 150M + 350M + 6M = **506M ISK**
-- OLD PRICE: 75M + (10 \* 60M) = 675M ISK ❌
-- Compare to PushX: 200M + (10 \* 100M) = 1.2B ISK
-- Compare to Black Frog: ~300-400M ISK (we're competitive)
-
-### Collateral Cap Test
-
-**Test 9: Over 5B Collateral**
-
-- Volume: 50,000 m³
-- Jumps: 10
-- Collateral: 6B ISK
-- Expected: **"Risako Hirano"**
-
-## Competitive Comparison
-
-| Scenario      | Vagrant (New) | PushX     | Advantage            |
-| :------------ | :------------ | :-------- | :------------------- |
-| BR HS 10J     | 11M           | 16.5M     | -33% cheaper         |
-| DST HS 10J    | 20M           | 16.5M     | +21% (more capacity) |
-| DST LS 10J 2B | 76M           | 1.2B (JF) | -94% cheaper         |
-| JF 10J 2B     | 506M          | 1.2B      | -58% cheaper         |
+### Execution Command
+```bash
+npm test
+```
+Or for the complete linting and testing quality gate:
+```bash
+npm run check
+```
