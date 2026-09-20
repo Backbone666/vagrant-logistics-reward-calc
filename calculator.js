@@ -56,8 +56,6 @@ function calcStargateRouteReward({
 	parsedHighsecJumps,
 	parsedDangerousJumps,
 	parsedCollateral,
-	rush,
-	opsConfig,
 	serviceClass,
 	maxCollateral,
 }) {
@@ -77,12 +75,7 @@ function calcStargateRouteReward({
 		collateralFee = calcCollateralSurcharge(parsedCollateral);
 	}
 
-	let total = baseRate + distanceFee + collateralFee;
-	let rushFee = 0;
-	if (rush) {
-		rushFee = opsConfig.rush_surcharge_subcapital || 0;
-		total += rushFee;
-	}
+	const total = baseRate + distanceFee + collateralFee;
 
 	return {
 		isRedirect,
@@ -91,7 +84,6 @@ function calcStargateRouteReward({
 		baseFee: baseRate,
 		distanceFee,
 		collateralFee,
-		rushFee,
 		multiplier: 1.0,
 		surcharge: 0,
 		serviceClass,
@@ -103,14 +95,7 @@ function calcStargateRouteReward({
 	};
 }
 
-function calcHighsecReward({
-	service,
-	opsConfig,
-	parsedHighsecJumps,
-	parsedCollateral,
-	rush,
-	serviceClass,
-}) {
+function calcHighsecReward({ service, parsedHighsecJumps, parsedCollateral, serviceClass }) {
 	const baseJumpRate = service.base_rate_per_jump || 0;
 	const minFee = service.minimum_contract_fee || 0;
 
@@ -134,12 +119,7 @@ function calcHighsecReward({
 	}
 
 	const collateralFee = baseFee * (multiplier - 1) + surcharge;
-	let total = baseFee + collateralFee;
-	let rushFee = 0;
-	if (rush) {
-		rushFee = opsConfig.rush_surcharge_subcapital || 0;
-		total += rushFee;
-	}
+	const total = baseFee + collateralFee;
 
 	return {
 		isRedirect,
@@ -148,7 +128,6 @@ function calcHighsecReward({
 		baseFee,
 		distanceFee: 0,
 		collateralFee,
-		rushFee,
 		multiplier,
 		surcharge,
 		serviceClass,
@@ -162,10 +141,8 @@ function calcHighsecReward({
 
 function calcJumpFreighterReward({
 	dangerousConfig,
-	opsConfig,
 	parsedDangerousJumps,
 	parsedCollateral,
-	rush,
 	serviceClass,
 }) {
 	const service = dangerousConfig.jump_freighter_standard || {};
@@ -185,12 +162,7 @@ function calcJumpFreighterReward({
 		collateralFee = calcCollateralSurcharge(parsedCollateral);
 	}
 
-	let total = baseFee + distanceFee + collateralFee;
-	let rushFee = 0;
-	if (rush) {
-		rushFee = opsConfig.rush_surcharge_jf || 0;
-		total += rushFee;
-	}
+	const total = baseFee + distanceFee + collateralFee;
 
 	return {
 		isRedirect,
@@ -199,7 +171,6 @@ function calcJumpFreighterReward({
 		baseFee,
 		distanceFee,
 		collateralFee,
-		rushFee,
 		multiplier: 1.0,
 		surcharge: 0,
 		serviceClass,
@@ -226,7 +197,6 @@ export function calcRewardDetails(options, configOpt) {
 		collateral,
 		highsecJumps,
 		dangerousJumps,
-		rush,
 		forceJF,
 		config: inlineConfig,
 	} = options || {};
@@ -271,15 +241,12 @@ export function calcRewardDetails(options, configOpt) {
 	// Extract config groups
 	const hsConfig = config.highsec_services || {};
 	const dangerousConfig = config.dangerous_space_services || {};
-	const opsConfig = config.operational_modifiers || {};
 
 	if (serviceClass === "highsec_services.blockade_runner_dst") {
 		return calcHighsecReward({
 			service: hsConfig.blockade_runner_dst || {},
-			opsConfig,
 			parsedHighsecJumps,
 			parsedCollateral,
-			rush,
 			serviceClass,
 		});
 	}
@@ -287,10 +254,8 @@ export function calcRewardDetails(options, configOpt) {
 	if (serviceClass === "highsec_services.freighter_standard") {
 		return calcHighsecReward({
 			service: hsConfig.freighter_standard || {},
-			opsConfig,
 			parsedHighsecJumps,
 			parsedCollateral,
-			rush,
 			serviceClass,
 		});
 	}
@@ -302,8 +267,6 @@ export function calcRewardDetails(options, configOpt) {
 			parsedHighsecJumps,
 			parsedDangerousJumps,
 			parsedCollateral,
-			rush,
-			opsConfig,
 			serviceClass,
 			maxCollateral: 5_000_000_000,
 		});
@@ -316,8 +279,6 @@ export function calcRewardDetails(options, configOpt) {
 			parsedHighsecJumps,
 			parsedDangerousJumps,
 			parsedCollateral,
-			rush,
-			opsConfig,
 			serviceClass,
 			maxCollateral: 3_000_000_000,
 		});
@@ -326,10 +287,8 @@ export function calcRewardDetails(options, configOpt) {
 	if (serviceClass === "dangerous_space_services.jump_freighter_standard") {
 		return calcJumpFreighterReward({
 			dangerousConfig,
-			opsConfig,
 			parsedDangerousJumps,
 			parsedCollateral,
-			rush,
 			serviceClass,
 		});
 	}

@@ -51,9 +51,9 @@ Authoritative documentation of core test scenarios implemented in the automated 
 - **Dangerous Scouted DST** $> 3\text{B ISK}$: Returns `"Risako Hirano"`.
 - **Jump Freighter** $> 50\text{B ISK}$: Returns `"Executive Review"`.
 
-### Test 8: Rush Delivery Surcharges
-- **Subcapital Rush Service** (`rush === true`): $+45,000,000\text{ ISK}$ flat surcharge added to computed reward.
-- **Jump Freighter Rush Service** (`rush === true`): $+150,000,000\text{ ISK}$ flat surcharge added to computed reward.
+### Test 8: Route Safety Preferences
+- **Safe Route (Prefer Highsec)** (`safeRoute === true`): Routes through empire High-Sec corridors (`pref=safest` in EVE TT, `flag=secure` in CCP ESI fallback), minimising exposure to dangerous stargates.
+- **Shortest Route** (`safeRoute === false`): Computes direct shortest path (`pref=shortest` in EVE TT, `flag=shortest` in CCP ESI fallback) respecting corporate mandatory system avoidance.
 
 ---
 

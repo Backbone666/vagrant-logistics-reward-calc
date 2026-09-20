@@ -8,7 +8,7 @@ const dangerousJumpsInput = document.getElementById("dangerous_jumps");
 const jumpsGrid = document.getElementById("jumps_grid");
 const toggleManualJumpsBtn = document.getElementById("toggle_manual_jumps");
 const volumeInput = document.getElementById("volume");
-const rushCheckbox = document.getElementById("rush");
+const safeRouteCheckbox = document.getElementById("safe_route");
 const forceJfCheckbox = document.getElementById("force_jf");
 const originInput = document.getElementById("origin_system");
 const destinationInput = document.getElementById("destination_system");
@@ -28,8 +28,6 @@ const bdDistanceLabel = document.getElementById("bd_distance_label");
 const bdDistance = document.getElementById("bd_distance");
 const bdCollateral = document.getElementById("bd_collateral");
 const bdSecurity = document.getElementById("bd_security");
-const bdRushRow = document.getElementById("bd_rush_row");
-const bdRush = document.getElementById("bd_rush");
 const configWarning = document.getElementById("config-warning");
 const calcCard = document.querySelector(".calculator-card");
 const presetBtns = document.querySelectorAll(".preset-btn");
@@ -91,10 +89,7 @@ const FALLBACK_CONFIG = {
 			max_collateral_isk: 50000000000,
 		},
 	},
-	operational_modifiers: {
-		rush_surcharge_subcapital: 45000000,
-		rush_surcharge_jf: 150000000,
-	},
+	operational_modifiers: {},
 };
 
 // Fetch dynamic configuration
@@ -158,7 +153,7 @@ function syncUrlParams(options) {
 		hj: options.highsecJumps.replace(/,/g, ""),
 		dj: options.dangerousJumps.replace(/,/g, ""),
 		v: options.volume.replace(/,/g, ""),
-		r: options.rush ? "1" : "",
+		sr: options.safeRoute === false ? "0" : "",
 		jf: options.forceJF ? "1" : "",
 		from: options.origin || "",
 		to: options.destination || "",
@@ -195,7 +190,7 @@ function getFormInputs() {
 		collateral: collateralInput.value,
 		highsecJumps: highsecJumpsInput.value,
 		dangerousJumps: dangerousJumpsInput.value,
-		rush: rushCheckbox.checked,
+		safeRoute: safeRouteCheckbox ? safeRouteCheckbox.checked : true,
 		forceJF: forceJfCheckbox.checked,
 		origin: originInput?.value?.trim().slice(0, 50) || "",
 		destination: destinationInput?.value?.trim().slice(0, 50) || "",
@@ -247,13 +242,6 @@ function renderBreakdown(details) {
 		bdDistance.textContent = `${formatNumber(details.distanceFee)} ISK`;
 		bdCollateral.textContent = `${formatNumber(details.collateralFee)} ISK`;
 		bdSecurity.textContent = `${details.multiplier}x`;
-
-		if (details.rushFee > 0) {
-			bdRushRow.style.display = "flex";
-			bdRush.textContent = `${formatNumber(details.rushFee)} ISK`;
-		} else {
-			bdRushRow.style.display = "none";
-		}
 
 		copyBtn.disabled = false;
 		copyQuoteBtn.disabled = false;
@@ -405,10 +393,12 @@ function handleRouteInputChange() {
 
 		try {
 			const avoid = resolveAvoidList(config?.mandatory_avoid_systems);
-			const routing = config?.routing;
+			const isSafe = safeRouteCheckbox ? safeRouteCheckbox.checked : true;
 			const result = await fetchEveRoute(origin, destination, {
 				signal: controller.signal,
 				avoid,
+				safeRoute: isSafe,
+				pref: isSafe ? "safest" : "shortest",
 				corsProxyGateway: routing?.cors_proxy_gateway,
 				corsProxyGateways: routing?.cors_proxy_gateways,
 				proxyTimeoutMs: routing?.proxy_timeout_ms,
@@ -630,7 +620,7 @@ copyQuoteBtn.addEventListener("click", async () => {
 		`Volume: ${volumeInput.value || 0} m³`,
 		`Collateral: ${collateralInput.value || 0} ISK`,
 		routeLabel,
-		`Rush Service: ${rushCheckbox.checked ? "Yes" : "No"}`,
+		`Routing: ${safeRouteCheckbox?.checked ? "Safe Route (Prefer Highsec)" : "Shortest Route"}`,
 		`Estimated Reward: ${detailsText}`,
 		`Link: ${window.location.href}`,
 	].join("\n");
@@ -638,6 +628,17 @@ copyQuoteBtn.addEventListener("click", async () => {
 	const success = await copyTextToClipboard(template);
 	triggerCopyFeedback(copyQuoteBtn, success, "Quote Copied!");
 });
+
+if (safeRouteCheckbox) {
+	safeRouteCheckbox.addEventListener("change", () => {
+		const origin = originInput?.value?.trim() || "";
+		const destination = destinationInput?.value?.trim() || "";
+		if (origin && destination && typeof checkAndTriggerRouteLookup === "function") {
+			checkAndTriggerRouteLookup();
+		}
+		updateAll();
+	});
+}
 
 clearBtn.addEventListener("click", () => {
 	cancelPendingRouteLookup();
@@ -649,7 +650,7 @@ clearBtn.addEventListener("click", () => {
 	highsecJumpsInput.value = "";
 	dangerousJumpsInput.value = "";
 	volumeInput.value = "";
-	rushCheckbox.checked = false;
+	if (safeRouteCheckbox) safeRouteCheckbox.checked = true;
 	forceJfCheckbox.checked = false;
 	setManualJumpVisibility(false);
 	updateAll();
@@ -691,7 +692,13 @@ function initParamsFromUrl() {
 		if (urlParams.has("v")) {
 			volumeInput.value = clampInputVal(urlParams.get("v"), 0, 1_500_000, true);
 		}
-		if (urlParams.get("r") === "1") rushCheckbox.checked = true;
+		if (safeRouteCheckbox) {
+			if (urlParams.get("sr") === "0") {
+				safeRouteCheckbox.checked = false;
+			} else if (urlParams.get("sr") === "1") {
+				safeRouteCheckbox.checked = true;
+			}
+		}
 		if (urlParams.get("jf") === "1") forceJfCheckbox.checked = true;
 
 		if (urlParams.has("from") && originInput) {

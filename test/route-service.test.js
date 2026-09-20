@@ -845,3 +845,94 @@ test("fetchEsiRoute: filters destination from avoidIds so ESI does not 404 on av
 	const avoidParam = parsedUrl.searchParams.get("avoid") || "";
 	assert.equal(avoidParam.includes("30005196"), false);
 });
+
+test("buildRouteUrl: supports safeRoute boolean option (sets pref=safest)", () => {
+	const safeUrl = buildRouteUrl("Jita", "Amarr", { safeRoute: true });
+	const parsedSafe = new URL(safeUrl);
+	assert.equal(parsedSafe.searchParams.get("pref"), "safest");
+
+	const shortestUrl = buildRouteUrl("Jita", "Amarr", { safeRoute: false });
+	const parsedShortest = new URL(shortestUrl);
+	assert.equal(parsedShortest.searchParams.get("pref"), "shortest");
+});
+
+test("fetchEsiRoute: uses flag=secure when safeRoute is true or pref=safest", async () => {
+	let capturedUrls = [];
+	const mockFetch = async (url) => {
+		capturedUrls.push(url);
+		return {
+			ok: true,
+			status: 200,
+			json: async () => [30000142, 30002187],
+		};
+	};
+
+	const highSecSet = new Set([30000142, 30002187]);
+	await fetchEsiRoute("Jita", "Amarr", {
+		fetch: mockFetch,
+		safeRoute: true,
+		highSecSet,
+	});
+	assert.ok(capturedUrls[0].includes("flag=secure"));
+
+	capturedUrls = [];
+	await fetchEsiRoute("Jita", "Amarr", {
+		fetch: mockFetch,
+		pref: "safest",
+		highSecSet,
+	});
+	assert.ok(capturedUrls[0].includes("flag=secure"));
+});
+
+test("fetchEsiRoute: uses flag=shortest when safeRoute is false and pref=shortest", async () => {
+	let capturedUrl = "";
+	const mockFetch = async (url) => {
+		capturedUrl = url;
+		return {
+			ok: true,
+			status: 200,
+			json: async () => [30000142, 30002187],
+		};
+	};
+
+	const highSecSet = new Set([30000142, 30002187]);
+	await fetchEsiRoute("Jita", "Amarr", {
+		fetch: mockFetch,
+		safeRoute: false,
+		pref: "shortest",
+		highSecSet,
+	});
+	assert.ok(capturedUrl.includes("flag=shortest"));
+});
+
+test("fetchEveRoute: propagates safeRoute option to URL building and ESI fallback", async () => {
+	let ttUrl = "";
+	let esiUrl = "";
+	const mockFetch = async (url) => {
+		if (url.includes("eve-route.vercel.app")) {
+			ttUrl = url;
+			throw new TypeError("Simulated TT network failure");
+		}
+		if (url.includes("esi.evetech.net")) {
+			esiUrl = url;
+			return {
+				ok: true,
+				status: 200,
+				json: async () => [30000142, 30002187],
+			};
+		}
+		throw new Error(`Unexpected url: ${url}`);
+	};
+
+	const highSecSet = new Set([30000142, 30002187]);
+	const result = await fetchEveRoute("Jita", "Amarr", {
+		safeRoute: true,
+		fetch: mockFetch,
+		corsProxyGateways: [],
+		highSecSet,
+	});
+
+	assert.ok(ttUrl.includes("pref=safest"));
+	assert.ok(esiUrl.includes("flag=secure"));
+	assert.equal(result.summary.pref, "safest");
+});

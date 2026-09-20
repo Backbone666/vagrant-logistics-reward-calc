@@ -88,10 +88,9 @@ $$\text{Reward} = 150,000,000 + (\text{Cyno Jumps} \times 35,000,000) + \text{Co
 
 ## 3. Operational Modifiers & System Avoidance
 
-### Rush Delivery Surcharges
-When "Rush Delivery" is checked (contract required within 24 hours):
-- **Subcapital Service** (High-Sec BR/DST, High-Sec Freighter, Dangerous BR/DST): $+45,000,000\text{ ISK}$ flat surcharge.
-- **Jump Freighter Service**: $+150,000,000\text{ ISK}$ flat surcharge.
+### Route Safety Preferences
+- **Safe Route (Prefer Highsec)**: Prioritises High-Sec travel (0.5+ security) and bypasses dangerous Low-Sec/Null-Sec stargates whenever a viable empire connection exists (`pref=safest` / `flag=secure`).
+- **Shortest Route**: Computes the fewest total jumps between origin and destination, enforcing only corporate mandatory system avoidance (`pref=shortest` / `flag=shortest`).
 
 ### Mandatory Avoidance Systems
 By corporate directive, all automated routing calculations enforce avoidance of critical choke points and hazard systems:

@@ -124,7 +124,7 @@ export function classifyJumps(routeSystems) {
 export function buildRouteUrl(origin, destination, options = {}) {
 	const baseUrl = options.baseUrl || EVE_ROUTE_BASE_URL;
 	const avoid = options.avoid ?? MANDATORY_AVOID_LIST;
-	const pref = options.pref || "shortest";
+	const pref = options.pref || (options.safeRoute ? "safest" : "shortest");
 
 	const url = new URL("/api/route", baseUrl);
 	url.searchParams.set("start", origin.trim());
@@ -324,7 +324,9 @@ export async function fetchEsiRoute(origin, destination, options = {}) {
 			.filter((id) => Boolean(id) && id !== originId && id !== destId);
 	}
 
-	let esiUrl = `https://esi.evetech.net/latest/route/${originId}/${destId}/?flag=shortest`;
+	const flag =
+		options.flag || (options.safeRoute || options.pref === "safest" ? "secure" : "shortest");
+	let esiUrl = `https://esi.evetech.net/latest/route/${originId}/${destId}/?flag=${flag}`;
 	if (avoidIds.length > 0) {
 		esiUrl += `&avoid=${avoidIds.join(",")}`;
 	}
@@ -376,7 +378,7 @@ export async function fetchEsiRoute(origin, destination, options = {}) {
 		summary: {
 			start: trimmedOrigin,
 			end: trimmedDestination,
-			pref: "shortest",
+			pref: options.pref || (options.safeRoute ? "safest" : "shortest"),
 			directJumps: totalJumps,
 		},
 		routes: { direct: systemsArray },

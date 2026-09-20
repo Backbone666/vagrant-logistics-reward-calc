@@ -57,10 +57,7 @@
 			"max_collateral_isk": 50000000000
 		}
 	},
-	"operational_modifiers": {
-		"rush_surcharge_subcapital": 45000000,
-		"rush_surcharge_jf": 150000000
-	},
+	"operational_modifiers": {},
 	"mandatory_avoid_systems": [
 		"Zarzakh",
 		"Ahbazon",

@@ -98,19 +98,18 @@ test("Test 8: Highsec Sub-Capital > 10B Collateral Redirect", () => {
 	assert.equal(result, "Risako Hirano");
 });
 
-test("Test 9: Jump Freighter Rush Service", () => {
+test("Test 9: Jump Freighter Standard Calculation", () => {
 	const result = calcReward(
 		{
 			volume: "200,000",
 			highsecJumps: "0",
 			dangerousJumps: "10",
 			collateral: "2,000,000,000",
-			rush: true,
 		},
 		config,
 	);
-	// 150M Base + 350M Jump + 6M Collateral + 150M Rush Surcharge = 656M
-	assert.equal(result, 656_000_000);
+	// 150M Base + 350M Jump + 6M Collateral = 506M
+	assert.equal(result, 506_000_000);
 });
 
 test("Test 10: Highsec Freighter > 5B Collateral Redirect", () => {
@@ -194,39 +193,33 @@ test("Test 13: Unknown serviceClass", () => {
 	// Only way to hit line 361 is if classifyService somehow returned something else.
 	// We can't actually do this without modifying calculator.js, but let's try with forceJF = false which is already done.
 });
-test("Test 14: Empty config fallback branches with rush", () => {
+test("Test 14: Empty config fallback branches", () => {
 	const emptyConfig = {
 		highsec_services: {},
 		dangerous_space_services: {},
 		operational_modifiers: {},
 	};
 
-	// Trigger hsBrDst fallback with rush
-	const hsBrDst = calcRewardDetails(
-		{ volume: 100, highsecJumps: 1, collateral: 0, rush: true },
-		emptyConfig,
-	);
+	// Trigger hsBrDst fallback
+	const hsBrDst = calcRewardDetails({ volume: 100, highsecJumps: 1, collateral: 0 }, emptyConfig);
 	assert.equal(hsBrDst.baseFee, 0);
 
-	// Trigger freighter fallback with rush
+	// Trigger freighter fallback
 	const hsFreighter = calcRewardDetails(
-		{ volume: 500000, highsecJumps: 1, collateral: 0, rush: true },
+		{ volume: 500000, highsecJumps: 1, collateral: 0 },
 		emptyConfig,
 	);
 	assert.equal(hsFreighter.baseFee, 0);
 
-	// Trigger stargate fallback with rush
+	// Trigger stargate fallback
 	const lsStargateBr = calcRewardDetails(
-		{ volume: 100, dangerousJumps: 1, collateral: 0, rush: true },
+		{ volume: 100, dangerousJumps: 1, collateral: 0 },
 		emptyConfig,
 	);
 	assert.equal(lsStargateBr.baseFee, 0);
 
-	// Trigger JF fallback with rush
-	const jf = calcRewardDetails(
-		{ volume: 200000, dangerousJumps: 1, collateral: 0, rush: true },
-		emptyConfig,
-	);
+	// Trigger JF fallback
+	const jf = calcRewardDetails({ volume: 200000, dangerousJumps: 1, collateral: 0 }, emptyConfig);
 	assert.equal(jf.baseFee, 0);
 });
 test("Test 15: Various edge cases for 100% coverage", () => {
@@ -488,7 +481,7 @@ test("Sub-unit: Input Validation and Redirect Paths", () => {
 	assert.equal(jfCollateral, "Executive Review");
 });
 
-test("Sub-unit: Pricing Modifiers (Minimum Fees & Rush)", () => {
+test("Sub-unit: Pricing Modifiers (Minimum Fees & Surcharges)", () => {
 	// BR/DST Highsec Minimum Fee
 	const hsBrDstMin = calcReward({ volume: 10000, highsecJumps: 1, collateral: 0 }, config);
 	assert.equal(hsBrDstMin, 4500000);
@@ -497,39 +490,21 @@ test("Sub-unit: Pricing Modifiers (Minimum Fees & Rush)", () => {
 	const hsFreighterMin = calcReward({ volume: 500000, highsecJumps: 1, collateral: 0 }, config);
 	assert.equal(hsFreighterMin, 10000000);
 
-	// Rush Surcharges
-	const hsBrDstRush = calcReward(
-		{ volume: 10000, highsecJumps: 1, collateral: 0, rush: true },
-		config,
-	);
-	assert.equal(hsBrDstRush, 4500000 + 45000000);
-
-	const hsFreighterRush = calcReward(
-		{ volume: 500000, highsecJumps: 1, collateral: 0, rush: true },
-		config,
-	);
-	assert.equal(hsFreighterRush, 10000000 + 45000000);
-
-	const lsStargateNonRush = calcReward({ volume: 10000, dangerousJumps: 1, collateral: 0 }, config);
-	const lsStargateRush = calcReward(
-		{ volume: 10000, dangerousJumps: 1, collateral: 0, rush: true },
-		config,
-	);
-	assert.equal(lsStargateRush, lsStargateNonRush + 45000000);
+	const lsStargateBase = calcReward({ volume: 10000, dangerousJumps: 1, collateral: 0 }, config);
 
 	// High-value Collateral (>3B) Surcharge for Stargate/JF Routes
 	const lsBrCollateralSurcharge = calcReward(
 		{ volume: 10000, dangerousJumps: 1, collateral: "4,000,000,000" },
 		config,
 	);
-	assert.equal(lsBrCollateralSurcharge, lsStargateNonRush + 20000000);
+	assert.equal(lsBrCollateralSurcharge, lsStargateBase + 20000000);
 
-	const jfNonRush = calcReward({ volume: 200000, dangerousJumps: 1, collateral: 0 }, config);
+	const jfBase = calcReward({ volume: 200000, dangerousJumps: 1, collateral: 0 }, config);
 	const jfCollateralSurcharge = calcReward(
 		{ volume: 200000, dangerousJumps: 1, collateral: "4,000,000,000" },
 		config,
 	);
-	assert.equal(jfCollateralSurcharge, jfNonRush + 20000000);
+	assert.equal(jfCollateralSurcharge, jfBase + 20000000);
 });
 
 test("Test 10: Negative jumps return error", () => {
