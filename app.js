@@ -405,9 +405,14 @@ function handleRouteInputChange() {
 
 		try {
 			const avoid = resolveAvoidList(config?.mandatory_avoid_systems);
+			const routing = config?.routing;
 			const result = await fetchEveRoute(origin, destination, {
 				signal: controller.signal,
 				avoid,
+				corsProxyGateway: routing?.cors_proxy_gateway,
+				corsProxyGateways: routing?.cors_proxy_gateways,
+				proxyTimeoutMs: routing?.proxy_timeout_ms,
+				esiFallback: routing?.esi_fallback_enabled,
 			});
 
 			if (controller.signal.aborted) return;

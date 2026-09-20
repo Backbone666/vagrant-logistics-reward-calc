@@ -29,6 +29,40 @@ export function resolveAvoidList(configAvoidList) {
 
 export const EVE_ROUTE_BASE_URL = "https://eve-route.vercel.app";
 export const DEFAULT_CORS_PROXY_GATEWAY = "https://api.allorigins.win/raw?url=";
+export const DEFAULT_CORS_PROXY_GATEWAYS = Object.freeze([
+	"https://api.allorigins.win/raw?url=",
+	"https://corsproxy.io/?url=",
+	"https://api.codetabs.com/v1/proxy/?quest=",
+]);
+export const DEFAULT_PROXY_TIMEOUT_MS = 2500;
+
+export const TRADE_HUB_IDS = Object.freeze({
+	jita: 30000142,
+	amarr: 30002187,
+	dodixie: 30002659,
+	rens: 30002510,
+	hek: 30002057,
+	perimeter: 30000144,
+});
+
+export const AVOID_SYSTEM_IDS = Object.freeze({
+	zarzakh: 30100000,
+	ahbazon: 30005196,
+	rancer: 30002718,
+	hagilur: 30002050,
+	siseide: 30002539,
+	tama: 30002813,
+	aunenen: 30001398,
+});
+
+export const SYSTEM_ID_CACHE = new Map();
+
+for (const [name, id] of Object.entries(TRADE_HUB_IDS)) {
+	SYSTEM_ID_CACHE.set(name.toLowerCase(), id);
+}
+for (const [name, id] of Object.entries(AVOID_SYSTEM_IDS)) {
+	SYSTEM_ID_CACHE.set(name.toLowerCase(), id);
+}
 
 export class RouteNotFoundError extends Error {
 	constructor(message = "No route found avoiding specified systems") {
@@ -144,9 +178,203 @@ function combineSignals(signals) {
 	return { signal: controller.signal, cleanup };
 }
 
+let cachedHighSecSet = null;
+let highSecFetchPromise = null;
+
+/**
+ * Load high-sec system ID set for O(1) jump classification.
+ *
+ * @param {string} [dataUrl="data/highsec-systems.json"]
+ * @param {object} [options]
+ * @returns {Promise<Set<number>>}
+ */
+export async function loadHighSecSystems(dataUrl = "data/highsec-systems.json", options = {}) {
+	if (cachedHighSecSet) return cachedHighSecSet;
+	if (highSecFetchPromise) return highSecFetchPromise;
+
+	highSecFetchPromise = (async () => {
+		try {
+			if (
+				typeof process !== "undefined" &&
+				process?.versions?.node &&
+				typeof window === "undefined"
+			) {
+				const fs = await import("node:fs");
+				const fileUrl = new URL("./data/highsec-systems.json", import.meta.url);
+				const content = fs.readFileSync(fileUrl, "utf-8");
+				const ids = JSON.parse(content);
+				cachedHighSecSet = new Set(ids);
+				return cachedHighSecSet;
+			}
+			const fetchFn = options.fetch || globalThis.fetch;
+			const res = await fetchFn(dataUrl);
+			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			const ids = await res.json();
+			cachedHighSecSet = new Set(ids);
+			return cachedHighSecSet;
+		} catch (err) {
+			console.warn("Failed to load highsec systems dataset:", err);
+			return new Set();
+		} finally {
+			highSecFetchPromise = null;
+		}
+	})();
+
+	return highSecFetchPromise;
+}
+
+/**
+ * Batch resolve system names to IDs via cache and CCP ESI.
+ *
+ * @param {string[]} systemNames
+ * @param {object} [options]
+ * @returns {Promise<Map<string, number>>}
+ */
+export async function resolveSystemIdsBatch(systemNames, options = {}) {
+	const fetchFn = options.fetch || globalThis.fetch;
+	const signal = options.signal;
+	const resolved = new Map();
+	const unresolved = [];
+
+	for (const name of systemNames) {
+		if (!name || typeof name !== "string") continue;
+		const clean = name.trim().toLowerCase();
+		if (SYSTEM_ID_CACHE.has(clean)) {
+			resolved.set(name, SYSTEM_ID_CACHE.get(clean));
+		} else {
+			unresolved.push(name.trim());
+		}
+	}
+
+	if (unresolved.length > 0) {
+		const res = await fetchFn("https://esi.evetech.net/latest/universe/ids/", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(unresolved),
+			signal,
+		});
+
+		if (!res.ok) {
+			throw new RouteUnavailableError(
+				"Route lookup unavailable — manual entry enabled",
+				new Error(`ESI Universe IDs returned HTTP ${res.status}`),
+			);
+		}
+
+		const data = await res.json();
+		const systems = data?.systems || [];
+		for (const sys of systems) {
+			const cleanName = sys.name.toLowerCase();
+			SYSTEM_ID_CACHE.set(cleanName, sys.id);
+			for (const reqName of unresolved) {
+				if (reqName.toLowerCase() === cleanName) {
+					resolved.set(reqName, sys.id);
+				}
+			}
+		}
+	}
+
+	return resolved;
+}
+
+/**
+ * Calculate route directly using CCP ESI and classify jumps using the highsec ID set.
+ *
+ * @param {string} origin
+ * @param {string} destination
+ * @param {object} [options]
+ * @returns {Promise<object>}
+ */
+export async function fetchEsiRoute(origin, destination, options = {}) {
+	const fetchFn = options.fetch || globalThis.fetch;
+	const signal = options.signal;
+
+	const trimmedOrigin = origin.trim();
+	const trimmedDestination = destination.trim();
+
+	const idMap = await resolveSystemIdsBatch([trimmedOrigin, trimmedDestination], options);
+	const originId = idMap.get(trimmedOrigin);
+	const destId = idMap.get(trimmedDestination);
+
+	if (!originId || !destId) {
+		throw new RouteNotFoundError(
+			`Unknown solar system: ${!originId ? trimmedOrigin : trimmedDestination}`,
+		);
+	}
+
+	const avoidNames = resolveAvoidList(options.avoid);
+	let avoidIds = [];
+	if (avoidNames.length > 0) {
+		const avoidMap = await resolveSystemIdsBatch(avoidNames, options);
+		avoidIds = avoidNames.map((n) => avoidMap.get(n)).filter(Boolean);
+	}
+
+	let esiUrl = `https://esi.evetech.net/latest/route/${originId}/${destId}/?flag=shortest`;
+	if (avoidIds.length > 0) {
+		esiUrl += `&avoid=${avoidIds.join(",")}`;
+	}
+
+	const res = await fetchFn(esiUrl, { signal });
+	if (!res.ok) {
+		if (res.status === 404) {
+			throw new RouteNotFoundError("No route found avoiding specified systems");
+		}
+		throw new RouteUnavailableError(
+			"Route lookup unavailable — manual entry enabled",
+			new Error(`ESI route returned HTTP ${res.status}`),
+		);
+	}
+
+	const routeIds = await res.json();
+	if (!Array.isArray(routeIds) || routeIds.length === 0) {
+		throw new RouteNotFoundError("No route found avoiding specified systems");
+	}
+
+	const highSecSet =
+		options.highSecSet ||
+		(options.highSecSystems
+			? new Set(options.highSecSystems)
+			: await loadHighSecSystems(options.highSecDataUrl, options));
+
+	let highSecJumps = 0;
+	let dangerousJumps = 0;
+
+	// Synchronous O(1) jump classification:
+	// System at index 0 is origin (not a jump)
+	for (let i = 1; i < routeIds.length; i++) {
+		const id = routeIds[i];
+		if (highSecSet.has(id)) {
+			highSecJumps++;
+		} else {
+			dangerousJumps++;
+		}
+	}
+
+	const totalJumps = highSecJumps + dangerousJumps;
+	const systemsArray = routeIds.map((id, idx) => ({
+		id,
+		name: idx === 0 ? trimmedOrigin : idx === routeIds.length - 1 ? trimmedDestination : String(id),
+		security: highSecSet.has(id) ? 1.0 : 0.0,
+	}));
+
+	return {
+		summary: {
+			start: trimmedOrigin,
+			end: trimmedDestination,
+			pref: "shortest",
+			directJumps: totalJumps,
+		},
+		routes: { direct: systemsArray },
+		systems: systemsArray,
+		highSecJumps,
+		dangerousJumps,
+		totalJumps,
+	};
+}
+
 /**
  * Attempt to fetch a resource directly; if blocked by CORS (TypeError)
- * or network error, transparently fetch via the client-side CORS gateway.
+ * or network error, sequentially retry via the CORS edge gateway pool.
  *
  * @param {string} targetUrl
  * @param {object} [options]
@@ -155,41 +383,72 @@ function combineSignals(signals) {
 export async function fetchWithCorsFallback(targetUrl, options = {}) {
 	const signal = options.signal;
 	const fetchFn = options.fetch || globalThis.fetch;
-	const proxyGateway =
-		options.corsProxyGateway !== undefined ? options.corsProxyGateway : DEFAULT_CORS_PROXY_GATEWAY;
+	let proxyGateways;
+	if (options.corsProxyGateways) {
+		proxyGateways = options.corsProxyGateways;
+	} else if (options.corsProxyGateway !== undefined) {
+		proxyGateways = options.corsProxyGateway ? [options.corsProxyGateway] : [];
+	} else {
+		proxyGateways = DEFAULT_CORS_PROXY_GATEWAYS;
+	}
+	const proxyTimeoutMs = options.proxyTimeoutMs || DEFAULT_PROXY_TIMEOUT_MS;
 
 	try {
 		const response = await fetchFn(targetUrl, { signal });
-		return response;
+		if (response.ok) {
+			return response;
+		}
+		if (![408, 429, 502, 503, 504].includes(response.status) || proxyGateways.length === 0) {
+			return response;
+		}
 	} catch (err) {
 		if (err.name === "AbortError" && signal?.aborted) {
 			throw err;
 		}
+	}
 
-		// If direct fetch failed (e.g. browser CORS TypeError: NetworkError),
-		// retry transparently via the CORS edge gateway if configured
-		if (proxyGateway) {
-			const proxiedUrl = `${proxyGateway}${encodeURIComponent(targetUrl)}`;
-			try {
-				const proxyResponse = await fetchFn(proxiedUrl, { signal });
-				return proxyResponse;
-			} catch (proxyErr) {
-				if (proxyErr.name === "AbortError" && signal?.aborted) {
-					throw proxyErr;
-				}
-				throw new RouteUnavailableError(
-					"Route lookup unavailable — manual entry enabled",
-					proxyErr,
-				);
-			}
+	if (proxyGateways.length === 0) {
+		throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled");
+	}
+
+	let lastError = null;
+	for (const gateway of proxyGateways) {
+		if (!gateway) continue;
+		if (signal?.aborted) {
+			const abortErr = new Error("The operation was aborted");
+			abortErr.name = "AbortError";
+			throw abortErr;
 		}
 
-		throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", err);
+		const proxiedUrl = `${gateway}${encodeURIComponent(targetUrl)}`;
+		const perProxyTimeout = AbortSignal.timeout(proxyTimeoutMs);
+		const combined = combineSignals(signal ? [signal, perProxyTimeout] : [perProxyTimeout]);
+
+		try {
+			const proxyResponse = await fetchFn(proxiedUrl, { signal: combined.signal });
+			if (proxyResponse.ok) {
+				return proxyResponse;
+			}
+			if ([408, 429, 502, 503, 504].includes(proxyResponse.status)) {
+				lastError = new Error(`Proxy ${gateway} returned HTTP ${proxyResponse.status}`);
+				continue;
+			}
+			return proxyResponse;
+		} catch (proxyErr) {
+			if (proxyErr.name === "AbortError" && signal?.aborted) {
+				throw proxyErr;
+			}
+			lastError = proxyErr;
+		} finally {
+			combined.cleanup();
+		}
 	}
+
+	throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", lastError);
 }
 
 /**
- * Fetch shortest path between origin and destination systems.
+ * Fetch shortest path between origin and destination systems with multi-tier failover.
  *
  * @param {string} origin
  * @param {string} destination
@@ -252,6 +511,29 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 	}
 
 	const fetchFn = options.fetch || globalThis.fetch;
+	const runEsiFallback = async (lastErr) => {
+		if (options.esiFallback === false) {
+			if (lastErr instanceof RouteUnavailableError || lastErr instanceof RouteNotFoundError) {
+				throw lastErr;
+			}
+			throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", lastErr);
+		}
+		try {
+			return await fetchEsiRoute(trimmedOrigin, trimmedDestination, {
+				...options,
+				signal,
+				fetch: fetchFn,
+			});
+		} catch (esiErr) {
+			if (esiErr.name === "AbortError" && options.signal?.aborted) {
+				throw esiErr;
+			}
+			if (esiErr instanceof RouteNotFoundError) {
+				throw esiErr;
+			}
+			throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", esiErr);
+		}
+	};
 
 	try {
 		let response;
@@ -260,15 +542,14 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 				signal,
 				fetch: fetchFn,
 				corsProxyGateway: options.corsProxyGateway,
+				corsProxyGateways: options.corsProxyGateways,
+				proxyTimeoutMs: options.proxyTimeoutMs,
 			});
 		} catch (fetchErr) {
 			if (fetchErr.name === "AbortError" && options.signal?.aborted) {
 				throw fetchErr;
 			}
-			if (fetchErr instanceof RouteUnavailableError) {
-				throw fetchErr;
-			}
-			throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", fetchErr);
+			return await runEsiFallback(fetchErr);
 		}
 
 		if (!response.ok) {
@@ -290,10 +571,7 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 				throw new RouteNotFoundError("No route found avoiding specified systems");
 			}
 
-			throw new RouteUnavailableError(
-				"Route lookup unavailable — manual entry enabled",
-				new Error(`HTTP ${response.status}: ${JSON.stringify(errBody)}`),
-			);
+			return await runEsiFallback(new Error(`HTTP ${response.status}: ${JSON.stringify(errBody)}`));
 		}
 
 		let data;
@@ -303,7 +581,7 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 			if (jsonErr.name === "AbortError" && options.signal?.aborted) {
 				throw jsonErr;
 			}
-			throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", jsonErr);
+			return await runEsiFallback(jsonErr);
 		}
 		const directSystems = data?.routes?.direct;
 

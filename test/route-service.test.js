@@ -4,24 +4,32 @@ import {
 	buildRouteUrl,
 	classifyJumps,
 	DEFAULT_CORS_PROXY_GATEWAY,
+	DEFAULT_CORS_PROXY_GATEWAYS,
 	DEFAULT_MANDATORY_AVOID_LIST,
+	DEFAULT_PROXY_TIMEOUT_MS,
 	DEFAULT_ROUTE_TIMEOUT_MS,
 	EVE_ROUTE_BASE_URL,
+	fetchEsiRoute,
 	fetchEveRoute,
 	fetchWithCorsFallback,
 	HIGH_SEC_SECURITY_THRESHOLD,
+	loadHighSecSystems,
 	MANDATORY_AVOID_LIST,
 	MAX_SYSTEM_NAME_LENGTH,
 	RouteNotFoundError,
 	RouteUnavailableError,
 	resolveAvoidList,
+	resolveSystemIdsBatch,
+	TRADE_HUB_IDS,
 } from "../route-service.js";
 
 test("route-service constants: threshold and defaults match specs", () => {
 	assert.equal(HIGH_SEC_SECURITY_THRESHOLD, 0.45);
 	assert.equal(DEFAULT_ROUTE_TIMEOUT_MS, 5000);
+	assert.equal(DEFAULT_PROXY_TIMEOUT_MS, 2500);
 	assert.equal(MAX_SYSTEM_NAME_LENGTH, 50);
 	assert.deepEqual(MANDATORY_AVOID_LIST, DEFAULT_MANDATORY_AVOID_LIST);
+	assert.ok(DEFAULT_CORS_PROXY_GATEWAYS.length >= 3);
 });
 
 test("resolveAvoidList: returns config list when provided or falls back to default", () => {
@@ -600,4 +608,198 @@ test("fetchEveRoute: transparently recovers from CORS error via gateway and clas
 	assert.equal(result.dangerousJumps, 1);
 	assert.equal(result.totalJumps, 2);
 	assert.equal(result.systems.length, 3);
+});
+
+test("loadHighSecSystems: returns a Set containing Jita (30000142) and Amarr (30002187)", async () => {
+	const highSec = await loadHighSecSystems();
+	assert.ok(highSec instanceof Set);
+	assert.ok(highSec.size > 1000);
+	assert.equal(highSec.has(30000142), true); // Jita
+	assert.equal(highSec.has(30002187), true); // Amarr
+	assert.equal(highSec.has(30005196), false); // Ahbazon (0.4, lowsec)
+});
+
+test("resolveSystemIdsBatch: resolves cached trade hubs synchronously without network call", async () => {
+	let fetchCalled = false;
+	const mockFetch = async () => {
+		fetchCalled = true;
+		throw new Error("Should not fetch");
+	};
+
+	const map = await resolveSystemIdsBatch(["Jita", "Amarr"], { fetch: mockFetch });
+	assert.equal(fetchCalled, false);
+	assert.equal(map.get("Jita"), TRADE_HUB_IDS.jita);
+	assert.equal(map.get("Amarr"), TRADE_HUB_IDS.amarr);
+});
+
+test("resolveSystemIdsBatch: batches POST to ESI for unknown systems", async () => {
+	const mockFetch = async (url, options) => {
+		assert.equal(url, "https://esi.evetech.net/latest/universe/ids/");
+		assert.equal(options.method, "POST");
+		const body = JSON.parse(options.body);
+		assert.deepEqual(body, ["CustomSys"]);
+		return {
+			ok: true,
+			status: 200,
+			json: async () => ({
+				systems: [{ id: 30001234, name: "CustomSys" }],
+			}),
+		};
+	};
+
+	const map = await resolveSystemIdsBatch(["Jita", "CustomSys"], { fetch: mockFetch });
+	assert.equal(map.get("Jita"), TRADE_HUB_IDS.jita);
+	assert.equal(map.get("CustomSys"), 30001234);
+});
+
+test("fetchWithCorsFallback: sequentially fails over from Proxy 1 (504 timeout) to Proxy 2 (200 OK)", async () => {
+	const calledUrls = [];
+	const mockFetch = async (url) => {
+		calledUrls.push(url);
+		if (url.includes("allorigins")) {
+			return {
+				ok: false,
+				status: 504,
+				json: async () => ({ error: "Gateway Timeout" }),
+			};
+		}
+		if (url.includes("corsproxy.io")) {
+			return {
+				ok: true,
+				status: 200,
+				json: async () => ({ success: true }),
+			};
+		}
+		throw new TypeError("CORS block on direct");
+	};
+
+	const targetUrl = "https://eve-route.vercel.app/api/route?start=Jita&end=Amarr";
+	const res = await fetchWithCorsFallback(targetUrl, {
+		fetch: mockFetch,
+		corsProxyGateways: ["https://api.allorigins.win/raw?url=", "https://corsproxy.io/?url="],
+	});
+
+	assert.equal(res.ok, true);
+	assert.equal(calledUrls.length, 3);
+	assert.equal(calledUrls[0], targetUrl);
+	assert.ok(calledUrls[1].includes("allorigins"));
+	assert.ok(calledUrls[2].includes("corsproxy.io"));
+});
+
+test("fetchEsiRoute: successfully resolves IDs, fetches route, and classifies jumps using highsec Set", async () => {
+	const mockFetch = async (url) => {
+		if (url.includes("/route/30000142/30002187/")) {
+			return {
+				ok: true,
+				status: 200,
+				json: async () => [
+					30000142, // Jita (origin, not counted)
+					30000144, // Perimeter (highsec, jump 1)
+					30005196, // Ahbazon (lowsec, jump 2)
+					30002187, // Amarr (highsec, jump 3)
+				],
+			};
+		}
+		throw new Error(`Unexpected URL: ${url}`);
+	};
+
+	const highSecSet = new Set([30000142, 30000144, 30002187]);
+	const result = await fetchEsiRoute("Jita", "Amarr", {
+		fetch: mockFetch,
+		highSecSet,
+	});
+
+	assert.equal(result.highSecJumps, 2);
+	assert.equal(result.dangerousJumps, 1);
+	assert.equal(result.totalJumps, 3);
+	assert.equal(result.systems.length, 4);
+	assert.equal(result.summary.start, "Jita");
+	assert.equal(result.summary.end, "Amarr");
+});
+
+test("fetchEsiRoute: throws RouteNotFoundError when origin or destination is invalid", async () => {
+	const mockFetch = async () => ({
+		ok: true,
+		status: 200,
+		json: async () => ({ systems: [] }),
+	});
+
+	await assert.rejects(
+		async () => {
+			await fetchEsiRoute("NonExistentOrigin999", "Amarr", { fetch: mockFetch });
+		},
+		(err) => {
+			assert(err instanceof RouteNotFoundError);
+			return true;
+		},
+	);
+});
+
+test("fetchEsiRoute: throws RouteNotFoundError when ESI returns 404", async () => {
+	const mockFetch = async (url) => {
+		if (url.includes("/route/")) {
+			return {
+				ok: false,
+				status: 404,
+				json: async () => ({ error: "No route found" }),
+			};
+		}
+		throw new Error(`Unexpected URL: ${url}`);
+	};
+
+	await assert.rejects(
+		async () => {
+			await fetchEsiRoute("Jita", "Amarr", { fetch: mockFetch });
+		},
+		(err) => {
+			assert(err instanceof RouteNotFoundError);
+			return true;
+		},
+	);
+});
+
+test("fetchEveRoute: transparently falls back to CCP ESI when EVE TT direct and all proxies fail", async () => {
+	const highSecSet = new Set([30000142, 30000144, 30002187]);
+	const mockFetch = async (url) => {
+		if (url.includes("eve-route.vercel.app")) {
+			throw new TypeError("Failed to fetch due to CORS / Gateway Timeout");
+		}
+		if (url.includes("/route/30000142/30002187/")) {
+			return {
+				ok: true,
+				status: 200,
+				json: async () => [30000142, 30000144, 30002187],
+			};
+		}
+		throw new Error(`Unexpected URL: ${url}`);
+	};
+
+	const result = await fetchEveRoute("Jita", "Amarr", {
+		fetch: mockFetch,
+		corsProxyGateways: [],
+		highSecSet,
+	});
+
+	assert.equal(result.highSecJumps, 2);
+	assert.equal(result.dangerousJumps, 0);
+	assert.equal(result.totalJumps, 2);
+});
+
+test("fetchEveRoute: throws RouteUnavailableError when both EVE TT and CCP ESI fail", async () => {
+	const mockFetch = async () => {
+		throw new TypeError("Network down completely");
+	};
+
+	await assert.rejects(
+		async () => {
+			await fetchEveRoute("Jita", "Amarr", {
+				fetch: mockFetch,
+				corsProxyGateways: [],
+			});
+		},
+		(err) => {
+			assert(err instanceof RouteUnavailableError);
+			return true;
+		},
+	);
 });

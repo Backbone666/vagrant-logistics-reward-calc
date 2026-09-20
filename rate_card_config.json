@@ -72,6 +72,13 @@
 	],
 	"routing": {
 		"eve_route_api_url": "https://eve-route.vercel.app/api/route",
-		"cors_proxy_gateway": "https://api.allorigins.win/raw?url="
+		"cors_proxy_gateway": "https://api.allorigins.win/raw?url=",
+		"cors_proxy_gateways": [
+			"https://api.allorigins.win/raw?url=",
+			"https://corsproxy.io/?url=",
+			"https://api.codetabs.com/v1/proxy/?quest="
+		],
+		"proxy_timeout_ms": 2500,
+		"esi_fallback_enabled": true
 	}
 }
