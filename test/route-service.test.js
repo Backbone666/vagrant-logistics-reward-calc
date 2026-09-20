@@ -29,7 +29,7 @@ test("route-service constants: threshold and defaults match specs", () => {
 	assert.equal(DEFAULT_PROXY_TIMEOUT_MS, 2500);
 	assert.equal(MAX_SYSTEM_NAME_LENGTH, 50);
 	assert.deepEqual(MANDATORY_AVOID_LIST, DEFAULT_MANDATORY_AVOID_LIST);
-	assert.ok(DEFAULT_CORS_PROXY_GATEWAYS.length >= 3);
+	assert.ok(DEFAULT_CORS_PROXY_GATEWAYS.length >= 2);
 });
 
 test("resolveAvoidList: returns config list when provided or falls back to default", () => {
@@ -935,4 +935,125 @@ test("fetchEveRoute: propagates safeRoute option to URL building and ESI fallbac
 	assert.ok(ttUrl.includes("pref=safest"));
 	assert.ok(esiUrl.includes("flag=secure"));
 	assert.equal(result.summary.pref, "safest");
+});
+
+test("fetchWithCorsFallback: fails over when proxy returns 401 Unauthorized or 403 Forbidden", async () => {
+	const calledUrls = [];
+	const mockFetch = async (url) => {
+		calledUrls.push(url);
+		if (url.includes("corsproxy.io")) {
+			// Paywalled proxy returning 401
+			return {
+				ok: false,
+				status: 401,
+				json: async () => ({ error: "API key required" }),
+			};
+		}
+		if (url.includes("forbidden-proxy")) {
+			// Proxy returning 403
+			return {
+				ok: false,
+				status: 403,
+				json: async () => ({ error: "Forbidden" }),
+			};
+		}
+		if (url.includes("working-proxy")) {
+			return {
+				ok: true,
+				status: 200,
+				json: async () => ({ success: true }),
+			};
+		}
+		throw new TypeError("CORS block on direct");
+	};
+
+	const targetUrl = "https://eve-route.vercel.app/api/route?start=Jita&end=Amarr";
+	const res = await fetchWithCorsFallback(targetUrl, {
+		fetch: mockFetch,
+		corsProxyGateways: [
+			"https://corsproxy.io/?url=",
+			"https://forbidden-proxy.example.com/?url=",
+			"https://working-proxy.example.com/?url=",
+		],
+	});
+
+	assert.equal(res.ok, true);
+	assert.equal(calledUrls.length, 4); // direct + 3 proxies
+	assert.equal(calledUrls[0], targetUrl);
+	assert.ok(calledUrls[1].includes("corsproxy.io"));
+	assert.ok(calledUrls[2].includes("forbidden-proxy"));
+	assert.ok(calledUrls[3].includes("working-proxy"));
+});
+
+test("fetchEveRoute: uses primaryEngine='esi' to resolve directly via CCP ESI without calling EVE TT", async () => {
+	let ttCalled = false;
+	let esiCalled = false;
+	const mockFetch = async (url) => {
+		if (url.includes("eve-route.vercel.app")) {
+			ttCalled = true;
+			throw new Error("Should not call EVE TT when primaryEngine is esi");
+		}
+		if (url.includes("esi.evetech.net")) {
+			esiCalled = true;
+			return {
+				ok: true,
+				status: 200,
+				json: async () => [30000142, 30002187],
+			};
+		}
+		throw new Error(`Unexpected url: ${url}`);
+	};
+
+	const highSecSet = new Set([30000142, 30002187]);
+	const result = await fetchEveRoute("Jita", "Amarr", {
+		primaryEngine: "esi",
+		fetch: mockFetch,
+		highSecSet,
+	});
+
+	assert.equal(ttCalled, false);
+	assert.equal(esiCalled, true);
+	assert.equal(result.highSecJumps, 1);
+	assert.equal(result.dangerousJumps, 0);
+	assert.equal(result.totalJumps, 1);
+});
+
+test("fetchEveRoute: falls back to EVE TT when primaryEngine='esi' and ESI encounters network error", async () => {
+	let ttCalled = false;
+	let esiCalled = false;
+	const mockFetch = async (url) => {
+		if (url.includes("esi.evetech.net")) {
+			esiCalled = true;
+			throw new TypeError("Failed to reach ESI (network down)");
+		}
+		if (url.includes("eve-route.vercel.app")) {
+			ttCalled = true;
+			return {
+				ok: true,
+				status: 200,
+				json: async () => ({
+					summary: { start: "Jita", end: "Amarr", directJumps: 2 },
+					routes: {
+						direct: [
+							{ name: "Jita", security: 0.95 },
+							{ name: "Perimeter", security: 0.95 },
+							{ name: "Amarr", security: 1.0 },
+						],
+					},
+				}),
+			};
+		}
+		throw new Error(`Unexpected url: ${url}`);
+	};
+
+	const result = await fetchEveRoute("Jita", "Amarr", {
+		primaryEngine: "esi",
+		fetch: mockFetch,
+	});
+
+	assert.equal(esiCalled, true);
+	assert.equal(ttCalled, true);
+	assert.equal(result.highSecJumps, 2);
+	assert.equal(result.dangerousJumps, 0);
+	assert.equal(result.totalJumps, 2);
 });

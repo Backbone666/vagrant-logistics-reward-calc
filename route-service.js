@@ -31,7 +31,6 @@ export const EVE_ROUTE_BASE_URL = "https://eve-route.vercel.app";
 export const DEFAULT_CORS_PROXY_GATEWAY = "https://api.allorigins.win/raw?url=";
 export const DEFAULT_CORS_PROXY_GATEWAYS = Object.freeze([
 	"https://api.allorigins.win/raw?url=",
-	"https://corsproxy.io/?url=",
 	"https://api.codetabs.com/v1/proxy/?quest=",
 ]);
 export const DEFAULT_PROXY_TIMEOUT_MS = 2500;
@@ -446,11 +445,7 @@ export async function fetchWithCorsFallback(targetUrl, options = {}) {
 			if (proxyResponse.ok) {
 				return proxyResponse;
 			}
-			if ([408, 429, 502, 503, 504].includes(proxyResponse.status)) {
-				lastError = new Error(`Proxy ${gateway} returned HTTP ${proxyResponse.status}`);
-				continue;
-			}
-			return proxyResponse;
+			lastError = new Error(`Proxy ${gateway} returned HTTP ${proxyResponse.status}`);
 		} catch (proxyErr) {
 			if (proxyErr.name === "AbortError" && signal?.aborted) {
 				throw proxyErr;
@@ -528,8 +523,10 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 	}
 
 	const fetchFn = options.fetch || globalThis.fetch;
+	const primaryEngine = options.primaryEngine || (options.esiPrimary ? "esi" : "eve-route");
+
 	const runEsiFallback = async (lastErr) => {
-		if (options.esiFallback === false) {
+		if (options.esiFallback === false || primaryEngine === "esi") {
 			if (lastErr instanceof RouteUnavailableError || lastErr instanceof RouteNotFoundError) {
 				throw lastErr;
 			}
@@ -551,6 +548,27 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 			throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", esiErr);
 		}
 	};
+
+	if (primaryEngine === "esi") {
+		try {
+			return await fetchEsiRoute(trimmedOrigin, trimmedDestination, {
+				...options,
+				signal,
+				fetch: fetchFn,
+			});
+		} catch (esiErr) {
+			if (esiErr.name === "AbortError" && options.signal?.aborted) {
+				throw esiErr;
+			}
+			if (esiErr instanceof RouteNotFoundError) {
+				throw esiErr;
+			}
+			if (options.fallbackToEveRoute === false) {
+				throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", esiErr);
+			}
+			// Fall through to EVE TT secondary resolution below
+		}
+	}
 
 	try {
 		let response;

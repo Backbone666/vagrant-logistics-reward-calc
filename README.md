@@ -42,9 +42,8 @@ The application is built on a **zero-framework, zero-runtime-dependency** paradi
 - **`calculator.js`**: Pure mathematical calculation engine and contract tier classifier (`calcReward`, `calcRewardDetails`, `classifyService`, `parseNum`). Independent of the DOM.
 - **`app.js`**: Presentation controller, input event normalization, debounced route calculations, bidirectional URL state synchronization (`?from=&to=&v=...`), and clipboard integrations.
 - **`route-service.js`**: Resilient multi-tier routing pipeline:
-  - *Tier 1*: Direct query to primary route provider (`eve-route.vercel.app`).
-  - *Tier 2*: Sequential failover through a pool of public CORS gateways (`allorigins.win`, `corsproxy.io`, `codetabs.com`) with short per-gateway timeouts.
-  - *Tier 3*: Direct CCP ESI route calculation (`esi.evetech.net/latest/route/`) with native browser CORS and synchronous $O(1)$ jump security classification using `data/highsec-systems.json`.
+  - *Primary*: Direct CCP ESI route calculation (`esi.evetech.net/latest/route/`) with native browser CORS and synchronous $O(1)$ jump security classification using `data/highsec-systems.json`.
+  - *Secondary*: Route provider (`eve-route.vercel.app`) with sequential failover across public CORS gateways (`allorigins.win`, `codetabs.com`).
 - **`system-autocomplete.js`**: Zero-latency in-memory prefix and substring search across all New Eden solar systems with keyboard navigation (`ArrowUp`/`ArrowDown`/`Enter`/`Escape`).
 - **`rate_card_config.json`**: Authoritative pricing configuration defining base rates, jump fees, collateral multipliers, and mandatory system avoidance lists.
 - **`data/systems.json`**: Compiled dictionary of 8,400+ New Eden solar systems for instant client-side autocomplete.

@@ -400,6 +400,7 @@ function handleRouteInputChange() {
 				avoid,
 				safeRoute: isSafe,
 				pref: isSafe ? "safest" : "shortest",
+				primaryEngine: routing?.primary_engine || "esi",
 				corsProxyGateway: routing?.cors_proxy_gateway,
 				corsProxyGateways: routing?.cors_proxy_gateways,
 				proxyTimeoutMs: routing?.proxy_timeout_ms,
