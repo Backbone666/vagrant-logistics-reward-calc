@@ -19,3 +19,13 @@ jobs:
           target-branch: gh-pages
           release-type: node
           token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Auto-merge Release PR
+        if: ${{ steps.release.outputs.pr }}
+        run: |
+          gh pr merge "${{ fromJson(steps.release.outputs.pr).number }}" \
+            --auto \
+            --squash \
+            --repo "${{ github.repository }}"
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
