@@ -1,130 +1,25 @@
 # Changelog
 
-## [1.1.0](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.0.0...v1.1.0) (2026-09-20)
+## [1.2.0](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.1.0...v1.2.0) (2026-09-20)
 
 
 ### Features
 
-* **a11y:** add semantic name attributes and aria-atomic live region ([e6ea8a9](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/e6ea8a928617e617bce89581e542bf5f8fba6381))
-* add external citations to FAQ page JSON-LD schema for GEO ([8d67c08](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/8d67c08d5f21bcb299040c0a28c3fec93045992d))
-* add support for decimal inputs in Collateral and Volume fields ([a942e33](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/a942e33b528bee8009ad1074476ce3c21428fb9d))
-* add URL query parameter synchronization and Quote copy template (Plan 018) ([b941cb9](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/b941cb963582a059925607e7c15a24eff2988338))
-* align calculation engine with competitive rates, surcharges, and freighter limits ([07e1220](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/07e122074dde1e7b32833b2234ec904340ae4b26))
-* **app:** add defensive bounds clamping and resilient url parameter handling ([395a59a](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/395a59a5da04c472d1b288a64480c55d867baaf2))
-* dynamically display 'Distance Jump Fee' or 'Distance Cyno Fee' based on ship class ([2b3ef74](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/2b3ef747df3388105f030a8982d033869f1fc65a))
-* frontend redesign, SEO, and LLM configuration ([fea9ac9](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/fea9ac91a471bb0c24b0e35fcc39107935163f82))
-* Implement 'Shadow Class' DST pricing logic ([893ed22](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/893ed22da3da289814a6b84b2916fea799577315))
-* implement competitive dangerous space pricing and high-risk modes ([0f0e066](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/0f0e06644f475aa81ee41d3a45c95fae599c7a9a))
-* implement fallback config and UI warning banner for config fetch failures (Plan 015) ([a622b62](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/a622b62e9aacf860d8e2425c24dd69aaf4747836))
-* integrate dynamic rate card config and courier calculator workflow ([3065e8b](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/3065e8bb8e4c18899325f4a4e428c2cab48bba6a))
-* remove wormhole space and rush service options ([e7457a8](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/e7457a8a3dfd578c435267108bedad54085e7343))
-* **route:** add real-time solar system autocomplete and progressive manual jump entry ([9879995](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/9879995f349b6723a1d0cb122c6d6c79c82b79b0))
 * **route:** implement resilient multi-tier routing with native ccp esi fallback ([75cddb1](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/75cddb1015be38cf73c808cc721dfbc365a756ee))
-* **route:** integrate eve tt routing engine with client-side cors gateway ([bb9f909](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/bb9f909ab736c30756f69b8907f89abd867b6190))
-* **route:** serialize origin and destination in url params and decouple avoidance config ([663eb06](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/663eb06082e2866b57226e7ec9cc9c42b9063eb0))
-* **routing:** integrate automated EVE Online route calculation engine ([36e97f4](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/36e97f4695f79d5c8931035bc9b99277de44de24))
 * **seo:** enhance open graph metadata, json-ld structured data, and visible aeo faq ([e4d1281](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/e4d1281cfa8877b969b9015d9f0032326596e627))
-* **typography:** implement fonttrio token architecture and tabular numeric layout ([91eba5f](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/91eba5f957daadd053e6be5a6e565edbe15261ab))
-* **ux:** resilient clipboard api with legacy fallback and error feedback ([03e173b](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/03e173b4ac58eab7a50d90664f8dffe14c033583))
-* Vagrant Logistics Rebrand & Rate Optimization ([#1](https://github.com/Backbone666/vagrant-logistics-reward-calc/issues/1)) ([817d854](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/817d8547805f505800a45415bc50b722a29c863f))
 
 
 ### Bug Fixes
 
-* **app:** flush debounced url sync on quote copy and render cached config on startup ([31732d9](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/31732d9d7cf9e678dff7e900a181d1a2e167491f))
-* **assets:** declare font binaries in gitattributes and regenerate woff2 without metadata drift ([c4ce5ca](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/c4ce5ca8f920458b38efabffeb5ce3617f78f348))
 * **autocomplete:** ensure dropdown dismissal on selection and trigger route lookup only on confirmed systems ([8c9920c](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/8c9920c74dfdd3fdf1a327590a8864f7e53254a4))
-* **calculator:** encapsulate metadata on error results and align fallback config ([f043ea8](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/f043ea8b9d95ba795e9bb87e86254d6f729f8c26))
 * **ci:** remove llms.txt from asset check and advance version to 1.2.0 ([dfae831](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/dfae831ee130953da28abdd1256250c8bdc12c78))
-* **dev:** add woff2 mime type and stream binary responses properly ([d5064df](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/d5064df00b9251da4828159cd2993b8f86559b10))
-* guard bdDistanceLabel textContent changes with null check to handle cached index.html ([ee73474](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/ee73474b8f00321aa58938c2f6224fd1645fdb77))
-* resolve Biome lint errors and configure VCS gitignore integration ([07e1f21](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/07e1f21e44cacb8d2d897ec2a360e43224768888))
-* resolve live rate config loading error and webview history restrictions ([b072b11](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/b072b11602b9626d02e5fb2f86864caf6ca1892a))
-* resolve mobile layout overflow and clipping issues ([88d3eb9](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/88d3eb93fd37da6e2d763dddc5d555ec612e0a9a))
-* resolve warning banner CSS selector cascade collision ([cb2bfdb](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/cb2bfdb93d2265511e81effcdc81263b1212a912))
-* Restore Freighter/JF pricing tiers while keeping Shadow Class DST logic ([df01bc1](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/df01bc1e761ca8de3f705b32053608d561f619a7))
-* **route-service:** clean up abort listeners in combineSignals fallback ([1da260a](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/1da260a8ca2dc765d877e3f76621ec54154aa6c2))
-* **route-service:** clean up fallback signal listeners on completion and neutralize disabled button hover ([84ba9a8](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/84ba9a80bb6d0bd6383af95a8442a315f2d227a7))
 * **route:** filter origin and destination from avoid constraints and ensure combobox enter dismissal ([76b5c70](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/76b5c70bf65c139275e2019926da67fcb51589a6))
-* **routing:** protect manual jump overrides and harden response error handling ([6378d5e](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/6378d5e19fca4ca1885b338ea1fefc0385dcfffd))
 
 
-### Performance Improvements
+### Documentation & Maintenance
 
-* **app:** streamline jump parsing in updateAll ([f1dab4a](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/f1dab4aafe1e3460d19e5a1476d1308bf1b17632))
-* batch DOM mutations in scheduleFrame and reuse cached lastDetails ([7ee2fb9](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/7ee2fb997a3a8b35b823472836a69d4a680d8d14))
-* cache calcCard selector at startup ([ac0625f](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/ac0625fc9b205a2a849bc828eceac1954ccf0837))
-* cap skip-link transition to &lt;=150ms using transition-smooth ([decd2a0](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/decd2a0eeba47bd6c550f24862aead2b748257f8))
-* debounce URL parameter history updates ([71ea976](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/71ea9769a78d02be4480a0a6e62b1af0188dfa82))
-* eliminate layout shift with explicit image dimensions and background aspect-ratio ([2fb9335](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/2fb933522f662418db819cbc2b83d5d5b75155b8))
-* optimize background animations and memoize number formatting ([d301069](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/d3010695c5559cd0b47f23c147a5b7cf9961a434))
-* optimize rendering and animations using CSS containment and RAF ([bf3328b](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/bf3328b5eaa93aef9f541e8ca72168fd5206693f))
-* preload woff2 font asset in index.html ([21cd261](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/21cd261a148e8de29daa68550694781b8aacf052))
-* prune unused and decorative keyframe blocks ([2f07988](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/2f07988b132248f14d63556fc777a5a8895f7a43))
-* replace backdrop-filter and expensive shadows with solid composite ([064e3f4](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/064e3f47063025da19c560cb7d14f9de0bbcc652))
-* retune transition token and remove ambient background animation ([aeebcc8](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/aeebcc88eab1ddf9f93232c3b12c05bc3f5de16c))
-
-## 1.0.0 (2026-09-20)
-
-
-### Features
-
-* **a11y:** add semantic name attributes and aria-atomic live region ([e6ea8a9](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/e6ea8a928617e617bce89581e542bf5f8fba6381))
-* add external citations to FAQ page JSON-LD schema for GEO ([8d67c08](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/8d67c08d5f21bcb299040c0a28c3fec93045992d))
-* add support for decimal inputs in Collateral and Volume fields ([a942e33](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/a942e33b528bee8009ad1074476ce3c21428fb9d))
-* add URL query parameter synchronization and Quote copy template (Plan 018) ([b941cb9](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/b941cb963582a059925607e7c15a24eff2988338))
-* align calculation engine with competitive rates, surcharges, and freighter limits ([07e1220](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/07e122074dde1e7b32833b2234ec904340ae4b26))
-* **app:** add defensive bounds clamping and resilient url parameter handling ([395a59a](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/395a59a5da04c472d1b288a64480c55d867baaf2))
-* dynamically display 'Distance Jump Fee' or 'Distance Cyno Fee' based on ship class ([2b3ef74](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/2b3ef747df3388105f030a8982d033869f1fc65a))
-* frontend redesign, SEO, and LLM configuration ([fea9ac9](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/fea9ac91a471bb0c24b0e35fcc39107935163f82))
-* Implement 'Shadow Class' DST pricing logic ([893ed22](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/893ed22da3da289814a6b84b2916fea799577315))
-* implement competitive dangerous space pricing and high-risk modes ([0f0e066](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/0f0e06644f475aa81ee41d3a45c95fae599c7a9a))
-* implement fallback config and UI warning banner for config fetch failures (Plan 015) ([a622b62](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/a622b62e9aacf860d8e2425c24dd69aaf4747836))
-* integrate dynamic rate card config and courier calculator workflow ([3065e8b](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/3065e8bb8e4c18899325f4a4e428c2cab48bba6a))
-* remove wormhole space and rush service options ([e7457a8](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/e7457a8a3dfd578c435267108bedad54085e7343))
-* **route:** add real-time solar system autocomplete and progressive manual jump entry ([9879995](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/9879995f349b6723a1d0cb122c6d6c79c82b79b0))
-* **route:** implement resilient multi-tier routing with native ccp esi fallback ([75cddb1](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/75cddb1015be38cf73c808cc721dfbc365a756ee))
-* **route:** integrate eve tt routing engine with client-side cors gateway ([bb9f909](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/bb9f909ab736c30756f69b8907f89abd867b6190))
-* **route:** serialize origin and destination in url params and decouple avoidance config ([663eb06](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/663eb06082e2866b57226e7ec9cc9c42b9063eb0))
-* **routing:** integrate automated EVE Online route calculation engine ([36e97f4](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/36e97f4695f79d5c8931035bc9b99277de44de24))
-* **seo:** enhance open graph metadata, json-ld structured data, and visible aeo faq ([e4d1281](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/e4d1281cfa8877b969b9015d9f0032326596e627))
-* **typography:** implement fonttrio token architecture and tabular numeric layout ([91eba5f](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/91eba5f957daadd053e6be5a6e565edbe15261ab))
-* **ux:** resilient clipboard api with legacy fallback and error feedback ([03e173b](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/03e173b4ac58eab7a50d90664f8dffe14c033583))
-* Vagrant Logistics Rebrand & Rate Optimization ([#1](https://github.com/Backbone666/vagrant-logistics-reward-calc/issues/1)) ([817d854](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/817d8547805f505800a45415bc50b722a29c863f))
-
-
-### Bug Fixes
-
-* **app:** flush debounced url sync on quote copy and render cached config on startup ([31732d9](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/31732d9d7cf9e678dff7e900a181d1a2e167491f))
-* **assets:** declare font binaries in gitattributes and regenerate woff2 without metadata drift ([c4ce5ca](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/c4ce5ca8f920458b38efabffeb5ce3617f78f348))
-* **autocomplete:** ensure dropdown dismissal on selection and trigger route lookup only on confirmed systems ([8c9920c](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/8c9920c74dfdd3fdf1a327590a8864f7e53254a4))
-* **calculator:** encapsulate metadata on error results and align fallback config ([f043ea8](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/f043ea8b9d95ba795e9bb87e86254d6f729f8c26))
-* **dev:** add woff2 mime type and stream binary responses properly ([d5064df](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/d5064df00b9251da4828159cd2993b8f86559b10))
-* guard bdDistanceLabel textContent changes with null check to handle cached index.html ([ee73474](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/ee73474b8f00321aa58938c2f6224fd1645fdb77))
-* resolve Biome lint errors and configure VCS gitignore integration ([07e1f21](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/07e1f21e44cacb8d2d897ec2a360e43224768888))
-* resolve live rate config loading error and webview history restrictions ([b072b11](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/b072b11602b9626d02e5fb2f86864caf6ca1892a))
-* resolve mobile layout overflow and clipping issues ([88d3eb9](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/88d3eb93fd37da6e2d763dddc5d555ec612e0a9a))
-* resolve warning banner CSS selector cascade collision ([cb2bfdb](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/cb2bfdb93d2265511e81effcdc81263b1212a912))
-* Restore Freighter/JF pricing tiers while keeping Shadow Class DST logic ([df01bc1](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/df01bc1e761ca8de3f705b32053608d561f619a7))
-* **route-service:** clean up abort listeners in combineSignals fallback ([1da260a](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/1da260a8ca2dc765d877e3f76621ec54154aa6c2))
-* **route-service:** clean up fallback signal listeners on completion and neutralize disabled button hover ([84ba9a8](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/84ba9a80bb6d0bd6383af95a8442a315f2d227a7))
-* **routing:** protect manual jump overrides and harden response error handling ([6378d5e](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/6378d5e19fca4ca1885b338ea1fefc0385dcfffd))
-
-
-### Performance Improvements
-
-* **app:** streamline jump parsing in updateAll ([f1dab4a](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/f1dab4aafe1e3460d19e5a1476d1308bf1b17632))
-* batch DOM mutations in scheduleFrame and reuse cached lastDetails ([7ee2fb9](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/7ee2fb997a3a8b35b823472836a69d4a680d8d14))
-* cache calcCard selector at startup ([ac0625f](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/ac0625fc9b205a2a849bc828eceac1954ccf0837))
-* cap skip-link transition to &lt;=150ms using transition-smooth ([decd2a0](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/decd2a0eeba47bd6c550f24862aead2b748257f8))
-* debounce URL parameter history updates ([71ea976](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/71ea9769a78d02be4480a0a6e62b1af0188dfa82))
-* eliminate layout shift with explicit image dimensions and background aspect-ratio ([2fb9335](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/2fb933522f662418db819cbc2b83d5d5b75155b8))
-* optimize background animations and memoize number formatting ([d301069](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/d3010695c5559cd0b47f23c147a5b7cf9961a434))
-* optimize rendering and animations using CSS containment and RAF ([bf3328b](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/bf3328b5eaa93aef9f541e8ca72168fd5206693f))
-* preload woff2 font asset in index.html ([21cd261](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/21cd261a148e8de29daa68550694781b8aacf052))
-* prune unused and decorative keyframe blocks ([2f07988](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/2f07988b132248f14d63556fc777a5a8895f7a43))
-* replace backdrop-filter and expensive shadows with solid composite ([064e3f4](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/064e3f47063025da19c560cb7d14f9de0bbcc652))
-* retune transition token and remove ambient background animation ([aeebcc8](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/aeebcc88eab1ddf9f93232c3b12c05bc3f5de16c))
+* **docs:** overhaul readme and operational architecture documentation for solo developer ([de57370](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/de5737050fa8959d3d92828b8a07156fb1ae7a29))
+* **chore:** untrack AI agent configurations and harden gitignore ([2f754b4](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/2f754b4fbf355877c44dbcb033878b66e16f3ea1))
 
 ## [1.1.0](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.0.1...v1.1.0) (2026-09-20)
 
