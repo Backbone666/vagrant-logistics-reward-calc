@@ -393,6 +393,7 @@ function handleRouteInputChange() {
 
 		try {
 			const avoid = resolveAvoidList(config?.mandatory_avoid_systems);
+			const routing = config?.routing;
 			const isSafe = safeRouteCheckbox ? safeRouteCheckbox.checked : true;
 			const result = await fetchEveRoute(origin, destination, {
 				signal: controller.signal,
