@@ -3,12 +3,32 @@ import test from "node:test";
 import {
 	buildRouteUrl,
 	classifyJumps,
+	DEFAULT_MANDATORY_AVOID_LIST,
+	DEFAULT_ROUTE_TIMEOUT_MS,
 	EVE_ROUTE_BASE_URL,
 	fetchEveRoute,
+	HIGH_SEC_SECURITY_THRESHOLD,
 	MANDATORY_AVOID_LIST,
+	MAX_SYSTEM_NAME_LENGTH,
 	RouteNotFoundError,
 	RouteUnavailableError,
+	resolveAvoidList,
 } from "../route-service.js";
+
+test("route-service constants: threshold and defaults match specs", () => {
+	assert.equal(HIGH_SEC_SECURITY_THRESHOLD, 0.45);
+	assert.equal(DEFAULT_ROUTE_TIMEOUT_MS, 5000);
+	assert.equal(MAX_SYSTEM_NAME_LENGTH, 50);
+	assert.deepEqual(MANDATORY_AVOID_LIST, DEFAULT_MANDATORY_AVOID_LIST);
+});
+
+test("resolveAvoidList: returns config list when provided or falls back to default", () => {
+	const custom = ["Tama", "Amamake"];
+	assert.deepEqual(resolveAvoidList(custom), ["Tama", "Amamake"]);
+	assert.deepEqual(resolveAvoidList([]), DEFAULT_MANDATORY_AVOID_LIST);
+	assert.deepEqual(resolveAvoidList(null), DEFAULT_MANDATORY_AVOID_LIST);
+	assert.deepEqual(resolveAvoidList(undefined), DEFAULT_MANDATORY_AVOID_LIST);
+});
 
 test("classifyJumps: returns 0 jumps for empty or single-system routes", () => {
 	assert.deepEqual(classifyJumps([]), { highSecJumps: 0, dangerousJumps: 0 });
