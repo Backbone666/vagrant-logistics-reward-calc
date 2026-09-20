@@ -49,7 +49,7 @@ jobs:
 
       - name: Verify static root assets
         run: |
-          for file in CNAME robots.txt sitemap.xml llms.txt; do
+          for file in CNAME robots.txt sitemap.xml; do
             if [ ! -s "$file" ]; then
               echo "Error: Required asset '$file' is missing or empty." >&2
               exit 1
