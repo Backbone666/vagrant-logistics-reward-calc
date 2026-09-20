@@ -70,13 +70,13 @@
 	"routing": {
 		"primary_engine": "eve-route",
 		"eve_route_api_url": "https://eve-route.vercel.app/api/route",
-		"cors_proxy_gateway": "https://api.cors.lol/?url=",
+		"cors_proxy_gateway": "https://corsproxy-latest.onrender.com/",
 		"cors_proxy_gateways": [
-			"https://api.cors.lol/?url=",
-			"https://api.allorigins.win/raw?url=",
-			"https://api.allorigins.win/get?url="
+			"https://corsproxy-latest.onrender.com/",
+			"https://reef-proxy.onrender.com/get?url=",
+			"https://api.allorigins.win/raw?url="
 		],
-		"proxy_timeout_ms": 6000,
+		"proxy_timeout_ms": 4000,
 		"esi_fallback_enabled": true
 	}
 }

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+	buildProxiedUrl,
 	buildRouteUrl,
 	classifyJumps,
 	DEFAULT_CORS_PROXY_GATEWAY,
@@ -25,8 +26,8 @@ import {
 
 test("route-service constants: threshold and defaults match specs", () => {
 	assert.equal(HIGH_SEC_SECURITY_THRESHOLD, 0.45);
-	assert.equal(DEFAULT_ROUTE_TIMEOUT_MS, 12000);
-	assert.equal(DEFAULT_PROXY_TIMEOUT_MS, 6000);
+	assert.equal(DEFAULT_ROUTE_TIMEOUT_MS, 10000);
+	assert.equal(DEFAULT_PROXY_TIMEOUT_MS, 4000);
 	assert.equal(MAX_SYSTEM_NAME_LENGTH, 50);
 	assert.deepEqual(MANDATORY_AVOID_LIST, DEFAULT_MANDATORY_AVOID_LIST);
 	assert.ok(DEFAULT_CORS_PROXY_GATEWAYS.length >= 2);
@@ -533,7 +534,7 @@ test("fetchWithCorsFallback: transparently retries via CORS proxy on network/COR
 	assert.equal(res.ok, true);
 	assert.equal(calledUrls.length, 2);
 	assert.equal(calledUrls[0], targetUrl);
-	assert.equal(calledUrls[1], `${DEFAULT_CORS_PROXY_GATEWAY}${encodeURIComponent(targetUrl)}`);
+	assert.equal(calledUrls[1], buildProxiedUrl(DEFAULT_CORS_PROXY_GATEWAY, targetUrl));
 });
 
 test("fetchWithCorsFallback: throws RouteUnavailableError when both direct and proxy fail", async () => {
@@ -1202,6 +1203,64 @@ test("fetchEveRoute: falls back to ESI when proxy returns 200 with non-route bod
 	const result = await fetchEveRoute("Jita", "Amarr", {
 		fetch: mockFetch,
 		corsProxyGateways: ["https://api.cors.lol/?url="],
+		highSecSet,
+	});
+
+	assert.equal(esiCalled, true);
+	assert.equal(result.highSecJumps, 1);
+	assert.equal(result.totalJumps, 1);
+});
+
+test("buildProxiedUrl: handles query-based, slash-terminated, and prefix gateways", () => {
+	const target = "https://eve-route.vercel.app/api/route?start=Jita&end=Amarr";
+	const encoded = encodeURIComponent(target);
+
+	assert.equal(
+		buildProxiedUrl("https://reef-proxy.onrender.com/get?url=", target),
+		`https://reef-proxy.onrender.com/get?url=${encoded}`,
+	);
+	assert.equal(
+		buildProxiedUrl("https://corsproxy-latest.onrender.com/", target),
+		`https://corsproxy-latest.onrender.com/${target}`,
+	);
+	assert.equal(
+		buildProxiedUrl("https://corsproxy-latest.onrender.com", target),
+		`https://corsproxy-latest.onrender.com/${target}`,
+	);
+});
+
+test("fetchEveRoute: decoupled ESI fallback succeeds even when proxy times out", async () => {
+	let esiCalled = false;
+	const mockFetch = async (url, options = {}) => {
+		if (url.includes("onrender.com") || url.includes("allorigins")) {
+			// Simulate hanging proxy that times out
+			return new Promise((_, reject) => {
+				const timer = setTimeout(() => reject(new Error("Hanging proxy")), 500);
+				options.signal?.addEventListener("abort", () => {
+					clearTimeout(timer);
+					const err = new Error("Proxy timeout aborted");
+					err.name = "AbortError";
+					reject(err);
+				});
+			});
+		}
+		if (url.includes("esi.evetech.net")) {
+			esiCalled = true;
+			return {
+				ok: true,
+				status: 200,
+				json: async () => [30000142, 30002187],
+			};
+		}
+		throw new Error(`Unexpected url: ${url}`);
+	};
+
+	const highSecSet = new Set([30000142, 30002187]);
+	const result = await fetchEveRoute("Jita", "Amarr", {
+		fetch: mockFetch,
+		proxyTimeoutMs: 50,
+		timeout: 80, // Overall route timeout aborts proxy
+		corsProxyGateways: ["https://corsproxy-latest.onrender.com/"],
 		highSecSet,
 	});
 

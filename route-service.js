@@ -4,7 +4,7 @@
  */
 
 export const HIGH_SEC_SECURITY_THRESHOLD = 0.45;
-export const DEFAULT_ROUTE_TIMEOUT_MS = 12000;
+export const DEFAULT_ROUTE_TIMEOUT_MS = 10000;
 export const MAX_SYSTEM_NAME_LENGTH = 50;
 
 export const DEFAULT_MANDATORY_AVOID_LIST = Object.freeze([
@@ -28,13 +28,27 @@ export function resolveAvoidList(configAvoidList) {
 }
 
 export const EVE_ROUTE_BASE_URL = "https://eve-route.vercel.app";
-export const DEFAULT_CORS_PROXY_GATEWAY = "https://api.cors.lol/?url=";
+export const DEFAULT_CORS_PROXY_GATEWAY = "https://corsproxy-latest.onrender.com/";
 export const DEFAULT_CORS_PROXY_GATEWAYS = Object.freeze([
-	"https://api.cors.lol/?url=",
+	"https://corsproxy-latest.onrender.com/",
+	"https://reef-proxy.onrender.com/get?url=",
 	"https://api.allorigins.win/raw?url=",
-	"https://api.allorigins.win/get?url=",
 ]);
-export const DEFAULT_PROXY_TIMEOUT_MS = 6000;
+export const DEFAULT_PROXY_TIMEOUT_MS = 4000;
+
+/**
+ * Format a proxied URL based on whether the gateway uses query parameters or path prefix.
+ *
+ * @param {string} gateway
+ * @param {string} targetUrl
+ * @returns {string}
+ */
+export function buildProxiedUrl(gateway, targetUrl) {
+	if (gateway.endsWith("=") || gateway.includes("?")) {
+		return `${gateway}${encodeURIComponent(targetUrl)}`;
+	}
+	return gateway.endsWith("/") ? `${gateway}${targetUrl}` : `${gateway}/${targetUrl}`;
+}
 
 export const TRADE_HUB_IDS = Object.freeze({
 	jita: 30000142,
@@ -220,7 +234,11 @@ export async function loadHighSecSystems(dataUrl = "data/highsec-systems.json", 
 				return cachedHighSecSet;
 			}
 			const fetchFn = options.fetch || globalThis.fetch;
-			const res = await fetchFn(dataUrl);
+			const resolvedUrl =
+				typeof window !== "undefined" && window.location?.href
+					? new URL(dataUrl, window.location.href).href
+					: dataUrl;
+			const res = await fetchFn(resolvedUrl);
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
 			const ids = await res.json();
 			cachedHighSecSet = new Set(ids);
@@ -453,7 +471,7 @@ export async function fetchWithCorsFallback(targetUrl, options = {}) {
 			throw abortErr;
 		}
 
-		const proxiedUrl = `${gateway}${encodeURIComponent(targetUrl)}`;
+		const proxiedUrl = buildProxiedUrl(gateway, targetUrl);
 		const perProxyTimeout = AbortSignal.timeout(proxyTimeoutMs);
 		const combined = combineSignals(signal ? [signal, perProxyTimeout] : [perProxyTimeout]);
 
@@ -579,11 +597,24 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 			throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", lastErr);
 		}
 		try {
-			return await fetchEsiRoute(trimmedOrigin, trimmedDestination, {
-				...options,
-				signal,
-				fetch: fetchFn,
-			});
+			if (options.signal?.aborted) {
+				throw options.signal.reason;
+			}
+			const esiTimeoutMs = options.esiTimeout ?? 6000;
+			const esiTimeoutSignal = AbortSignal.timeout(esiTimeoutMs);
+			const esiCombined = options.signal
+				? combineSignals([options.signal, esiTimeoutSignal])
+				: { signal: esiTimeoutSignal, cleanup: () => {} };
+
+			try {
+				return await fetchEsiRoute(trimmedOrigin, trimmedDestination, {
+					...options,
+					signal: esiCombined.signal,
+					fetch: fetchFn,
+				});
+			} finally {
+				esiCombined.cleanup();
+			}
 		} catch (esiErr) {
 			if (esiErr.name === "AbortError" && options.signal?.aborted) {
 				throw esiErr;
