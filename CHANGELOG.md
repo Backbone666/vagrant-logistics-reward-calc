@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.2](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.3.1...v1.3.2) (2026-09-20)
+
+
+### Bug Fixes
+
+* **route:** restore eve-route primary engine with resilient public cors gateway pool and 6s timeout ([cfa3ae0](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/cfa3ae03e607187d8124a626898f4f3d0d0676e4))
+* **route:** set native ccp esi as primary engine and fail over on 401/403 proxy errors ([86a901d](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/86a901d99e274a39885b1a54c004b7890acd9fa5))
+
 ## [1.3.1](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.3.0...v1.3.1) (2026-09-20)
 
 
