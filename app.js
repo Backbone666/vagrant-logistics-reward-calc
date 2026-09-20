@@ -1,14 +1,19 @@
 import { calcRewardDetails, parseNum } from "./calculator.js";
 import { fetchEveRoute, RouteNotFoundError, resolveAvoidList } from "./route-service.js";
+import { attachSystemAutocomplete } from "./system-autocomplete.js";
 
 const collateralInput = document.getElementById("collateral");
 const highsecJumpsInput = document.getElementById("highsec_jumps");
 const dangerousJumpsInput = document.getElementById("dangerous_jumps");
+const jumpsGrid = document.getElementById("jumps_grid");
+const toggleManualJumpsBtn = document.getElementById("toggle_manual_jumps");
 const volumeInput = document.getElementById("volume");
 const rushCheckbox = document.getElementById("rush");
 const forceJfCheckbox = document.getElementById("force_jf");
 const originInput = document.getElementById("origin_system");
 const destinationInput = document.getElementById("destination_system");
+const originList = document.getElementById("origin_system_list");
+const destinationList = document.getElementById("destination_system_list");
 const routeStatus = document.getElementById("route-status");
 
 const rewardOutput = document.getElementById("reward_output");
@@ -350,6 +355,28 @@ function cancelPendingRouteLookup() {
 	}
 }
 
+let isManualJumpEntryEnabled = false;
+
+export function setManualJumpVisibility(show) {
+	isManualJumpEntryEnabled = show;
+	if (jumpsGrid) {
+		jumpsGrid.classList.toggle("hidden", !show);
+	}
+	if (toggleManualJumpsBtn) {
+		toggleManualJumpsBtn.setAttribute("aria-expanded", show ? "true" : "false");
+		toggleManualJumpsBtn.textContent = show ? "Hide manual jumps" : "Enter jumps manually";
+	}
+}
+
+if (toggleManualJumpsBtn) {
+	toggleManualJumpsBtn.addEventListener("click", () => {
+		setManualJumpVisibility(!isManualJumpEntryEnabled);
+		if (isManualJumpEntryEnabled) {
+			highsecJumpsInput?.focus();
+		}
+	});
+}
+
 function handleRouteInputChange() {
 	cancelPendingRouteLookup();
 
@@ -395,9 +422,11 @@ function handleRouteInputChange() {
 			}
 			if (err instanceof RouteNotFoundError || err.code === "NO_ROUTE") {
 				setRouteStatus("warning", "No route found avoiding specified systems");
+				setManualJumpVisibility(true);
 			} else {
 				console.warn("Route lookup unavailable:", err);
 				setRouteStatus("warning", "Route lookup unavailable — manual entry enabled");
+				setManualJumpVisibility(true);
 			}
 		} finally {
 			if (routeAbortController === controller) {
@@ -573,6 +602,7 @@ clearBtn.addEventListener("click", () => {
 	volumeInput.value = "";
 	rushCheckbox.checked = false;
 	forceJfCheckbox.checked = false;
+	setManualJumpVisibility(false);
 	updateAll();
 	if (syncUrlTimeout) {
 		clearTimeout(syncUrlTimeout);
@@ -603,6 +633,12 @@ function initParamsFromUrl() {
 		if (urlParams.has("dj")) {
 			dangerousJumpsInput.value = clampInputVal(urlParams.get("dj"), 0, 100, false);
 		}
+		if (
+			(urlParams.has("hj") && urlParams.get("hj") !== "0") ||
+			(urlParams.has("dj") && urlParams.get("dj") !== "0")
+		) {
+			setManualJumpVisibility(true);
+		}
 		if (urlParams.has("v")) {
 			volumeInput.value = clampInputVal(urlParams.get("v"), 0, 1_500_000, true);
 		}
@@ -627,6 +663,14 @@ function initParamsFromUrl() {
 	} catch (err) {
 		console.warn("Failed to parse URL query parameters defensively:", err);
 	}
+}
+
+// Attach autocomplete to origin and destination inputs
+if (originInput && originList) {
+	attachSystemAutocomplete(originInput, originList);
+}
+if (destinationInput && destinationList) {
+	attachSystemAutocomplete(destinationInput, destinationList);
 }
 
 // Load config dynamically on startup

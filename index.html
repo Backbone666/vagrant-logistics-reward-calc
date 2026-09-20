@@ -204,7 +204,7 @@
             </div>
 
             <div class="route-grid">
-              <div class="input-group">
+              <div class="input-group system-input-group">
                 <label for="origin_system">Origin System</label>
                 <input
                   id="origin_system"
@@ -214,9 +214,20 @@
                   maxlength="50"
                   autocomplete="off"
                   spellcheck="false"
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-expanded="false"
+                  aria-haspopup="listbox"
+                  aria-controls="origin_system_list"
                 />
+                <ul
+                  id="origin_system_list"
+                  class="system-dropdown hidden"
+                  role="listbox"
+                  aria-label="Origin Solar System Suggestions"
+                ></ul>
               </div>
-              <div class="input-group">
+              <div class="input-group system-input-group">
                 <label for="destination_system">Destination System</label>
                 <input
                   id="destination_system"
@@ -226,14 +237,35 @@
                   maxlength="50"
                   autocomplete="off"
                   spellcheck="false"
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-expanded="false"
+                  aria-haspopup="listbox"
+                  aria-controls="destination_system_list"
                 />
+                <ul
+                  id="destination_system_list"
+                  class="system-dropdown hidden"
+                  role="listbox"
+                  aria-label="Destination Solar System Suggestions"
+                ></ul>
               </div>
             </div>
             <div class="route-status-container" aria-live="polite">
               <span id="route-status" class="route-status"></span>
+              <button
+                type="button"
+                id="toggle_manual_jumps"
+                class="btn-manual-toggle"
+                aria-expanded="false"
+                aria-controls="jumps_grid"
+              >
+                Enter jumps manually
+              </button>
             </div>
 
-            <div class="jumps-grid">
+            <!-- Jumps grid: Hidden by default, only shown when manual entry is enabled -->
+            <div class="jumps-grid hidden" id="jumps_grid">
               <div class="input-group">
                 <label for="highsec_jumps">Highsec Jumps</label>
                 <input

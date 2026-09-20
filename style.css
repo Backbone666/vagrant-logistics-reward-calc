@@ -387,11 +387,94 @@ h2 {
 }
 
 .route-status-container {
-	min-height: 1.2rem;
+	min-height: 1.5rem;
 	margin-top: calc(-1 * var(--space-xs));
 	margin-bottom: calc(-1 * var(--space-xs));
 	display: flex;
+	justify-content: space-between;
 	align-items: center;
+}
+
+.btn-manual-toggle {
+	background: transparent;
+	border: none;
+	color: var(--muted-gold);
+	font-family: var(--font-body);
+	font-size: 0.8rem;
+	cursor: pointer;
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	transition: color 150ms ease;
+	padding: 2px 4px;
+	margin-left: auto;
+}
+
+.btn-manual-toggle:hover {
+	color: var(--primary-gold);
+}
+
+.jumps-grid.hidden {
+	display: none;
+}
+
+/* Solar System Autocomplete Combobox */
+.system-input-group {
+	position: relative;
+}
+
+.system-dropdown {
+	position: absolute;
+	top: calc(100% + 4px);
+	left: 0;
+	right: 0;
+	z-index: 50;
+	background: hsla(0, 10%, 5%, 0.96);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	border: 1px solid var(--glass-border);
+	border-radius: var(--radius-md);
+	box-shadow:
+		0 10px 25px rgba(0, 0, 0, 0.7),
+		0 0 12px var(--primary-gold-glow);
+	max-height: 220px;
+	overflow-y: auto;
+	list-style: none;
+	padding: 4px 0;
+	margin: 0;
+}
+
+.system-option {
+	padding: 8px 14px;
+	font-family: var(--font-body);
+	font-size: 0.95rem;
+	color: var(--text-primary);
+	cursor: pointer;
+	transition:
+		background 120ms ease,
+		color 120ms ease;
+	user-select: none;
+}
+
+.system-option:hover,
+.system-option.active {
+	background: hsla(45, 70%, 55%, 0.2);
+	color: var(--bright-gold);
+	border-left: 3px solid var(--primary-gold);
+	padding-left: 11px;
+}
+
+.calculator-card.route-dangerous .system-dropdown {
+	border-color: hsla(28, 90%, 55%, 0.4);
+	box-shadow:
+		0 10px 25px rgba(0, 0, 0, 0.7),
+		0 0 12px var(--warning-glow);
+}
+
+.calculator-card.route-dangerous .system-option:hover,
+.calculator-card.route-dangerous .system-option.active {
+	background: hsla(28, 90%, 55%, 0.2);
+	color: hsl(28, 100%, 75%);
+	border-left-color: var(--warning-amber);
 }
 
 .route-status {
