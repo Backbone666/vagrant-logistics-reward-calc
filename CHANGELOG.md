@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.3.3...v1.4.0) (2026-09-20)
+
+
+### Features
+
+* **route:** support blockade runner thera wormholes and subtle shortcut badge ([48a6bad](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/48a6bad06851a8ccb7711114b4797658a4f61803))
+
 ## [1.3.3](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.3.2...v1.3.3) (2026-09-20)
 
 
