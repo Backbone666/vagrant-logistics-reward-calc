@@ -3,10 +3,12 @@ import test from "node:test";
 import {
 	buildRouteUrl,
 	classifyJumps,
+	DEFAULT_CORS_PROXY_GATEWAY,
 	DEFAULT_MANDATORY_AVOID_LIST,
 	DEFAULT_ROUTE_TIMEOUT_MS,
 	EVE_ROUTE_BASE_URL,
 	fetchEveRoute,
+	fetchWithCorsFallback,
 	HIGH_SEC_SECURITY_THRESHOLD,
 	MANDATORY_AVOID_LIST,
 	MAX_SYSTEM_NAME_LENGTH,
@@ -475,4 +477,127 @@ test("fetchEveRoute: rethrows AbortError when signal is aborted during json body
 			return true;
 		},
 	);
+});
+
+test("fetchWithCorsFallback: uses direct fetch if successful", async () => {
+	const calledUrls = [];
+	const mockFetch = async (url) => {
+		calledUrls.push(url);
+		return {
+			ok: true,
+			status: 200,
+			json: async () => ({ success: true }),
+		};
+	};
+
+	const res = await fetchWithCorsFallback(
+		"https://eve-route.vercel.app/api/route?start=Jita&end=Amarr",
+		{
+			fetch: mockFetch,
+		},
+	);
+	assert.equal(res.ok, true);
+	assert.equal(calledUrls.length, 1);
+	assert.equal(calledUrls[0], "https://eve-route.vercel.app/api/route?start=Jita&end=Amarr");
+});
+
+test("fetchWithCorsFallback: transparently retries via CORS proxy on network/CORS error", async () => {
+	const calledUrls = [];
+	const mockFetch = async (url) => {
+		calledUrls.push(url);
+		if (url.startsWith("https://eve-route.vercel.app")) {
+			// Simulate browser CORS block: TypeError: Failed to fetch / NetworkError
+			throw new TypeError("Failed to fetch (CORS block)");
+		}
+		// Proxy gateway call succeeds
+		return {
+			ok: true,
+			status: 200,
+			json: async () => ({ proxied: true }),
+		};
+	};
+
+	const targetUrl = "https://eve-route.vercel.app/api/route?start=Jita&end=Amarr";
+	const res = await fetchWithCorsFallback(targetUrl, {
+		fetch: mockFetch,
+	});
+
+	assert.equal(res.ok, true);
+	assert.equal(calledUrls.length, 2);
+	assert.equal(calledUrls[0], targetUrl);
+	assert.equal(calledUrls[1], `${DEFAULT_CORS_PROXY_GATEWAY}${encodeURIComponent(targetUrl)}`);
+});
+
+test("fetchWithCorsFallback: throws RouteUnavailableError when both direct and proxy fail", async () => {
+	const mockFetch = async () => {
+		throw new TypeError("Network failed");
+	};
+
+	await assert.rejects(
+		async () => {
+			await fetchWithCorsFallback("https://eve-route.vercel.app/test", {
+				fetch: mockFetch,
+			});
+		},
+		(err) => {
+			assert(err instanceof RouteUnavailableError);
+			return true;
+		},
+	);
+});
+
+test("fetchWithCorsFallback: does not retry proxy if corsProxyGateway is null or empty", async () => {
+	let attempts = 0;
+	const mockFetch = async () => {
+		attempts++;
+		throw new TypeError("Failed to fetch");
+	};
+
+	await assert.rejects(
+		async () => {
+			await fetchWithCorsFallback("https://eve-route.vercel.app/test", {
+				fetch: mockFetch,
+				corsProxyGateway: null,
+			});
+		},
+		(err) => {
+			assert(err instanceof RouteUnavailableError);
+			assert.equal(attempts, 1);
+			return true;
+		},
+	);
+});
+
+test("fetchEveRoute: transparently recovers from CORS error via gateway and classifies jumps", async () => {
+	const mockFetch = async (url) => {
+		if (!url.startsWith(DEFAULT_CORS_PROXY_GATEWAY)) {
+			// Direct call blocked by browser CORS
+			throw new TypeError("Failed to fetch due to CORS");
+		}
+		// Proxy gateway call succeeds with EVE TT payload
+		return {
+			ok: true,
+			status: 200,
+			json: async () => ({
+				summary: {
+					start: "Jita",
+					end: "Amarr",
+					directJumps: 2,
+				},
+				routes: {
+					direct: [
+						{ name: "Jita", security: 0.95 },
+						{ name: "Perimeter", security: 0.95 },
+						{ name: "Ahbazon", security: 0.4 },
+					],
+				},
+			}),
+		};
+	};
+
+	const result = await fetchEveRoute("Jita", "Amarr", { fetch: mockFetch });
+	assert.equal(result.highSecJumps, 1);
+	assert.equal(result.dangerousJumps, 1);
+	assert.equal(result.totalJumps, 2);
+	assert.equal(result.systems.length, 3);
 });
