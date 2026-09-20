@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.0](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.0.1...v1.1.0) (2026-09-20)
+
+
+### Features
+
+* **route:** add real-time solar system autocomplete and progressive manual jump entry ([2f362ca](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/2f362ca5aa3936e8b5384c9ef65b56c03b9e9771))
+* **route:** integrate eve tt routing engine with client-side cors gateway ([c39f8f6](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/c39f8f6dff508dbdc481109b785a6d3b8c5197dc))
+* **route:** serialize origin and destination in url params and decouple avoidance config ([49e4011](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/49e40118b0c01a1152e2d82a051920d67646dc1e))
+* **typography:** implement fonttrio token architecture and tabular numeric layout ([7bc0471](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/7bc04712f7c1932f469e0e234cccb38163ecd35b))
+
 ## [1.0.1](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.0.0...v1.0.1) (2026-09-19)
 
 
