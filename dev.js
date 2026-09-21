@@ -20,7 +20,16 @@ const MIME_TYPES = {
 
 const server = http.createServer((req, res) => {
 	const urlPath = req.url.split("?")[0];
-	const filePath = path.join(__dirname, urlPath === "/" ? "index.html" : urlPath);
+	const target = urlPath === "/" ? "index.html" : urlPath.replace(/^\/+/, "");
+	const filePath = path.resolve(__dirname, target);
+
+	const rootWithSep = __dirname.endsWith(path.sep) ? __dirname : __dirname + path.sep;
+	if (!filePath.startsWith(rootWithSep)) {
+		res.writeHead(403, { "Content-Type": "text/plain" });
+		res.end("403 Forbidden");
+		return;
+	}
+
 	const ext = path.extname(filePath);
 	const contentType = MIME_TYPES[ext] || "application/octet-stream";
 
@@ -34,7 +43,11 @@ const server = http.createServer((req, res) => {
 				res.end(`Server Error: ${err.code}`);
 			}
 		} else {
-			res.writeHead(200, { "Content-Type": contentType });
+			res.writeHead(200, {
+				"Content-Type": contentType,
+				"X-Content-Type-Options": "nosniff",
+				"Access-Control-Allow-Origin": "*",
+			});
 			res.end(content);
 		}
 	});
