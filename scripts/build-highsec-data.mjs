@@ -9,9 +9,9 @@ const OUTPUT_FILE = path.join(ROOT_DIR, "data", "highsec-systems.json");
 
 const BATCH_CONCURRENCY = 60;
 const HIGH_SEC_SECURITY_THRESHOLD = 0.45;
-export const KSPACE_MIN_SYSTEM_ID = 30000000;
-export const KSPACE_MAX_SYSTEM_ID = 31000000;
-export const ZARZAKH_SYSTEM_ID = 30100000;
+const KSPACE_MIN_SYSTEM_ID = 30000000;
+const KSPACE_MAX_SYSTEM_ID = 31000000;
+const ZARZAKH_SYSTEM_ID = 30100000;
 
 export async function fetchKspaceSystemIds({ includeZarzakh = false } = {}) {
 	console.log("Fetching solar systems list from CCP ESI...");
