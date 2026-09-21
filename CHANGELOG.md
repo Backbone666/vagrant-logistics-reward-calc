@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.0](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.4.0...v1.5.0) (2026-09-21)
+
+
+### Features
+
+* **rates:** establish ultra-competitive dangerous space rates, expand DST cap to 5B, and refine JF pricing ([2e3d1ab](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/2e3d1ab08680948d765f5b601c7ca58c4102f543))
+* **route:** default shortest route, display calculated jumps, and lock safe route for freighter volume ([40609af](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/40609af163142a074315c0a31cb007ac79da9ac4))
+
 ## [1.4.0](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.3.3...v1.4.0) (2026-09-20)
 
 
