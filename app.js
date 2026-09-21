@@ -236,6 +236,27 @@ function syncSafeRouteLock(volume) {
 	}
 }
 
+function handleVolumeChange(volumeValue) {
+	const wasOverJf = safeRouteCheckbox?.disabled;
+	syncSafeRouteLock(volumeValue);
+	const isNowOverJf = safeRouteCheckbox?.disabled;
+	const origin = originInput?.value?.trim() || "";
+	const dest = destinationInput?.value?.trim() || "";
+	if (
+		!wasOverJf &&
+		isNowOverJf &&
+		origin &&
+		dest &&
+		typeof checkAndTriggerRouteLookup === "function"
+	) {
+		checkAndTriggerRouteLookup();
+	} else if (lastRouteResult) {
+		applyRouteSelection();
+	} else {
+		updateAll();
+	}
+}
+
 function getFormInputs() {
 	return {
 		volume: volumeInput.value,
@@ -531,6 +552,18 @@ function handleRouteInputChange() {
 	}, ROUTE_DEBOUNCE_MS);
 }
 
+function resolveSystemNames(origin, destination, systems) {
+	if (!systems || systems.length === 0) return true;
+	if (!isKnownSystem(origin, systems) || !isKnownSystem(destination, systems)) {
+		return false;
+	}
+	const matchOrigin = systems.find((s) => s.toLowerCase() === origin.toLowerCase());
+	const matchDest = systems.find((s) => s.toLowerCase() === destination.toLowerCase());
+	if (matchOrigin && originInput.value !== matchOrigin) originInput.value = matchOrigin;
+	if (matchDest && destinationInput.value !== matchDest) destinationInput.value = matchDest;
+	return true;
+}
+
 async function checkAndTriggerRouteLookup() {
 	const origin = originInput?.value?.trim() || "";
 	const destination = destinationInput?.value?.trim() || "";
@@ -541,15 +574,8 @@ async function checkAndTriggerRouteLookup() {
 	}
 
 	const systems = await loadSystemsData();
-	if (systems && systems.length > 0) {
-		if (!isKnownSystem(origin, systems) || !isKnownSystem(destination, systems)) {
-			return;
-		}
-
-		const matchOrigin = systems.find((s) => s.toLowerCase() === origin.toLowerCase());
-		const matchDest = systems.find((s) => s.toLowerCase() === destination.toLowerCase());
-		if (matchOrigin && originInput.value !== matchOrigin) originInput.value = matchOrigin;
-		if (matchDest && destinationInput.value !== matchDest) destinationInput.value = matchDest;
+	if (!resolveSystemNames(origin, destination, systems)) {
+		return;
 	}
 
 	handleRouteInputChange();
@@ -629,24 +655,7 @@ toFormatNumberInputs.forEach((input) => {
 		e.target.setSelectionRange(start + delta, end + delta);
 
 		if (e.target === volumeInput) {
-			const wasOverJf = safeRouteCheckbox?.disabled;
-			syncSafeRouteLock(e.target.value);
-			const isNowOverJf = safeRouteCheckbox?.disabled;
-			const origin = originInput?.value?.trim() || "";
-			const dest = destinationInput?.value?.trim() || "";
-			if (
-				!wasOverJf &&
-				isNowOverJf &&
-				origin &&
-				dest &&
-				typeof checkAndTriggerRouteLookup === "function"
-			) {
-				checkAndTriggerRouteLookup();
-			} else if (lastRouteResult) {
-				applyRouteSelection();
-			} else {
-				updateAll();
-			}
+			handleVolumeChange(e.target.value);
 		} else {
 			updateAll();
 		}
@@ -693,24 +702,7 @@ presetBtns.forEach((btn) => {
 		btn.classList.add("active");
 
 		volumeInput.value = formatNumber(btn.getAttribute("data-val"));
-		const wasOverJf = safeRouteCheckbox?.disabled;
-		syncSafeRouteLock(volumeInput.value);
-		const isNowOverJf = safeRouteCheckbox?.disabled;
-		const origin = originInput?.value?.trim() || "";
-		const dest = destinationInput?.value?.trim() || "";
-		if (
-			!wasOverJf &&
-			isNowOverJf &&
-			origin &&
-			dest &&
-			typeof checkAndTriggerRouteLookup === "function"
-		) {
-			checkAndTriggerRouteLookup();
-		} else if (lastRouteResult) {
-			applyRouteSelection();
-		} else {
-			updateAll();
-		}
+		handleVolumeChange(volumeInput.value);
 	});
 });
 
