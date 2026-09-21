@@ -150,6 +150,7 @@ body::before {
 
 /* Accessibility: Skip to main content link */
 .skip-link {
+	position: fixed;
 	background: var(--deep-burgundy);
 	color: var(--primary-gold);
 	border: 1px solid var(--primary-gold);
@@ -157,6 +158,7 @@ body::before {
 	border-radius: 0 0 var(--radius-md) var(--radius-md);
 	text-decoration: none;
 	font-weight: bold;
+	font-family: var(--font-body);
 	z-index: 1000;
 	top: 0;
 	left: 50%;
@@ -165,9 +167,14 @@ body::before {
 	box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
-.skip-link:focus {
+.skip-link:focus,
+.skip-link:focus-visible {
 	transform: translateX(-50%) translateY(0);
-	outline: none;
+	outline: 2px solid var(--bright-gold);
+	outline-offset: 2px;
+	box-shadow:
+		0 0 15px var(--primary-gold-glow),
+		0 4px 20px rgba(0, 0, 0, 0.8);
 }
 
 .container {

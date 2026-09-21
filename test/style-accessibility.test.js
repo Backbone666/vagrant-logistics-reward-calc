@@ -97,3 +97,21 @@ test("a11y: content text avoids opacity dilution", () => {
 		".fee-breakdown.placeholder-active must not dilute text contrast with low opacity",
 	);
 });
+
+test("a11y: skip-link provides visible keyboard focus without outline: none", () => {
+	assert.match(
+		styleCss,
+		/\.skip-link\s*\{[^}]*position:\s*fixed/s,
+		".skip-link must declare position: fixed for viewport positioning",
+	);
+	assert.match(
+		styleCss,
+		/\.skip-link:(?:focus|focus-visible)\s*\{[^}]*outline:\s*2px\s+solid/s,
+		".skip-link:focus must declare a visible 2px solid outline",
+	);
+	assert.doesNotMatch(
+		styleCss,
+		/\.skip-link:focus\s*\{[^}]*outline:\s*none/s,
+		".skip-link:focus must not suppress focus outline with outline: none",
+	);
+});
