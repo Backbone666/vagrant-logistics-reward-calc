@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { fetchKspaceSystemIds } from "./build-highsec-data.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -8,13 +9,7 @@ const ROOT_DIR = path.resolve(__dirname, "..");
 const OUTPUT_FILE = path.join(ROOT_DIR, "data", "systems.json");
 
 async function main() {
-	console.log("Fetching solar systems list from CCP ESI...");
-	const res = await fetch("https://esi.evetech.net/latest/universe/systems/");
-	if (!res.ok) throw new Error(`Failed to fetch system IDs: HTTP ${res.status}`);
-	const allIds = await res.json();
-
-	// Filter K-space systems (30000000..30999999) plus Zarzakh (30100000)
-	const kspaceIds = allIds.filter((id) => (id >= 30000000 && id < 31000000) || id === 30100000);
+	const kspaceIds = await fetchKspaceSystemIds({ includeZarzakh: true });
 	console.log(`Found ${kspaceIds.length} K-space/Zarzakh system IDs.`);
 
 	const names = [];

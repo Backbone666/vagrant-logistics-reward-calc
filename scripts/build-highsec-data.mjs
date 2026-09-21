@@ -9,6 +9,21 @@ const OUTPUT_FILE = path.join(ROOT_DIR, "data", "highsec-systems.json");
 
 const BATCH_CONCURRENCY = 60;
 const HIGH_SEC_SECURITY_THRESHOLD = 0.45;
+export const KSPACE_MIN_SYSTEM_ID = 30000000;
+export const KSPACE_MAX_SYSTEM_ID = 31000000;
+export const ZARZAKH_SYSTEM_ID = 30100000;
+
+export async function fetchKspaceSystemIds({ includeZarzakh = false } = {}) {
+	console.log("Fetching solar systems list from CCP ESI...");
+	const res = await fetch("https://esi.evetech.net/latest/universe/systems/");
+	if (!res.ok) throw new Error(`Failed to fetch system IDs: HTTP ${res.status}`);
+	const allIds = await res.json();
+	return allIds.filter(
+		(id) =>
+			(id >= KSPACE_MIN_SYSTEM_ID && id < KSPACE_MAX_SYSTEM_ID) ||
+			(includeZarzakh && id === ZARZAKH_SYSTEM_ID),
+	);
+}
 
 async function fetchSystemWithRetry(id, retries = 3) {
 	for (let attempt = 0; attempt < retries; attempt++) {
@@ -24,13 +39,7 @@ async function fetchSystemWithRetry(id, retries = 3) {
 }
 
 async function main() {
-	console.log("Fetching solar systems list from CCP ESI...");
-	const res = await fetch("https://esi.evetech.net/latest/universe/systems/");
-	if (!res.ok) throw new Error(`Failed to fetch system IDs: HTTP ${res.status}`);
-	const allIds = await res.json();
-
-	// Filter K-space systems (30000000..30999999)
-	const kspaceIds = allIds.filter((id) => id >= 30000000 && id < 31000000);
+	const kspaceIds = await fetchKspaceSystemIds({ includeZarzakh: false });
 	console.log(`Scanning security status for ${kspaceIds.length} K-space systems...`);
 
 	const highSecSystemIds = [];
