@@ -223,16 +223,25 @@ function syncSafeRouteLock(volume) {
 	const parsedVolume = parseNum(volume);
 	const isOverJfVolume = parsedVolume > JUMP_FREIGHTER_MAX_VOLUME;
 
+	const lockTooltip =
+		"Safe Route (High-Sec only) enforced: Volume exceeds Jump Freighter capacity (360,000 m³). Freighters cannot traverse dangerous space.";
 	if (isOverJfVolume) {
 		safeRouteCheckbox.checked = true;
 		safeRouteCheckbox.disabled = true;
-		safeRouteCheckbox.parentElement?.classList.add("locked");
-		safeRouteCheckbox.title =
-			"Safe Route (High-Sec only) enforced: Volume exceeds Jump Freighter capacity (360,000 m³). Freighters cannot traverse dangerous space.";
+		safeRouteCheckbox.setAttribute("aria-disabled", "true");
+		safeRouteCheckbox.title = lockTooltip;
+		if (safeRouteCheckbox.parentElement) {
+			safeRouteCheckbox.parentElement.classList.add("locked");
+			safeRouteCheckbox.parentElement.title = lockTooltip;
+		}
 	} else {
 		safeRouteCheckbox.disabled = false;
-		safeRouteCheckbox.parentElement?.classList.remove("locked");
+		safeRouteCheckbox.removeAttribute("aria-disabled");
 		safeRouteCheckbox.removeAttribute("title");
+		if (safeRouteCheckbox.parentElement) {
+			safeRouteCheckbox.parentElement.classList.remove("locked");
+			safeRouteCheckbox.parentElement.removeAttribute("title");
+		}
 	}
 }
 

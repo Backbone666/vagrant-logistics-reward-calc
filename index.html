@@ -289,8 +289,8 @@
             <div class="route-status-container" aria-live="polite">
               <div class="route-status-group">
                 <span id="route-status" class="route-status"></span>
-                <span id="route-jumps-summary" class="route-jumps-summary hidden" role="status"></span>
-                <span id="thera-badge" class="thera-badge hidden" role="status"></span>
+                <span id="route-jumps-summary" class="route-jumps-summary hidden"></span>
+                <span id="thera-badge" class="thera-badge hidden"></span>
               </div>
               <button
                 type="button"
@@ -366,10 +366,11 @@
 
             <div class="checkbox-group">
               <label class="checkbox-item">
-                <input type="checkbox" id="safe_route" name="safe_route" class="to_change" />
+                <input type="checkbox" id="safe_route" name="safe_route" class="to_change" aria-describedby="safe_route_hint" />
                 <span class="checkbox-custom"></span>
                 Safe Route (Prefer Highsec)
               </label>
+              <span id="safe_route_hint" class="sr-only">Safe Route is locked to high-sec only when volume exceeds Jump Freighter capacity (360,000 m³).</span>
               <label class="checkbox-item">
                 <input type="checkbox" id="force_jf" name="force_jf" class="to_change" />
                 <span class="checkbox-custom"></span>
@@ -378,7 +379,8 @@
             </div>
           </section>
 
-          <section class="result-area" aria-live="polite" aria-atomic="true">
+          <section class="result-area" aria-labelledby="result-area-title" aria-live="polite" aria-atomic="true">
+            <h3 id="result-area-title" class="sr-only">Quote and Calculation Breakdown</h3>
             <div class="reward-display">
               <div class="reward-label" id="reward-label">Estimated Reward</div>
               <div id="reward_output" class="reward-value" aria-labelledby="reward-label">0 ISK</div>
@@ -486,7 +488,7 @@
         </div>
       </section>
 
-      <footer class="footer">
+      <footer class="footer" aria-label="Alliance affiliation">
         <img
           src="https://images.evetech.net/alliances/99011546/logo"
           alt="The Charter Logo"
@@ -499,7 +501,7 @@
         <span>Member of The Charter</span>
       </footer>
 
-      <footer class="legal-footer">
+      <footer class="legal-footer" aria-label="Legal notices and copyright">
         <small>
           <p>
             EVE Online and the EVE logo are the registered trademarks of
