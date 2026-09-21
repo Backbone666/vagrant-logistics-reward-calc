@@ -42,7 +42,8 @@
 		"EveSansNeue", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
 		sans-serif;
 	--font-mono:
-		"JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+		ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+		monospace;
 	--font-numeric: var(--font-body);
 
 	/* Backwards-compatible alias for existing selectors */
