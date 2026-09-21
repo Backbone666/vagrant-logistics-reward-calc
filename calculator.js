@@ -59,6 +59,36 @@ function calcJfCollateralSurcharge(parsedCollateral) {
 	return parsedCollateral * 0.006;
 }
 
+function createRewardResult({
+	isRedirect = false,
+	redirectTarget = "",
+	total = 0,
+	baseFee = 0,
+	distanceFee = 0,
+	collateralFee = 0,
+	multiplier = 1.0,
+	surcharge = 0,
+	serviceClass = "",
+	hullClass = "Standard Sub-Capital",
+}) {
+	return {
+		isRedirect,
+		redirectTarget,
+		total,
+		baseFee,
+		distanceFee,
+		collateralFee,
+		multiplier,
+		surcharge,
+		serviceClass,
+		serviceName: hullClass || "Standard Sub-Capital",
+		distanceLabel: serviceClass?.includes("jump_freighter")
+			? "Distance Cyno Fee:"
+			: "Distance Jump Fee:",
+		finalTotal: Math.max(1_000_000, Math.ceil(total)),
+	};
+}
+
 function calcStargateRouteReward({
 	service,
 	parsedHighsecJumps,
@@ -89,22 +119,16 @@ function calcStargateRouteReward({
 
 	const total = baseRate + distanceFee + collateralFee;
 
-	return {
+	return createRewardResult({
 		isRedirect,
 		redirectTarget: isRedirect ? "Risako Hirano" : "",
 		total,
 		baseFee: baseRate,
 		distanceFee,
 		collateralFee,
-		multiplier: 1.0,
-		surcharge: 0,
 		serviceClass,
-		serviceName: service.hull_class || "Standard Sub-Capital",
-		distanceLabel: serviceClass?.includes("jump_freighter")
-			? "Distance Cyno Fee:"
-			: "Distance Jump Fee:",
-		finalTotal: Math.max(1_000_000, Math.ceil(total)),
-	};
+		hullClass: service.hull_class,
+	});
 }
 
 function calcHighsecReward({ service, parsedHighsecJumps, parsedCollateral, serviceClass }) {
@@ -133,7 +157,7 @@ function calcHighsecReward({ service, parsedHighsecJumps, parsedCollateral, serv
 	const collateralFee = baseFee * (multiplier - 1) + surcharge;
 	const total = baseFee + collateralFee;
 
-	return {
+	return createRewardResult({
 		isRedirect,
 		redirectTarget,
 		total,
@@ -143,12 +167,8 @@ function calcHighsecReward({ service, parsedHighsecJumps, parsedCollateral, serv
 		multiplier,
 		surcharge,
 		serviceClass,
-		serviceName: service.hull_class || "Standard Sub-Capital",
-		distanceLabel: serviceClass?.includes("jump_freighter")
-			? "Distance Cyno Fee:"
-			: "Distance Jump Fee:",
-		finalTotal: Math.max(1_000_000, Math.ceil(total)),
-	};
+		hullClass: service.hull_class,
+	});
 }
 
 function calcJumpFreighterReward({
@@ -176,22 +196,16 @@ function calcJumpFreighterReward({
 
 	const total = baseFee + distanceFee + collateralFee;
 
-	return {
+	return createRewardResult({
 		isRedirect,
 		redirectTarget: isRedirect ? "Executive Review" : "",
 		total,
 		baseFee,
 		distanceFee,
 		collateralFee,
-		multiplier: 1.0,
-		surcharge: 0,
 		serviceClass,
-		serviceName: service.hull_class || "Standard Sub-Capital",
-		distanceLabel: serviceClass?.includes("jump_freighter")
-			? "Distance Cyno Fee:"
-			: "Distance Jump Fee:",
-		finalTotal: Math.max(1_000_000, Math.ceil(total)),
-	};
+		hullClass: service.hull_class,
+	});
 }
 function createErrorResult(message) {
 	return {
