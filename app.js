@@ -49,9 +49,13 @@ let config = null;
 let lastRouteResult = null;
 
 const FALLBACK_CONFIG = {
+	service_provider: "Vagrant Logistics",
+	effective_period: "2026_2027",
+	currency: "ISK",
 	highsec_services: {
 		blockade_runner_dst: {
 			hull_class: "BR / DST Highsec Standard",
+			max_volume_m3: 62500,
 			base_rate_per_jump: 1500000,
 			minimum_contract_fee: 4500000,
 			collateral_brackets: [
@@ -68,6 +72,7 @@ const FALLBACK_CONFIG = {
 		},
 		freighter_standard: {
 			hull_class: "Freighter / Bowhead / Avalanche",
+			max_volume_m3: 1125000,
 			base_rate_per_jump: 1750000,
 			minimum_contract_fee: 10000000,
 			collateral_brackets: [
@@ -80,26 +85,66 @@ const FALLBACK_CONFIG = {
 	dangerous_space_services: {
 		blockade_runner_stargate: {
 			hull_class: "Blockade Runner",
+			max_volume_m3: 12500,
 			base_rate_isk: 10000000,
-			base_rate_per_jump_dangerous: 2000000,
-			base_rate_per_jump_highsec: 1500000,
+			base_rate_per_jump_dangerous: 1800000,
+			base_rate_per_jump_highsec: 1200000,
 			max_collateral_isk: 5000000000,
 		},
 		scouted_dst_stargate: {
 			hull_class: "Deep Space Transport",
+			max_volume_m3: 62500,
 			base_rate_isk: 20000000,
-			base_rate_per_jump_dangerous: 5000000,
-			base_rate_per_jump_highsec: 2000000,
-			max_collateral_isk: 3000000000,
+			base_rate_per_jump_dangerous: 4500000,
+			base_rate_per_jump_highsec: 1500000,
+			max_collateral_isk: 5000000000,
 		},
 		jump_freighter_standard: {
 			hull_class: "Jump Freighter",
-			base_rate_isk: 150000000,
-			cyno_jump_fee_isk: 35000000,
+			max_volume_m3: 360000,
+			base_rate_isk: 160000000,
+			cyno_jump_fee_isk: 40000000,
 			max_collateral_isk: 50000000000,
 		},
 	},
-	operational_modifiers: {},
+	dangerous_collateral_rules: {
+		blockade_runner: [
+			{ max_collateral_isk: 1000000000, rate: 0.0 },
+			{ max_collateral_isk: 3000000000, rate: 0.002 },
+			{ max_collateral_isk: 5000000000, rate: 0.004 },
+		],
+		scouted_dst: [
+			{ max_collateral_isk: 1000000000, rate: 0.0 },
+			{ max_collateral_isk: 3000000000, rate: 0.003 },
+			{ max_collateral_isk: 5000000000, rate: 0.005 },
+		],
+		jump_freighter: [
+			{ max_collateral_isk: 2000000000, rate: 0.0 },
+			{ max_collateral_isk: 10000000000, rate: 0.004 },
+			{ max_collateral_isk: 50000000000, rate: 0.006 },
+		],
+	},
+	mandatory_avoid_systems: [
+		"Zarzakh",
+		"Ahbazon",
+		"Rancer",
+		"Hagilur",
+		"Siseide",
+		"Tama",
+		"Aunenen",
+	],
+	routing: {
+		primary_engine: "eve-route",
+		eve_route_api_url: "https://eve-route.vercel.app/api/route",
+		cors_proxy_gateway: "https://corsproxy-latest.onrender.com/",
+		cors_proxy_gateways: [
+			"https://corsproxy-latest.onrender.com/",
+			"https://reef-proxy.onrender.com/get?url=",
+			"https://api.allorigins.win/raw?url=",
+		],
+		proxy_timeout_ms: 4000,
+		esi_fallback_enabled: true,
+	},
 };
 
 // Fetch dynamic configuration
@@ -159,7 +204,7 @@ function syncUrlParams(options) {
 		hj: options.highsecJumps.replace(/,/g, ""),
 		dj: options.dangerousJumps.replace(/,/g, ""),
 		v: options.volume.replace(/,/g, ""),
-		sr: options.safeRoute === false ? "0" : "",
+		sr: options.safeRoute ? "1" : "",
 		jf: options.forceJF ? "1" : "",
 		from: options.origin || "",
 		to: options.destination || "",

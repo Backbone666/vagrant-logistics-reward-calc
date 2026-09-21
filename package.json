@@ -8,8 +8,8 @@
 	},
 	"scripts": {
 		"dev": "node dev.js",
-		"test": "node --test test/calculator.test.js test/route-service.test.js test/system-autocomplete.test.js test/style-accessibility.test.js test/config-storage.test.js",
-		"test:coverage": "node --experimental-test-coverage --test test/calculator.test.js test/route-service.test.js test/system-autocomplete.test.js test/style-accessibility.test.js test/config-storage.test.js",
+		"test": "node --test test/calculator.test.js test/route-service.test.js test/system-autocomplete.test.js test/style-accessibility.test.js test/config-storage.test.js test/url-params.test.js",
+		"test:coverage": "node --experimental-test-coverage --test test/calculator.test.js test/route-service.test.js test/system-autocomplete.test.js test/style-accessibility.test.js test/config-storage.test.js test/url-params.test.js",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",
 		"format": "biome format --write .",
