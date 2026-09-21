@@ -2,8 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
 	attachSystemAutocomplete,
+	buildCanonicalSystemMap,
 	findMatchingSystems,
+	getCanonicalSystemMap,
 	isKnownSystem,
+	loadSystemsData,
 } from "../system-autocomplete.js";
 
 const SAMPLE_SYSTEMS = [
@@ -366,5 +369,43 @@ test("attachSystemAutocomplete: pressing Enter with partial match dismisses drop
 		assert.equal(inputEl.getAttribute("aria-expanded"), "false");
 	} finally {
 		globalThis.document = prevDoc;
+	}
+});
+
+test("buildCanonicalSystemMap: builds lowercased-to-canonical mapping", () => {
+	const systems = ["Jita", "Amarr", "1DQ1-A"];
+	const map = buildCanonicalSystemMap(systems);
+	assert.equal(map.get("jita"), "Jita");
+	assert.equal(map.get("amarr"), "Amarr");
+	assert.equal(map.get("1dq1-a"), "1DQ1-A");
+});
+
+test("isKnownSystem: supports Set and Map instances for O(1) synchronous lookup", () => {
+	const systemSet = new Set(["jita", "amarr", "1dq1-a"]);
+	const systemMap = new Map([
+		["jita", "Jita"],
+		["amarr", "Amarr"],
+	]);
+	assert.equal(isKnownSystem("Jita", systemSet), true);
+	assert.equal(isKnownSystem("amarr", systemSet), true);
+	assert.equal(isKnownSystem("Rens", systemSet), false);
+	assert.equal(isKnownSystem("Jita", systemMap), true);
+	assert.equal(isKnownSystem("Rens", systemMap), false);
+});
+
+test("isKnownSystem: utilizes cachedCanonicalMap when called without second argument", async () => {
+	const originalFetch = globalThis.fetch;
+	globalThis.fetch = async () => ({
+		ok: true,
+		json: async () => ["Jita", "Amarr", "1DQ1-A"],
+	});
+	try {
+		await loadSystemsData();
+		assert.ok(getCanonicalSystemMap() instanceof Map);
+		assert.equal(isKnownSystem("Jita"), true);
+		assert.equal(isKnownSystem("jita"), true);
+		assert.equal(isKnownSystem("Rens"), false);
+	} finally {
+		globalThis.fetch = originalFetch;
 	}
 });

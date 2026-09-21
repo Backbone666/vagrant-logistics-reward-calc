@@ -7,7 +7,12 @@ import {
 	resolveAvoidList,
 	selectRouteForVolume,
 } from "./route-service.js";
-import { attachSystemAutocomplete, isKnownSystem, loadSystemsData } from "./system-autocomplete.js";
+import {
+	attachSystemAutocomplete,
+	getCanonicalSystemMap,
+	isKnownSystem,
+	loadSystemsData,
+} from "./system-autocomplete.js";
 
 const collateralInput = document.getElementById("collateral");
 const highsecJumpsInput = document.getElementById("highsec_jumps");
@@ -608,8 +613,13 @@ function resolveSystemNames(origin, destination, systems) {
 	if (!isKnownSystem(origin, systems) || !isKnownSystem(destination, systems)) {
 		return false;
 	}
-	const matchOrigin = systems.find((s) => s.toLowerCase() === origin.toLowerCase());
-	const matchDest = systems.find((s) => s.toLowerCase() === destination.toLowerCase());
+	const canonicalMap = getCanonicalSystemMap();
+	const normOrigin = origin.toLowerCase();
+	const normDest = destination.toLowerCase();
+
+	const matchOrigin = canonicalMap?.get(normOrigin) || null;
+	const matchDest = canonicalMap?.get(normDest) || null;
+
 	if (matchOrigin && originInput.value !== matchOrigin) originInput.value = matchOrigin;
 	if (matchDest && destinationInput.value !== matchDest) destinationInput.value = matchDest;
 	return true;

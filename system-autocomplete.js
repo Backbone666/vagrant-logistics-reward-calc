@@ -54,17 +54,47 @@ export function findMatchingSystems(query, systems, limit = 8) {
  * @param {string[]} systems
  * @returns {boolean}
  */
+let cachedSystems = null;
+let cachedCanonicalMap = null;
+let systemsFetchPromise = null;
+
+export function buildCanonicalSystemMap(systems) {
+	if (systems instanceof Map) return systems;
+	if (!Array.isArray(systems)) return new Map();
+	const map = new Map();
+	for (const s of systems) {
+		if (typeof s === "string") {
+			map.set(s.toLowerCase(), s);
+		}
+	}
+	return map;
+}
+
+export function getCanonicalSystemMap() {
+	return cachedCanonicalMap;
+}
+
 export function isKnownSystem(name, systems) {
-	if (!name || typeof name !== "string" || !Array.isArray(systems)) {
+	if (!name || typeof name !== "string") {
 		return false;
 	}
 	const clean = name.trim().toLowerCase();
 	if (!clean) return false;
+
+	if (systems instanceof Set || systems instanceof Map) {
+		return systems.has(clean);
+	}
+
+	if (cachedCanonicalMap && (systems === cachedSystems || !systems)) {
+		return cachedCanonicalMap.has(clean);
+	}
+
+	if (!Array.isArray(systems)) {
+		return false;
+	}
+
 	return systems.some((s) => typeof s === "string" && s.toLowerCase() === clean);
 }
-
-let cachedSystems = null;
-let systemsFetchPromise = null;
 
 /**
  * Lazily load New Eden systems dataset once.
@@ -80,7 +110,9 @@ export async function loadSystemsData(dataUrl = "data/systems.json") {
 		try {
 			const res = await fetch(dataUrl);
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
-			cachedSystems = await res.json();
+			const data = await res.json();
+			cachedSystems = data;
+			cachedCanonicalMap = buildCanonicalSystemMap(data);
 			return cachedSystems;
 		} catch (err) {
 			console.warn("Failed to load systems dataset for autocomplete:", err);
