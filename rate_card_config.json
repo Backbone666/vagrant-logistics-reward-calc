@@ -74,7 +74,6 @@
 			{ "max_collateral_isk": 50000000000, "rate": 0.006 }
 		]
 	},
-	"operational_modifiers": {},
 	"mandatory_avoid_systems": [
 		"Zarzakh",
 		"Ahbazon",

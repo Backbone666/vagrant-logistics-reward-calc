@@ -145,7 +145,6 @@ test("Test 12: Empty config fallback branches", () => {
 	const emptyConfig = {
 		highsec_services: {},
 		dangerous_space_services: {},
-		operational_modifiers: {},
 	};
 
 	// Trigger hsBrDst fallback
@@ -197,7 +196,6 @@ test("Test 14: Empty config fallback branches", () => {
 	const emptyConfig = {
 		highsec_services: {},
 		dangerous_space_services: {},
-		operational_modifiers: {},
 	};
 
 	// Trigger hsBrDst fallback
@@ -234,7 +232,6 @@ test("Test 15: Various edge cases for 100% coverage", () => {
 	const emptyConfig = {
 		highsec_services: {},
 		dangerous_space_services: {},
-		operational_modifiers: {},
 	};
 
 	// JF > 50B with empty config
@@ -640,4 +637,122 @@ test("Test 17: Jump Freighter Multi-Tier Collateral Brackets (Free <=2B, 0.4% 2B
 		config,
 	);
 	assert.equal(jfTier3, 500_000_000);
+});
+
+test("calcRewardDetails: calculates collateral surcharge tiers for dangerous space routes", () => {
+	// Blockade Runner (volume <= 12.5k): <=1B (0%), 1B-3B (0.2%), 3B-5B (0.4%)
+	const brZero = calcRewardDetails({
+		volume: "10,000",
+		highsecJumps: "0",
+		dangerousJumps: "1",
+		collateral: "1,000,000,000",
+		config,
+	});
+	assert.equal(brZero.collateralFee, 0);
+
+	const brTier1 = calcRewardDetails({
+		volume: "10,000",
+		highsecJumps: "0",
+		dangerousJumps: "1",
+		collateral: "2,000,000,000",
+		config,
+	});
+	assert.equal(brTier1.collateralFee, 4_000_000); // 2B * 0.002
+
+	const brTier2 = calcRewardDetails({
+		volume: "10,000",
+		highsecJumps: "0",
+		dangerousJumps: "1",
+		collateral: "4,000,000,000",
+		config,
+	});
+	assert.equal(brTier2.collateralFee, 16_000_000); // 4B * 0.004
+
+	// Deep Space Transport (volume <= 62.5k): <=1B (0%), 1B-3B (0.3%), 3B-5B (0.5%)
+	const dstZero = calcRewardDetails({
+		volume: "50,000",
+		highsecJumps: "0",
+		dangerousJumps: "1",
+		collateral: "1,000,000,000",
+		config,
+	});
+	assert.equal(dstZero.collateralFee, 0);
+
+	const dstTier1 = calcRewardDetails({
+		volume: "50,000",
+		highsecJumps: "0",
+		dangerousJumps: "1",
+		collateral: "2,000,000,000",
+		config,
+	});
+	assert.equal(dstTier1.collateralFee, 6_000_000); // 2B * 0.003
+
+	const dstTier2 = calcRewardDetails({
+		volume: "50,000",
+		highsecJumps: "0",
+		dangerousJumps: "1",
+		collateral: "4,000,000,000",
+		config,
+	});
+	assert.equal(dstTier2.collateralFee, 20_000_000); // 4B * 0.005
+
+	// Jump Freighter (forceJF or bulk volume): <=2B (0%), 2B-10B (0.4%), 10B-50B (0.6%)
+	const jfZero = calcRewardDetails({
+		volume: "300,000",
+		highsecJumps: "0",
+		dangerousJumps: "1",
+		collateral: "2,000,000,000",
+		config,
+	});
+	assert.equal(jfZero.collateralFee, 0);
+
+	const jfTier1 = calcRewardDetails({
+		volume: "300,000",
+		highsecJumps: "0",
+		dangerousJumps: "1",
+		collateral: "5,000,000,000",
+		config,
+	});
+	assert.equal(jfTier1.collateralFee, 20_000_000); // 5B * 0.004
+
+	const jfTier2 = calcRewardDetails({
+		volume: "300,000",
+		highsecJumps: "0",
+		dangerousJumps: "1",
+		collateral: "20,000,000,000",
+		config,
+	});
+	assert.equal(jfTier2.collateralFee, 120_000_000); // 20B * 0.006
+});
+
+test("calcRewardDetails: handles empty or non-array collateral rules gracefully", () => {
+	// Empty array rules trigger defensive guard (!Array.isArray(rules) || rules.length === 0)
+	const emptyRulesResult = calcRewardDetails({
+		volume: "10,000",
+		highsecJumps: "0",
+		dangerousJumps: "1",
+		collateral: "2,000,000,000",
+		config: {
+			...config,
+			dangerous_collateral_rules: {
+				blockade_runner: [],
+			},
+		},
+	});
+	assert.equal(emptyRulesResult.collateralFee, 0);
+
+	// Non-array rules trigger !Array.isArray(rules) guard
+	const nonArrayRulesResult = calcRewardDetails({
+		volume: "10,000",
+		highsecJumps: "0",
+		dangerousJumps: "1",
+		collateral: "2,000,000,000",
+		config: {
+			...config,
+			dangerous_collateral_rules: {
+				blockade_runner: "invalid",
+			},
+		},
+	});
+	assert.equal(nonArrayRulesResult.collateralFee, 0);
 });

@@ -41,22 +41,32 @@ function findCollateralBracket(service, parsedCollateral) {
 	return brackets.find((b) => parsedCollateral <= b.max_collateral_isk);
 }
 
-function calcBrCollateralSurcharge(parsedCollateral) {
-	if (parsedCollateral <= 1_000_000_000) return 0;
-	if (parsedCollateral <= 3_000_000_000) return parsedCollateral * 0.002;
-	return parsedCollateral * 0.004;
-}
+const DEFAULT_COLLATERAL_RULES = Object.freeze({
+	blockade_runner: [
+		{ max_collateral_isk: 1_000_000_000, rate: 0.0 },
+		{ max_collateral_isk: 3_000_000_000, rate: 0.002 },
+		{ max_collateral_isk: 5_000_000_000, rate: 0.004 },
+	],
+	scouted_dst: [
+		{ max_collateral_isk: 1_000_000_000, rate: 0.0 },
+		{ max_collateral_isk: 3_000_000_000, rate: 0.003 },
+		{ max_collateral_isk: 5_000_000_000, rate: 0.005 },
+	],
+	jump_freighter: [
+		{ max_collateral_isk: 2_000_000_000, rate: 0.0 },
+		{ max_collateral_isk: 10_000_000_000, rate: 0.004 },
+		{ max_collateral_isk: 50_000_000_000, rate: 0.006 },
+	],
+});
 
-function calcDstCollateralSurcharge(parsedCollateral) {
-	if (parsedCollateral <= 1_000_000_000) return 0;
-	if (parsedCollateral <= 3_000_000_000) return parsedCollateral * 0.003;
-	return parsedCollateral * 0.005;
-}
-
-function calcJfCollateralSurcharge(parsedCollateral) {
-	if (parsedCollateral <= 2_000_000_000) return 0;
-	if (parsedCollateral <= 10_000_000_000) return parsedCollateral * 0.004;
-	return parsedCollateral * 0.006;
+function calcCollateralSurcharge(parsedCollateral, rules) {
+	if (!Array.isArray(rules) || rules.length === 0) return 0;
+	const matched = rules.find((b) => parsedCollateral <= b.max_collateral_isk);
+	if (matched) {
+		return parsedCollateral * (matched.rate ?? 0);
+	}
+	const highest = rules[rules.length - 1];
+	return parsedCollateral * (highest?.rate ?? 0);
 }
 
 function createRewardResult({
@@ -96,6 +106,7 @@ function calcStargateRouteReward({
 	parsedCollateral,
 	serviceClass,
 	maxCollateral,
+	collateralRules,
 }) {
 	let isRedirect = false;
 	if (parsedCollateral > (service.max_collateral_isk || maxCollateral || 5_000_000_000)) {
@@ -110,11 +121,9 @@ function calcStargateRouteReward({
 
 	let collateralFee = 0;
 	if (!isRedirect) {
-		if (serviceClass?.includes("blockade_runner")) {
-			collateralFee = calcBrCollateralSurcharge(parsedCollateral);
-		} else {
-			collateralFee = calcDstCollateralSurcharge(parsedCollateral);
-		}
+		const rulesKey = serviceClass?.includes("blockade_runner") ? "blockade_runner" : "scouted_dst";
+		const rules = collateralRules?.[rulesKey] || DEFAULT_COLLATERAL_RULES[rulesKey];
+		collateralFee = calcCollateralSurcharge(parsedCollateral, rules);
 	}
 
 	const total = baseRate + distanceFee + collateralFee;
@@ -176,6 +185,7 @@ function calcJumpFreighterReward({
 	parsedDangerousJumps,
 	parsedCollateral,
 	serviceClass,
+	collateralRules,
 }) {
 	const service = dangerousConfig.jump_freighter_standard || {};
 	const jfBase = service.base_rate_isk || 0;
@@ -191,7 +201,8 @@ function calcJumpFreighterReward({
 
 	let collateralFee = 0;
 	if (!isRedirect) {
-		collateralFee = calcJfCollateralSurcharge(parsedCollateral);
+		const rules = collateralRules?.jump_freighter || DEFAULT_COLLATERAL_RULES.jump_freighter;
+		collateralFee = calcCollateralSurcharge(parsedCollateral, rules);
 	}
 
 	const total = baseFee + distanceFee + collateralFee;
@@ -295,6 +306,7 @@ export function calcRewardDetails(options, configOpt) {
 			parsedCollateral,
 			serviceClass,
 			maxCollateral: 5_000_000_000,
+			collateralRules: config.dangerous_collateral_rules,
 		});
 	}
 
@@ -307,6 +319,7 @@ export function calcRewardDetails(options, configOpt) {
 			parsedCollateral,
 			serviceClass,
 			maxCollateral: 5_000_000_000,
+			collateralRules: config.dangerous_collateral_rules,
 		});
 	}
 
@@ -316,6 +329,7 @@ export function calcRewardDetails(options, configOpt) {
 			parsedDangerousJumps,
 			parsedCollateral,
 			serviceClass,
+			collateralRules: config.dangerous_collateral_rules,
 		});
 	}
 
