@@ -397,7 +397,7 @@ function cancelPendingRouteLookup() {
 
 let isManualJumpEntryEnabled = false;
 
-export function setManualJumpVisibility(show) {
+function setManualJumpVisibility(show) {
 	isManualJumpEntryEnabled = show;
 	if (jumpsGrid) {
 		jumpsGrid.classList.toggle("hidden", !show);
@@ -440,7 +440,7 @@ function updateTheraBadge(selection) {
 	}
 }
 
-export function applyRouteSelection() {
+function applyRouteSelection() {
 	if (!lastRouteResult) return;
 	const selection = selectRouteForVolume(lastRouteResult, volumeInput?.value);
 	if (!selection.selectedRoute) return;
@@ -531,7 +531,7 @@ function handleRouteInputChange() {
 	}, ROUTE_DEBOUNCE_MS);
 }
 
-export async function checkAndTriggerRouteLookup() {
+async function checkAndTriggerRouteLookup() {
 	const origin = originInput?.value?.trim() || "";
 	const destination = destinationInput?.value?.trim() || "";
 

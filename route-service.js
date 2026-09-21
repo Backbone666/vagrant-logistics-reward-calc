@@ -119,7 +119,8 @@ export const TRADE_HUB_IDS = Object.freeze({
 	perimeter: 30000144,
 });
 
-export const AVOID_SYSTEM_IDS = Object.freeze({
+/** @internal Encapsulated high-risk choke point IDs */
+const AVOID_SYSTEM_IDS = Object.freeze({
 	zarzakh: 30100000,
 	ahbazon: 30005196,
 	rancer: 30002718,
@@ -129,7 +130,8 @@ export const AVOID_SYSTEM_IDS = Object.freeze({
 	aunenen: 30001398,
 });
 
-export const SYSTEM_ID_CACHE = new Map();
+/** @internal Encapsulated solar system ID lookup cache */
+const SYSTEM_ID_CACHE = new Map();
 
 for (const [name, id] of Object.entries(TRADE_HUB_IDS)) {
 	SYSTEM_ID_CACHE.set(name.toLowerCase(), id);
