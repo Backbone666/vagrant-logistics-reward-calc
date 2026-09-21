@@ -1,4 +1,5 @@
 import { calcRewardDetails, parseNum } from "./calculator.js";
+import { loadCachedConfig, saveCachedConfig } from "./config-storage.js";
 import {
 	fetchEveRoute,
 	JUMP_FREIGHTER_MAX_VOLUME,
@@ -112,11 +113,7 @@ async function loadConfig() {
 			throw new Error(`HTTP error! status: ${response.status}`);
 		}
 		config = await response.json();
-		try {
-			localStorage.setItem("vagrant_logistics_rate_config", JSON.stringify(config));
-		} catch (e) {
-			console.warn("Failed to cache configuration to localStorage:", e);
-		}
+		saveCachedConfig(config);
 		configWarning.classList.add("hidden");
 		updateAll();
 	} catch (err) {
@@ -893,14 +890,10 @@ initParamsFromUrl();
 syncUrlParams(getFormInputs());
 
 // Try loading from localStorage first to render instantly
-try {
-	const cachedConfig = localStorage.getItem("vagrant_logistics_rate_config");
-	if (cachedConfig) {
-		config = JSON.parse(cachedConfig);
-		updateAll();
-	}
-} catch (e) {
-	console.warn("Failed to parse cached configuration:", e);
+const cachedConfig = loadCachedConfig();
+if (cachedConfig) {
+	config = cachedConfig;
+	updateAll();
 }
 
 loadConfig();

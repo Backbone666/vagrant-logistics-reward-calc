@@ -484,7 +484,7 @@ function isDirectFetchAllowed(targetUrl, options = {}) {
 	const isBrowser =
 		typeof window !== "undefined" && window.location && typeof window.location.origin === "string";
 	if (!isBrowser) return true;
-	if (Boolean(options.allowDirectBrowserFetch)) return true;
+	if (options.allowDirectBrowserFetch) return true;
 	try {
 		return new URL(targetUrl).origin === window.location.origin;
 	} catch {
