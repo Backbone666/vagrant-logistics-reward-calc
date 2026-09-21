@@ -480,6 +480,48 @@ export async function fetchEsiRoute(origin, destination, options = {}) {
 	};
 }
 
+function isDirectFetchAllowed(targetUrl, options = {}) {
+	const isBrowser =
+		typeof window !== "undefined" && window.location && typeof window.location.origin === "string";
+	if (!isBrowser) return true;
+	if (Boolean(options.allowDirectBrowserFetch)) return true;
+	try {
+		return new URL(targetUrl).origin === window.location.origin;
+	} catch {
+		return false;
+	}
+}
+
+async function unwrapProxyEnvelope(proxyResponse, gateway) {
+	if (!gateway.includes("/get?")) return proxyResponse;
+	try {
+		const clone = typeof proxyResponse.clone === "function" ? proxyResponse.clone() : proxyResponse;
+		const wrapper = await clone.json();
+		if (wrapper && typeof wrapper === "object" && typeof wrapper.contents === "string") {
+			const status = wrapper.status?.http_code || 200;
+			if (status >= 200 && status < 300) {
+				if (typeof Response === "function") {
+					return new Response(wrapper.contents, {
+						status,
+						statusText: "OK",
+						headers: { "Content-Type": "application/json" },
+					});
+				}
+				return {
+					ok: true,
+					status,
+					json: async () => JSON.parse(wrapper.contents),
+					text: async () => wrapper.contents,
+				};
+			}
+			throw new Error(`Wrapped upstream proxy returned HTTP ${status}`);
+		}
+	} catch (err) {
+		if (err.message?.startsWith("Wrapped upstream proxy")) throw err;
+	}
+	return proxyResponse;
+}
+
 /**
  * Attempt to fetch a resource directly; if blocked by CORS (TypeError)
  * or network error, sequentially retry via the CORS edge gateway pool.
@@ -501,19 +543,7 @@ export async function fetchWithCorsFallback(targetUrl, options = {}) {
 	}
 	const proxyTimeoutMs = options.proxyTimeoutMs || DEFAULT_PROXY_TIMEOUT_MS;
 
-	const isBrowser =
-		typeof window !== "undefined" && window.location && typeof window.location.origin === "string";
-	const isSameOrigin =
-		isBrowser &&
-		(() => {
-			try {
-				return new URL(targetUrl).origin === window.location.origin;
-			} catch {
-				return false;
-			}
-		})();
-	const shouldAttemptDirect =
-		!isBrowser || isSameOrigin || Boolean(options.allowDirectBrowserFetch);
+	const shouldAttemptDirect = isDirectFetchAllowed(targetUrl, options);
 
 	if (shouldAttemptDirect) {
 		try {
@@ -551,36 +581,12 @@ export async function fetchWithCorsFallback(targetUrl, options = {}) {
 		try {
 			const proxyResponse = await fetchFn(proxiedUrl, { signal: combined.signal });
 			if (proxyResponse.ok) {
-				if (gateway.includes("/get?")) {
-					try {
-						const clone =
-							typeof proxyResponse.clone === "function" ? proxyResponse.clone() : proxyResponse;
-						const wrapper = await clone.json();
-						if (wrapper && typeof wrapper === "object" && typeof wrapper.contents === "string") {
-							const status = wrapper.status?.http_code || 200;
-							if (status >= 200 && status < 300) {
-								if (typeof Response === "function") {
-									return new Response(wrapper.contents, {
-										status,
-										statusText: "OK",
-										headers: { "Content-Type": "application/json" },
-									});
-								}
-								return {
-									ok: true,
-									status,
-									json: async () => JSON.parse(wrapper.contents),
-									text: async () => wrapper.contents,
-								};
-							}
-							lastError = new Error(`Wrapped upstream proxy returned HTTP ${status}`);
-							continue;
-						}
-					} catch {
-						// Not a JSON wrapper, fall through to return proxyResponse
-					}
+				try {
+					return await unwrapProxyEnvelope(proxyResponse, gateway);
+				} catch (wrapErr) {
+					lastError = wrapErr;
+					continue;
 				}
-				return proxyResponse;
 			}
 			lastError = new Error(`Proxy ${gateway} returned HTTP ${proxyResponse.status}`);
 		} catch (proxyErr) {
@@ -594,6 +600,50 @@ export async function fetchWithCorsFallback(targetUrl, options = {}) {
 	}
 
 	throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", lastError);
+}
+
+async function executeEsiFallbackRoute(
+	origin,
+	destination,
+	options,
+	fetchFn,
+	primaryEngine,
+	lastErr,
+) {
+	if (options.esiFallback === false || primaryEngine === "esi") {
+		if (lastErr instanceof RouteUnavailableError || lastErr instanceof RouteNotFoundError) {
+			throw lastErr;
+		}
+		throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", lastErr);
+	}
+	try {
+		if (options.signal?.aborted) {
+			throw options.signal.reason;
+		}
+		const esiTimeoutMs = options.esiTimeout ?? 6000;
+		const esiTimeoutSignal = AbortSignal.timeout(esiTimeoutMs);
+		const esiCombined = options.signal
+			? combineSignals([options.signal, esiTimeoutSignal])
+			: { signal: esiTimeoutSignal, cleanup: () => {} };
+
+		try {
+			return await fetchEsiRoute(origin, destination, {
+				...options,
+				signal: esiCombined.signal,
+				fetch: fetchFn,
+			});
+		} finally {
+			esiCombined.cleanup();
+		}
+	} catch (esiErr) {
+		if (esiErr.name === "AbortError" && options.signal?.aborted) {
+			throw esiErr;
+		}
+		if (esiErr instanceof RouteNotFoundError) {
+			throw esiErr;
+		}
+		throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", esiErr);
+	}
 }
 
 /**
@@ -618,7 +668,7 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 		!origin.trim() ||
 		!destination.trim()
 	) {
-		throw new Error("Origin and destination systems are required.");
+		throw new Error("Origin and destination must be non-empty strings");
 	}
 
 	const trimmedOrigin = origin.trim();
@@ -627,10 +677,11 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 	// Identical systems require 0 jumps without a network request
 	if (trimmedOrigin.toLowerCase() === trimmedDestination.toLowerCase()) {
 		const directInfo = {
-			systems: [{ name: trimmedOrigin, security: 1.0 }],
+			name: "direct",
+			jumps: 0,
 			highSecJumps: 0,
 			dangerousJumps: 0,
-			totalJumps: 0,
+			systems: [{ name: trimmedOrigin, security: 1.0 }],
 		};
 		return {
 			summary: {
@@ -672,42 +723,15 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 	const fetchFn = options.fetch || globalThis.fetch;
 	const primaryEngine = options.primaryEngine || (options.esiPrimary ? "esi" : "eve-route");
 
-	const runEsiFallback = async (lastErr) => {
-		if (options.esiFallback === false || primaryEngine === "esi") {
-			if (lastErr instanceof RouteUnavailableError || lastErr instanceof RouteNotFoundError) {
-				throw lastErr;
-			}
-			throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", lastErr);
-		}
-		try {
-			if (options.signal?.aborted) {
-				throw options.signal.reason;
-			}
-			const esiTimeoutMs = options.esiTimeout ?? 6000;
-			const esiTimeoutSignal = AbortSignal.timeout(esiTimeoutMs);
-			const esiCombined = options.signal
-				? combineSignals([options.signal, esiTimeoutSignal])
-				: { signal: esiTimeoutSignal, cleanup: () => {} };
-
-			try {
-				return await fetchEsiRoute(trimmedOrigin, trimmedDestination, {
-					...options,
-					signal: esiCombined.signal,
-					fetch: fetchFn,
-				});
-			} finally {
-				esiCombined.cleanup();
-			}
-		} catch (esiErr) {
-			if (esiErr.name === "AbortError" && options.signal?.aborted) {
-				throw esiErr;
-			}
-			if (esiErr instanceof RouteNotFoundError) {
-				throw esiErr;
-			}
-			throw new RouteUnavailableError("Route lookup unavailable — manual entry enabled", esiErr);
-		}
-	};
+	const runEsiFallback = (lastErr) =>
+		executeEsiFallbackRoute(
+			trimmedOrigin,
+			trimmedDestination,
+			options,
+			fetchFn,
+			primaryEngine,
+			lastErr,
+		);
 
 	if (primaryEngine === "esi") {
 		try {
