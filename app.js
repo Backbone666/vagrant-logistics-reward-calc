@@ -276,6 +276,7 @@ function syncSafeRouteLock(volume) {
 		safeRouteCheckbox.checked = true;
 		safeRouteCheckbox.disabled = true;
 		safeRouteCheckbox.setAttribute("aria-disabled", "true");
+		safeRouteCheckbox.setAttribute("aria-describedby", "safe_route_hint");
 		safeRouteCheckbox.title = lockTooltip;
 		if (safeRouteCheckbox.parentElement) {
 			safeRouteCheckbox.parentElement.classList.add("locked");
@@ -284,6 +285,7 @@ function syncSafeRouteLock(volume) {
 	} else {
 		safeRouteCheckbox.disabled = false;
 		safeRouteCheckbox.removeAttribute("aria-disabled");
+		safeRouteCheckbox.removeAttribute("aria-describedby");
 		safeRouteCheckbox.removeAttribute("title");
 		if (safeRouteCheckbox.parentElement) {
 			safeRouteCheckbox.parentElement.classList.remove("locked");
@@ -329,11 +331,9 @@ function getFormInputs() {
 function syncPresets(volumeStr) {
 	presetBtns.forEach((btn) => {
 		const btnVal = btn.getAttribute("data-val");
-		if (volumeStr === btnVal) {
-			btn.classList.add("active");
-		} else {
-			btn.classList.remove("active");
-		}
+		const isActive = volumeStr === btnVal;
+		btn.classList.toggle("active", isActive);
+		btn.setAttribute("aria-pressed", isActive ? "true" : "false");
 	});
 }
 
@@ -759,8 +759,10 @@ presetBtns.forEach((btn) => {
 	btn.addEventListener("click", () => {
 		presetBtns.forEach((b) => {
 			b.classList.remove("active");
+			b.setAttribute("aria-pressed", "false");
 		});
 		btn.classList.add("active");
+		btn.setAttribute("aria-pressed", "true");
 
 		volumeInput.value = formatNumber(btn.getAttribute("data-val"));
 		handleVolumeChange(volumeInput.value);

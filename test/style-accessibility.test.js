@@ -115,3 +115,13 @@ test("a11y: skip-link provides visible keyboard focus without outline: none", ()
 		".skip-link:focus must not suppress focus outline with outline: none",
 	);
 });
+
+test("a11y: volume preset buttons define aria-pressed attribute", () => {
+	const html = fs.readFileSync(path.resolve(__dirname, "../index.html"), "utf-8");
+	const presetMatches = html.match(/class="preset-btn"[^>]*aria-pressed="false"/g) || [];
+	assert.equal(
+		presetMatches.length,
+		3,
+		"All 3 preset buttons must declare initial aria-pressed='false'",
+	);
+});
