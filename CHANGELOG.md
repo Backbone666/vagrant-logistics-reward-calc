@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.6.0](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.5.0...v1.6.0) (2026-09-22)
+
+
+### Features
+
+* **a11y:** add aria-pressed to volume presets and dynamic describedby lock hint ([66c7b41](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/66c7b41f13a762d66f3608f5a8390c6b8f24df1b))
+* **privacy:** enforce gdpr storage limitation with resilient cache wrapper ([e4185c0](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/e4185c051ff4e784577d4e9a07ff0b91ee42dadc))
+* **route:** restrict thera routing to blockade runner and add interactive route toggle button ([0b55b2f](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/0b55b2fe191690e9ff5d65da61dd178f716933bb))
+
+
+### Bug Fixes
+
+* **a11y:** restore skip-link focus visibility and keyboard outline ([8553e14](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/8553e140760973f458f29e504d4cfb580b7f6053))
+* **a11y:** upgrade results section landmark and synchronize locked tooltip ([1807532](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/180753270d0b5c2962aa6f3147616689dfb6dd73))
+* **route:** synchronize safe route url parameter and align offline fallback config ([35df148](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/35df148294d88e73ea566a7aba04af18d7c31249))
+* **seo:** align schema version, script cache hash, and outbound referrer policy ([b7c9dbd](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/b7c9dbdd2fd33b7c93e8f98aa274a59997b96d7a))
+
+
+### Performance Improvements
+
+* **autocomplete:** optimize system validation and casing lookup with canonical Map ([b354d31](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/b354d31475c08e0faf609df58d063307b6392f66))
+* **privacy:** enforce strict referrer policy and prune external font preconnects ([830d9a8](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/830d9a8a29f3e11b8de3f0fba907bbb57b19239c))
+
 ## [1.5.0](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.4.0...v1.5.0) (2026-09-21)
 
 
