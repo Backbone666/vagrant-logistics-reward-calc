@@ -304,8 +304,14 @@ h2 {
 }
 
 /* Footer Styles */
-.footer {
+.site-footer {
+	width: 100%;
 	margin-top: var(--space-lg);
+}
+
+.footer-affiliation,
+.footer {
+	margin-top: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -1187,7 +1193,8 @@ dd.req-value {
 	border-color: hsla(45, 70%, 55%, 0.05);
 }
 
-.fee-breakdown.placeholder-active .breakdown-row span,
+.fee-breakdown.placeholder-active .breakdown-row dt,
+.fee-breakdown.placeholder-active .breakdown-row dd,
 .fee-breakdown.placeholder-active #bd_service {
 	color: var(--text-muted);
 }
@@ -1202,6 +1209,14 @@ dd.req-value {
 	padding-bottom: 4px;
 }
 
+dl.breakdown-grid {
+	margin: 0;
+}
+
+.bd-service-val {
+	color: var(--primary-gold);
+}
+
 .breakdown-grid {
 	display: flex;
 	flex-direction: column;
@@ -1212,6 +1227,12 @@ dd.req-value {
 	display: flex;
 	justify-content: space-between;
 	color: var(--text-secondary);
+}
+
+.breakdown-row dt,
+.breakdown-row dd {
+	margin: 0;
+	font-weight: inherit;
 }
 
 .breakdown-row.highlight {

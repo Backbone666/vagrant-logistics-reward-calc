@@ -500,6 +500,7 @@ function updateTheraBadge(selection) {
 		theraBadge.className = "thera-badge hidden";
 		theraBadge.textContent = "";
 		theraBadge.removeAttribute("title");
+		theraBadge.removeAttribute("aria-label");
 		return;
 	}
 
@@ -509,11 +510,15 @@ function updateTheraBadge(selection) {
 	if (selection.routeUsed === "thera") {
 		theraBadge.className = "thera-badge thera-active";
 		theraBadge.textContent = `⚡ Via Thera (${theraJumps} jumps)`;
-		theraBadge.title = `Thera wormhole shortcut active (${theraJumps} jumps vs ${directJumps} stargate jumps). Supported for Blockade Runners (≤ 12,500 m³).`;
+		const desc = `Thera wormhole shortcut active (${theraJumps} jumps vs ${directJumps} stargate jumps). Supported for Blockade Runners (≤ 12,500 m³).`;
+		theraBadge.title = desc;
+		theraBadge.setAttribute("aria-label", desc);
 	} else {
 		theraBadge.className = "thera-badge thera-available";
 		theraBadge.textContent = `🌀 Thera shortcut: ${theraJumps}j (BR only)`;
-		theraBadge.title = `A ${theraJumps}-jump Thera wormhole shortcut exists for Blockade Runners (≤ 12,500 m³). Stargate route (${directJumps} jumps) required for larger hulls.`;
+		const desc = `A ${theraJumps}-jump Thera wormhole shortcut exists for Blockade Runners (≤ 12,500 m³). Stargate route (${directJumps} jumps) required for larger hulls.`;
+		theraBadge.title = desc;
+		theraBadge.setAttribute("aria-label", desc);
 	}
 }
 

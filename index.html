@@ -389,28 +389,28 @@
 
               <div id="fee_breakdown" class="fee-breakdown">
                 <div class="breakdown-title">Quote Breakdown</div>
-                <div class="breakdown-grid">
+                <dl class="breakdown-grid">
                   <div class="breakdown-row">
-                    <span>Service Class:</span>
-                    <span id="bd_service" style="color: var(--primary-gold);">N/A</span>
+                    <dt>Service Class:</dt>
+                    <dd id="bd_service" class="bd-service-val">N/A</dd>
                   </div>
                   <div class="breakdown-row">
-                    <span>Base Transport Fee:</span>
-                    <span id="bd_base">0 ISK</span>
+                    <dt>Base Transport Fee:</dt>
+                    <dd id="bd_base">0 ISK</dd>
                   </div>
                   <div class="breakdown-row">
-                    <span id="bd_distance_label">Distance Cyno Fee:</span>
-                    <span id="bd_distance">0 ISK</span>
+                    <dt id="bd_distance_label">Distance Cyno Fee:</dt>
+                    <dd id="bd_distance">0 ISK</dd>
                   </div>
                   <div class="breakdown-row">
-                    <span>Collateral / Risk Fee:</span>
-                    <span id="bd_collateral">0 ISK</span>
+                    <dt>Collateral / Risk Fee:</dt>
+                    <dd id="bd_collateral">0 ISK</dd>
                   </div>
                   <div class="breakdown-row highlight">
-                    <span>Collateral Multiplier:</span>
-                    <span id="bd_security">1.0x</span>
+                    <dt>Collateral Multiplier:</dt>
+                    <dd id="bd_security">1.0x</dd>
                   </div>
-                </div>
+                </dl>
               </div>
               <div class="button-group">
                 <button type="button" id="copy_btn" class="btn-copy">
@@ -489,36 +489,38 @@
         </div>
       </section>
 
-      <footer class="footer" aria-label="Alliance affiliation">
-        <img
-          src="https://images.evetech.net/alliances/99011546/logo"
-          alt="The Charter Logo"
-          width="24"
-          height="24"
-          decoding="async"
-          loading="lazy"
-          class="footer-logo"
-        />
-        <span>Member of The Charter</span>
-      </footer>
+      <footer class="site-footer" aria-label="Affiliation and legal notices">
+        <div class="footer-affiliation" aria-label="Alliance affiliation">
+          <img
+            src="https://images.evetech.net/alliances/99011546/logo"
+            alt="The Charter Logo"
+            width="24"
+            height="24"
+            decoding="async"
+            loading="lazy"
+            class="footer-logo"
+          />
+          <span>Member of The Charter</span>
+        </div>
 
-      <footer class="legal-footer" aria-label="Legal notices and copyright">
-        <small>
-          <p>
-            EVE Online and the EVE logo are the registered trademarks of
-            Fenris Creations ehf. All rights are reserved worldwide. All
-            other trademarks are the property of their respective owners.
-            All artwork, screenshots, characters, vehicles, storylines,
-            world facts or other recognisable features of the intellectual
-            property relating to these trademarks are likewise the
-            intellectual property of Fenris Creations ehf.
-          </p>
-          <p>
-            This material is used with limited permission of Fenris
-            Creations. No official affiliation or endorsement by Fenris
-            Creations is stated or implied.
-          </p>
-        </small>
+        <div class="legal-footer" aria-label="Legal notices and copyright">
+          <small>
+            <p>
+              EVE Online and the EVE logo are the registered trademarks of
+              Fenris Creations ehf. All rights are reserved worldwide. All
+              other trademarks are the property of their respective owners.
+              All artwork, screenshots, characters, vehicles, storylines,
+              world facts or other recognisable features of the intellectual
+              property relating to these trademarks are likewise the
+              intellectual property of Fenris Creations ehf.
+            </p>
+            <p>
+              This material is used with limited permission of Fenris
+              Creations. No official affiliation or endorsement by Fenris
+              Creations is stated or implied.
+            </p>
+          </small>
+        </div>
       </footer>
     </div>
 
