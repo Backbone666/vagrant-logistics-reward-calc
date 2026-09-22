@@ -1293,10 +1293,11 @@ test("selectRouteForVolume: selects Thera for Blockade Runner (<= 12.5k) and Dir
 	assert.equal(exactBr.routeUsed, "thera");
 	assert.equal(exactBr.selectedRoute.totalJumps, 22);
 
-	// Volume 0 -> considered <= 12500 -> selects Thera
+	// Volume 0 -> strictly selects Direct stargate (requires positive volume for BR)
 	const zeroVol = selectRouteForVolume(mockResult, 0);
-	assert.equal(zeroVol.routeUsed, "thera");
-	assert.equal(zeroVol.selectedRoute.totalJumps, 22);
+	assert.equal(zeroVol.routeUsed, "direct");
+	assert.equal(zeroVol.isBlockadeRunner, false);
+	assert.equal(zeroVol.selectedRoute.totalJumps, 24);
 
 	// Bulk transport: 12,501 m³ -> strictly selects Direct stargate
 	const overBr = selectRouteForVolume(mockResult, 12501);
@@ -1386,4 +1387,32 @@ test("fetchEveRoute: returns both direct and thera with correct volume selection
 	assert.equal(defaultResult.routeUsed, "direct");
 	assert.equal(defaultResult.hasTheraShortcut, true);
 	assert.equal(defaultResult.totalJumps, 2);
+});
+
+test("selectRouteForVolume: respects enableThera option for Blockade Runner", () => {
+	const mockResult = {
+		hasTheraShortcut: true,
+		direct: { highSecJumps: 23, dangerousJumps: 1, totalJumps: 24 },
+		thera: { highSecJumps: 20, dangerousJumps: 2, totalJumps: 22 },
+	};
+
+	// Enabled -> selects Thera
+	const theraEnabled = selectRouteForVolume(mockResult, 10000, { enableThera: true });
+	assert.equal(theraEnabled.routeUsed, "thera");
+	assert.equal(theraEnabled.selectedRoute.totalJumps, 22);
+
+	// Disabled -> strictly selects Direct stargate
+	const theraDisabled = selectRouteForVolume(mockResult, 10000, { enableThera: false });
+	assert.equal(theraDisabled.routeUsed, "direct");
+	assert.equal(theraDisabled.selectedRoute.totalJumps, 24);
+
+	// Zero volume -> strictly selects Direct stargate
+	const zeroVol = selectRouteForVolume(mockResult, 0, { enableThera: true });
+	assert.equal(zeroVol.routeUsed, "direct");
+	assert.equal(zeroVol.isBlockadeRunner, false);
+
+	// Bulk transport (DST) -> strictly selects Direct even if enableThera is true
+	const dstResult = selectRouteForVolume(mockResult, 62500, { enableThera: true });
+	assert.equal(dstResult.routeUsed, "direct");
+	assert.equal(dstResult.selectedRoute.totalJumps, 24);
 });

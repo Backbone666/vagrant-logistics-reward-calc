@@ -54,7 +54,7 @@ export const JUMP_FREIGHTER_MAX_VOLUME = 360000;
  *   hasTheraShortcut: boolean
  * }}
  */
-export function selectRouteForVolume(routeResult, volume) {
+export function selectRouteForVolume(routeResult, volume, options = {}) {
 	if (!routeResult) {
 		return {
 			selectedRoute: null,
@@ -82,9 +82,12 @@ export function selectRouteForVolume(routeResult, volume) {
 
 	const parsedVolume =
 		typeof volume === "number" ? volume : parseFloat(String(volume || 0).replace(/,/g, "")) || 0;
-	const isBlockadeRunner = parsedVolume <= BLOCKADE_RUNNER_MAX_VOLUME;
+	// Blockade Runner requires positive cargo volume up to 12,500 m³
+	const isBlockadeRunner = parsedVolume > 0 && parsedVolume <= BLOCKADE_RUNNER_MAX_VOLUME;
+	const enableThera = options.enableThera !== false;
 
-	const useThera = isBlockadeRunner && hasTheraShortcut && Boolean(routeResult.thera);
+	const useThera =
+		isBlockadeRunner && hasTheraShortcut && Boolean(routeResult.thera) && enableThera;
 	const selectedRoute = useThera ? routeResult.thera : routeResult.direct || routeResult;
 	const routeUsed = useThera ? "thera" : "direct";
 

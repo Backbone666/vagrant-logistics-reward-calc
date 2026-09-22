@@ -1,6 +1,7 @@
 import { calcRewardDetails, parseNum } from "./calculator.js";
 import { loadCachedConfig, saveCachedConfig } from "./config-storage.js";
 import {
+	BLOCKADE_RUNNER_MAX_VOLUME,
 	fetchEveRoute,
 	JUMP_FREIGHTER_MAX_VOLUME,
 	RouteNotFoundError,
@@ -28,7 +29,16 @@ const originList = document.getElementById("origin_system_list");
 const destinationList = document.getElementById("destination_system_list");
 const routeStatus = document.getElementById("route-status");
 const routeJumpsSummary = document.getElementById("route-jumps-summary");
-const theraBadge = document.getElementById("thera-badge");
+const theraToggleBtn =
+	document.getElementById("thera_toggle") || document.getElementById("thera-badge");
+
+let isTheraToggleActive = true;
+
+function isBlockadeRunnerVolume(volStr) {
+	if (!volStr) return false;
+	const num = parseFloat(String(volStr).replace(/,/g, "")) || 0;
+	return num > 0 && num <= BLOCKADE_RUNNER_MAX_VOLUME;
+}
 
 const rewardOutput = document.getElementById("reward_output");
 const rewardIpjOutput = document.getElementById("reward_ipj_output");
@@ -209,6 +219,7 @@ function syncUrlParams(options) {
 		v: options.volume.replace(/,/g, ""),
 		sr: options.safeRoute ? "1" : "",
 		jf: options.forceJF ? "1" : "",
+		th: isBlockadeRunnerVolume(options.volume) ? (options.thera ? "1" : "0") : "",
 		from: options.origin || "",
 		to: options.destination || "",
 	};
@@ -321,6 +332,7 @@ function getFormInputs() {
 		dangerousJumps: dangerousJumpsInput.value,
 		safeRoute: safeRouteCheckbox ? safeRouteCheckbox.checked : false,
 		forceJF: forceJfCheckbox.checked,
+		thera: isTheraToggleActive,
 		origin: originInput?.value?.trim().slice(0, 50) || "",
 		destination: destinationInput?.value?.trim().slice(0, 50) || "",
 	};
@@ -495,50 +507,45 @@ if (toggleManualJumpsBtn) {
 	});
 }
 
-function clearTheraBadge() {
-	if (!theraBadge) return;
-	theraBadge.className = "thera-badge hidden";
-	theraBadge.textContent = "";
-	theraBadge.removeAttribute("title");
-	theraBadge.removeAttribute("aria-label");
-}
-
-function renderTheraActiveBadge(theraJumps, directJumps) {
-	theraBadge.className = "thera-badge thera-active";
-	theraBadge.textContent = `⚡ Via Thera (${theraJumps} jumps)`;
-	const label = `Thera wormhole shortcut active (${theraJumps} jumps vs ${directJumps} stargate jumps). Supported for Blockade Runners (≤ 12,500 m³).`;
-	theraBadge.title = label;
-	theraBadge.setAttribute("aria-label", label);
-}
-
-function renderTheraAvailableBadge(theraJumps, directJumps) {
-	theraBadge.className = "thera-badge thera-available";
-	theraBadge.textContent = `🌀 Thera shortcut: ${theraJumps}j (BR only)`;
-	const label = `A ${theraJumps}-jump Thera wormhole shortcut exists for Blockade Runners (≤ 12,500 m³). Stargate route (${directJumps} jumps) required for larger hulls.`;
-	theraBadge.title = label;
-	theraBadge.setAttribute("aria-label", label);
-}
-
 function updateTheraBadge(selection) {
-	if (!theraBadge) return;
-	if (!selection || !selection.hasTheraShortcut || !lastRouteResult?.thera) {
-		clearTheraBadge();
+	if (!theraToggleBtn) return;
+
+	const isBr = isBlockadeRunnerVolume(volumeInput?.value);
+	const hasThera = Boolean(lastRouteResult?.hasTheraShortcut && lastRouteResult?.thera);
+
+	// Strictly hide Thera control if selection is null (error/reset), not BR volume, or no Thera shortcut exists
+	if (!selection || !selection.hasTheraShortcut || !isBr || !hasThera) {
+		theraToggleBtn.className = "btn-thera-toggle hidden";
+		theraToggleBtn.textContent = "";
+		theraToggleBtn.removeAttribute("title");
+		theraToggleBtn.removeAttribute("aria-label");
+		theraToggleBtn.setAttribute("aria-pressed", "false");
 		return;
 	}
 
 	const theraJumps = lastRouteResult.thera.totalJumps;
 	const directJumps = lastRouteResult.direct?.totalJumps ?? 0;
+	const isUsingThera = selection.routeUsed === "thera";
 
-	if (selection.routeUsed === "thera") {
-		renderTheraActiveBadge(theraJumps, directJumps);
+	if (isUsingThera) {
+		theraToggleBtn.className = "btn-thera-toggle thera-active";
+		theraToggleBtn.textContent = `⚡ Via Thera (${theraJumps} jumps)`;
+		theraToggleBtn.title = `Thera wormhole shortcut active (${theraJumps} jumps vs ${directJumps} stargate jumps). Click to switch to direct stargate route.`;
+		theraToggleBtn.setAttribute("aria-pressed", "true");
 	} else {
-		renderTheraAvailableBadge(theraJumps, directJumps);
+		theraToggleBtn.className = "btn-thera-toggle thera-available";
+		theraToggleBtn.textContent = `🌀 Use Thera (${theraJumps} jumps)`;
+		theraToggleBtn.title = `Thera wormhole shortcut available (${theraJumps} jumps vs ${directJumps} stargate jumps). Click to enable Thera shortcut route.`;
+		theraToggleBtn.setAttribute("aria-pressed", "false");
 	}
 }
 
 function applyRouteSelection() {
 	if (!lastRouteResult) return;
-	const selection = selectRouteForVolume(lastRouteResult, volumeInput?.value);
+	const isBr = isBlockadeRunnerVolume(volumeInput?.value);
+	const selection = selectRouteForVolume(lastRouteResult, volumeInput?.value, {
+		enableThera: isBr && isTheraToggleActive,
+	});
 	if (!selection.selectedRoute) return;
 
 	highsecJumpsInput.value = formatNumber(selection.selectedRoute.highSecJumps, false);
@@ -788,6 +795,17 @@ presetBtns.forEach((btn) => {
 	});
 });
 
+if (theraToggleBtn) {
+	theraToggleBtn.addEventListener("click", () => {
+		if (!lastRouteResult?.hasTheraShortcut || !lastRouteResult?.thera) return;
+		if (!isBlockadeRunnerVolume(volumeInput?.value)) return;
+
+		isTheraToggleActive = !isTheraToggleActive;
+		applyRouteSelection();
+		syncUrlParams(getFormInputs());
+	});
+}
+
 copyBtn.addEventListener("click", async () => {
 	let textToCopy = "";
 
@@ -826,7 +844,10 @@ copyQuoteBtn.addEventListener("click", async () => {
 
 	const originVal = originInput?.value?.trim();
 	const destVal = destinationInput?.value?.trim();
-	const viaTheraTag = lastRouteResult?.routeUsed === "thera" ? " [via Thera]" : "";
+	const viaTheraTag =
+		lastRouteResult?.routeUsed === "thera" && isBlockadeRunnerVolume(volumeInput?.value)
+			? " [via Thera]"
+			: "";
 	const routeLabel =
 		originVal && destVal
 			? `Route: ${originVal} → ${destVal}${viaTheraTag} (${highsecJumpsInput.value || 0} HighSec / ${dangerousJumpsInput.value || 0} Dangerous Jumps)`
@@ -923,6 +944,12 @@ function initParamsFromUrl() {
 		}
 		syncSafeRouteLock(volumeInput?.value);
 		if (urlParams.get("jf") === "1") forceJfCheckbox.checked = true;
+
+		if (urlParams.get("th") === "0") {
+			isTheraToggleActive = false;
+		} else if (urlParams.get("th") === "1") {
+			isTheraToggleActive = true;
+		}
 
 		if (urlParams.has("from") && originInput) {
 			originInput.value = urlParams.get("from").trim().slice(0, 50);

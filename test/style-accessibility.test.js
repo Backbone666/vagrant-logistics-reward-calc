@@ -125,3 +125,44 @@ test("a11y: volume preset buttons define aria-pressed attribute", () => {
 		"All 3 preset buttons must declare initial aria-pressed='false'",
 	);
 });
+
+test("a11y: #thera_toggle is a semantic button with accessible focus and target size", () => {
+	const indexHtmlPath = path.resolve(__dirname, "../index.html");
+	const indexHtml = fs.readFileSync(indexHtmlPath, "utf-8");
+
+	// 1. Semantic button in index.html
+	assert.match(
+		indexHtml,
+		/<button\b[^>]*\bid=["']thera_toggle["'][^>]*>/s,
+		"#thera_toggle must be a <button>",
+	);
+	assert.match(
+		indexHtml,
+		/<button\b[^>]*\bid=["']thera_toggle["'][^>]*>/s,
+		'#thera_toggle must declare type="button"',
+	);
+	assert.match(
+		indexHtml,
+		/<button\b[^>]*\btype=["']button["'][^>]*\bid=["']thera_toggle["'][^>]*>/s,
+		'#thera_toggle must declare type="button"',
+	);
+	assert.match(
+		indexHtml,
+		/<button\b[^>]*\bid=["']thera_toggle["'][^>]*\baria-pressed=["']false["'][^>]*>/s,
+		"#thera_toggle must initialize with aria-pressed attribute",
+	);
+
+	// 2. Minimum target size (WCAG 2.5.8 >= 24px)
+	assert.match(
+		styleCss,
+		/\.btn-thera-toggle[^{]*\{[^}]*min-height:\s*(2[4-9]|[3-9][0-9])px/s,
+		".btn-thera-toggle must specify min-height >= 24px for WCAG 2.5.8 target size",
+	);
+
+	// 3. Focus-visible indicator defined
+	assert.match(
+		styleCss,
+		/\.btn-thera-toggle:focus-visible[^{]*\{[^}]*box-shadow:/s,
+		".btn-thera-toggle:focus-visible must provide clear box-shadow focus indicator",
+	);
+});
