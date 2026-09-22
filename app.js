@@ -180,24 +180,22 @@ async function loadConfig() {
 // Memoized number formatter
 const numberFormatter = new Intl.NumberFormat("en-US");
 
-const formatNumber = (val, allowDecimal = true) => {
+function sanitizeNumericString(val, allowDecimal) {
 	const regex = allowDecimal ? /[^0-9.]/g : /[^0-9]/g;
-	let cleaned = val.toString().replace(regex, "");
+	const cleaned = val.toString().replace(regex, "");
+	if (!allowDecimal) return cleaned;
+	const parts = cleaned.split(".");
+	return parts.length > 2 ? `${parts[0]}.${parts.slice(1).join("")}` : cleaned;
+}
 
-	if (allowDecimal) {
-		const parts = cleaned.split(".");
-		if (parts.length > 2) {
-			cleaned = `${parts[0]}.${parts.slice(1).join("")}`;
-		}
-	}
-
+const formatNumber = (val, allowDecimal = true) => {
+	const cleaned = sanitizeNumericString(val, allowDecimal);
 	if (!cleaned) return "";
 
 	if (allowDecimal && cleaned.includes(".")) {
 		const [integerPart, decimalPart] = cleaned.split(".");
 		if (integerPart === "") return `.${decimalPart}`;
-		const formattedInteger = numberFormatter.format(integerPart);
-		return `${formattedInteger}.${decimalPart}`;
+		return `${numberFormatter.format(integerPart)}.${decimalPart}`;
 	}
 	return numberFormatter.format(cleaned);
 };
@@ -337,43 +335,46 @@ function syncPresets(volumeStr) {
 	});
 }
 
+function renderPlaceholderBreakdown(details) {
+	feeBreakdown.classList.add("placeholder-active");
+	bdService.textContent = "—";
+	bdBase.textContent = "—";
+	bdDistance.textContent = "—";
+	bdCollateral.textContent = "—";
+	bdSecurity.textContent = "—";
+	if (bdDistanceLabel) {
+		bdDistanceLabel.textContent = "Distance Jump Fee:";
+	}
+
+	const isKnownRedirect =
+		details.isRedirect &&
+		(details.redirectTarget === "Risako Hirano" || details.redirectTarget === "Executive Review");
+
+	copyBtn.disabled = !isKnownRedirect;
+	copyQuoteBtn.disabled = !isKnownRedirect;
+}
+
+function renderActiveBreakdown(details) {
+	feeBreakdown.classList.remove("placeholder-active");
+	bdService.textContent = details.serviceName || "Standard Sub-Capital";
+	if (bdDistanceLabel) {
+		bdDistanceLabel.textContent = details.distanceLabel || "Distance Jump Fee:";
+	}
+
+	bdBase.textContent = `${formatNumber(details.baseFee)} ISK`;
+	bdDistance.textContent = `${formatNumber(details.distanceFee)} ISK`;
+	bdCollateral.textContent = `${formatNumber(details.collateralFee)} ISK`;
+	bdSecurity.textContent = `${details.multiplier}x`;
+
+	copyBtn.disabled = false;
+	copyQuoteBtn.disabled = false;
+}
+
 function renderBreakdown(details) {
 	if (details.error || details.isRedirect) {
-		feeBreakdown.classList.add("placeholder-active");
-		bdService.textContent = "—";
-		bdBase.textContent = "—";
-		bdDistance.textContent = "—";
-		bdCollateral.textContent = "—";
-		bdSecurity.textContent = "—";
-		if (bdDistanceLabel) {
-			bdDistanceLabel.textContent = "Distance Jump Fee:";
-		}
-
-		if (
-			details.isRedirect &&
-			(details.redirectTarget === "Risako Hirano" || details.redirectTarget === "Executive Review")
-		) {
-			copyBtn.disabled = false;
-			copyQuoteBtn.disabled = false;
-		} else {
-			copyBtn.disabled = true;
-			copyQuoteBtn.disabled = true;
-		}
+		renderPlaceholderBreakdown(details);
 	} else {
-		feeBreakdown.classList.remove("placeholder-active");
-
-		bdService.textContent = details.serviceName || "Standard Sub-Capital";
-		if (bdDistanceLabel) {
-			bdDistanceLabel.textContent = details.distanceLabel || "Distance Jump Fee:";
-		}
-
-		bdBase.textContent = `${formatNumber(details.baseFee)} ISK`;
-		bdDistance.textContent = `${formatNumber(details.distanceFee)} ISK`;
-		bdCollateral.textContent = `${formatNumber(details.collateralFee)} ISK`;
-		bdSecurity.textContent = `${details.multiplier}x`;
-
-		copyBtn.disabled = false;
-		copyQuoteBtn.disabled = false;
+		renderActiveBreakdown(details);
 	}
 }
 
@@ -494,13 +495,34 @@ if (toggleManualJumpsBtn) {
 	});
 }
 
+function clearTheraBadge() {
+	if (!theraBadge) return;
+	theraBadge.className = "thera-badge hidden";
+	theraBadge.textContent = "";
+	theraBadge.removeAttribute("title");
+	theraBadge.removeAttribute("aria-label");
+}
+
+function renderTheraActiveBadge(theraJumps, directJumps) {
+	theraBadge.className = "thera-badge thera-active";
+	theraBadge.textContent = `⚡ Via Thera (${theraJumps} jumps)`;
+	const label = `Thera wormhole shortcut active (${theraJumps} jumps vs ${directJumps} stargate jumps). Supported for Blockade Runners (≤ 12,500 m³).`;
+	theraBadge.title = label;
+	theraBadge.setAttribute("aria-label", label);
+}
+
+function renderTheraAvailableBadge(theraJumps, directJumps) {
+	theraBadge.className = "thera-badge thera-available";
+	theraBadge.textContent = `🌀 Thera shortcut: ${theraJumps}j (BR only)`;
+	const label = `A ${theraJumps}-jump Thera wormhole shortcut exists for Blockade Runners (≤ 12,500 m³). Stargate route (${directJumps} jumps) required for larger hulls.`;
+	theraBadge.title = label;
+	theraBadge.setAttribute("aria-label", label);
+}
+
 function updateTheraBadge(selection) {
 	if (!theraBadge) return;
 	if (!selection || !selection.hasTheraShortcut || !lastRouteResult?.thera) {
-		theraBadge.className = "thera-badge hidden";
-		theraBadge.textContent = "";
-		theraBadge.removeAttribute("title");
-		theraBadge.removeAttribute("aria-label");
+		clearTheraBadge();
 		return;
 	}
 
@@ -508,17 +530,9 @@ function updateTheraBadge(selection) {
 	const directJumps = lastRouteResult.direct?.totalJumps ?? 0;
 
 	if (selection.routeUsed === "thera") {
-		theraBadge.className = "thera-badge thera-active";
-		theraBadge.textContent = `⚡ Via Thera (${theraJumps} jumps)`;
-		const desc = `Thera wormhole shortcut active (${theraJumps} jumps vs ${directJumps} stargate jumps). Supported for Blockade Runners (≤ 12,500 m³).`;
-		theraBadge.title = desc;
-		theraBadge.setAttribute("aria-label", desc);
+		renderTheraActiveBadge(theraJumps, directJumps);
 	} else {
-		theraBadge.className = "thera-badge thera-available";
-		theraBadge.textContent = `🌀 Thera shortcut: ${theraJumps}j (BR only)`;
-		const desc = `A ${theraJumps}-jump Thera wormhole shortcut exists for Blockade Runners (≤ 12,500 m³). Stargate route (${directJumps} jumps) required for larger hulls.`;
-		theraBadge.title = desc;
-		theraBadge.setAttribute("aria-label", desc);
+		renderTheraAvailableBadge(theraJumps, directJumps);
 	}
 }
 
