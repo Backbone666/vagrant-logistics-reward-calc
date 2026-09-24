@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.6.0...v1.7.0) (2026-09-24)
+
+
+### Features
+
+* **ui:** compact thera route toggle and add eve ship icons ([6971e38](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/6971e38c95faee8bf1ee0c2eff7d83901cc9f9ce))
+
 ## [1.6.0](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.5.0...v1.6.0) (2026-09-22)
 
 
