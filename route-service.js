@@ -485,11 +485,14 @@ export async function fetchEsiRoute(origin, destination, options = {}) {
 	};
 }
 
+function isBrowserContext() {
+	return typeof window !== "undefined" && typeof window.location?.origin === "string";
+}
+
 function isDirectFetchAllowed(targetUrl, options = {}) {
-	const isBrowser =
-		typeof window !== "undefined" && window.location && typeof window.location.origin === "string";
-	if (!isBrowser) return true;
-	if (options.allowDirectBrowserFetch) return true;
+	if (!isBrowserContext() || options.allowDirectBrowserFetch) {
+		return true;
+	}
 	try {
 		return new URL(targetUrl).origin === window.location.origin;
 	} catch {
