@@ -5,26 +5,17 @@ export const parseNum = (val) => {
 	return Number.isNaN(parsed) ? 0 : parsed;
 };
 
-export function classifyService({ volume, routeSecurity, dangerousJumps, forceJF }) {
-	const parsedVolume = parseNum(volume);
-	const hasDangerousJumps =
-		parseNum(dangerousJumps) > 0 || routeSecurity === "dangerous" || routeSecurity === "high_risk";
-
-	if (forceJF) {
-		return "dangerous_space_services.jump_freighter_standard";
+function classifyHighsecService(parsedVolume) {
+	if (parsedVolume <= 62500) {
+		return "highsec_services.blockade_runner_dst";
 	}
-
-	if (!hasDangerousJumps) {
-		if (parsedVolume <= 62500) {
-			return "highsec_services.blockade_runner_dst";
-		}
-		if (parsedVolume <= 1125000) {
-			return "highsec_services.freighter_standard";
-		}
-		return "volume_limit_exceeded";
+	if (parsedVolume <= 1125000) {
+		return "highsec_services.freighter_standard";
 	}
+	return "volume_limit_exceeded";
+}
 
-	// Route contains lowsec/nullsec stargates
+function classifyDangerousService(parsedVolume) {
 	if (parsedVolume <= 12500) {
 		return "dangerous_space_services.blockade_runner_stargate";
 	}
@@ -35,6 +26,20 @@ export function classifyService({ volume, routeSecurity, dangerousJumps, forceJF
 		return "dangerous_space_services.jump_freighter_standard";
 	}
 	return "volume_limit_exceeded";
+}
+
+export function classifyService({ volume, routeSecurity, dangerousJumps, forceJF }) {
+	if (forceJF) {
+		return "dangerous_space_services.jump_freighter_standard";
+	}
+
+	const parsedVolume = parseNum(volume);
+	const hasDangerousJumps =
+		parseNum(dangerousJumps) > 0 || routeSecurity === "dangerous" || routeSecurity === "high_risk";
+
+	return hasDangerousJumps
+		? classifyDangerousService(parsedVolume)
+		: classifyHighsecService(parsedVolume);
 }
 
 function findCollateralBracket(service, parsedCollateral) {
