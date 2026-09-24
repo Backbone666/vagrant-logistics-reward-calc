@@ -140,29 +140,36 @@ function calcStargateRouteReward({
 	});
 }
 
-function calcHighsecReward({ service, parsedHighsecJumps, parsedCollateral, serviceClass }) {
+function resolveHighsecBaseFee(service, parsedHighsecJumps) {
 	const baseJumpRate = service.base_rate_per_jump || 0;
 	const minFee = service.minimum_contract_fee || 0;
+	return Math.max(minFee, parsedHighsecJumps * baseJumpRate);
+}
 
-	let baseFee = parsedHighsecJumps * baseJumpRate;
-	if (baseFee < minFee) {
-		baseFee = minFee;
-	}
-
+function resolveHighsecCollateralParams(service, parsedCollateral) {
 	const matchedBracket = findCollateralBracket(service, parsedCollateral);
-	let isRedirect = false;
-	let redirectTarget = "";
-	let multiplier = 1.0;
-	let surcharge = 0;
-
 	if (!matchedBracket) {
-		isRedirect = true;
-		redirectTarget = "Risako Hirano";
-	} else {
-		multiplier = matchedBracket.multiplier ?? 1.0;
-		surcharge = matchedBracket.surcharge ?? 0;
+		return {
+			isRedirect: true,
+			redirectTarget: "Risako Hirano",
+			multiplier: 1.0,
+			surcharge: 0,
+		};
 	}
+	return {
+		isRedirect: false,
+		redirectTarget: "",
+		multiplier: matchedBracket.multiplier ?? 1.0,
+		surcharge: matchedBracket.surcharge ?? 0,
+	};
+}
 
+function calcHighsecReward({ service, parsedHighsecJumps, parsedCollateral, serviceClass }) {
+	const baseFee = resolveHighsecBaseFee(service, parsedHighsecJumps);
+	const { isRedirect, redirectTarget, multiplier, surcharge } = resolveHighsecCollateralParams(
+		service,
+		parsedCollateral,
+	);
 	const collateralFee = baseFee * (multiplier - 1) + surcharge;
 	const total = baseFee + collateralFee;
 
