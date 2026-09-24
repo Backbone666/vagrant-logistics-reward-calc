@@ -280,33 +280,36 @@ function updateRouteJumpsSummary(highSecJumps, dangerousJumps) {
 	routeJumpsSummary.classList.remove("hidden");
 }
 
-function syncSafeRouteLock(volume) {
-	if (!safeRouteCheckbox) return;
-	const parsedVolume = parseNum(volume);
-	const isOverJfVolume = parsedVolume > JUMP_FREIGHTER_MAX_VOLUME;
+const SAFE_ROUTE_LOCK_TOOLTIP =
+	"Safe Route (High-Sec only) enforced: Volume exceeds Jump Freighter capacity (360,000 m³). Freighters cannot traverse dangerous space.";
 
-	const lockTooltip =
-		"Safe Route (High-Sec only) enforced: Volume exceeds Jump Freighter capacity (360,000 m³). Freighters cannot traverse dangerous space.";
-	if (isOverJfVolume) {
-		safeRouteCheckbox.checked = true;
-		safeRouteCheckbox.disabled = true;
-		safeRouteCheckbox.setAttribute("aria-disabled", "true");
-		safeRouteCheckbox.setAttribute("aria-describedby", "safe_route_hint");
-		safeRouteCheckbox.title = lockTooltip;
-		if (safeRouteCheckbox.parentElement) {
-			safeRouteCheckbox.parentElement.classList.add("locked");
-			safeRouteCheckbox.parentElement.title = lockTooltip;
+function applySafeRouteLockState(checkbox, isLocked) {
+	checkbox.disabled = isLocked;
+	const parent = checkbox.parentElement;
+	if (isLocked) {
+		checkbox.checked = true;
+		checkbox.setAttribute("aria-disabled", "true");
+		checkbox.setAttribute("aria-describedby", "safe_route_hint");
+		checkbox.title = SAFE_ROUTE_LOCK_TOOLTIP;
+		if (parent) {
+			parent.classList.add("locked");
+			parent.title = SAFE_ROUTE_LOCK_TOOLTIP;
 		}
 	} else {
-		safeRouteCheckbox.disabled = false;
-		safeRouteCheckbox.removeAttribute("aria-disabled");
-		safeRouteCheckbox.removeAttribute("aria-describedby");
-		safeRouteCheckbox.removeAttribute("title");
-		if (safeRouteCheckbox.parentElement) {
-			safeRouteCheckbox.parentElement.classList.remove("locked");
-			safeRouteCheckbox.parentElement.removeAttribute("title");
+		checkbox.removeAttribute("aria-disabled");
+		checkbox.removeAttribute("aria-describedby");
+		checkbox.removeAttribute("title");
+		if (parent) {
+			parent.classList.remove("locked");
+			parent.removeAttribute("title");
 		}
 	}
+}
+
+function syncSafeRouteLock(volume) {
+	if (!safeRouteCheckbox) return;
+	const isOverJfVolume = parseNum(volume) > JUMP_FREIGHTER_MAX_VOLUME;
+	applySafeRouteLockState(safeRouteCheckbox, isOverJfVolume);
 }
 
 function handleVolumeChange(volumeValue) {
