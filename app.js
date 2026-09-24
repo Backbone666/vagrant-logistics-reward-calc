@@ -648,20 +648,22 @@ function handleRouteInputChange() {
 	}, ROUTE_DEBOUNCE_MS);
 }
 
+function applyCanonicalSystemName(inputEl, rawName, canonicalMap) {
+	if (!inputEl || !rawName || !canonicalMap) return;
+	const canonical = canonicalMap.get(rawName.toLowerCase());
+	if (canonical && inputEl.value !== canonical) {
+		inputEl.value = canonical;
+	}
+}
+
 function resolveSystemNames(origin, destination, systems) {
 	if (!systems || systems.length === 0) return true;
 	if (!isKnownSystem(origin, systems) || !isKnownSystem(destination, systems)) {
 		return false;
 	}
 	const canonicalMap = getCanonicalSystemMap();
-	const normOrigin = origin.toLowerCase();
-	const normDest = destination.toLowerCase();
-
-	const matchOrigin = canonicalMap?.get(normOrigin) || null;
-	const matchDest = canonicalMap?.get(normDest) || null;
-
-	if (matchOrigin && originInput.value !== matchOrigin) originInput.value = matchOrigin;
-	if (matchDest && destinationInput.value !== matchDest) destinationInput.value = matchDest;
+	applyCanonicalSystemName(originInput, origin, canonicalMap);
+	applyCanonicalSystemName(destinationInput, destination, canonicalMap);
 	return true;
 }
 
