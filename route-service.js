@@ -240,17 +240,13 @@ export function buildRouteUrl(origin, destination, options = {}) {
  * @param {Array<AbortSignal>} signals
  * @returns {{ signal: AbortSignal, cleanup: () => void }}
  */
-function combineSignals(signals) {
-	if (typeof AbortSignal.any === "function") {
-		return { signal: AbortSignal.any(signals), cleanup: () => {} };
-	}
+function combineSignalsFallback(signals) {
 	const controller = new AbortController();
 	const cleanups = [];
 	const cleanup = () => {
 		while (cleanups.length > 0) {
-			const fn = cleanups.pop();
 			try {
-				fn();
+				cleanups.pop()();
 			} catch {
 				// ignore
 			}
@@ -270,6 +266,13 @@ function combineSignals(signals) {
 		cleanups.push(() => sig.removeEventListener("abort", onAbort));
 	}
 	return { signal: controller.signal, cleanup };
+}
+
+function combineSignals(signals) {
+	if (typeof AbortSignal.any === "function") {
+		return { signal: AbortSignal.any(signals), cleanup: () => {} };
+	}
+	return combineSignalsFallback(signals);
 }
 
 let cachedHighSecSet = null;
