@@ -566,6 +566,28 @@ function applyRouteSelection() {
 	updateAll();
 }
 
+function clearRouteResults(statusType = "", statusMsg = "") {
+	lastRouteResult = null;
+	updateTheraBadge(null);
+	updateRouteJumpsSummary(0, 0);
+	setRouteStatus(statusType, statusMsg);
+}
+
+function handleRouteLookupError(err, controller) {
+	if (controller.signal.aborted || err.name === "AbortError") {
+		return;
+	}
+	lastRouteResult = null;
+	updateTheraBadge(null);
+	if (err instanceof RouteNotFoundError || err.code === "NO_ROUTE") {
+		setRouteStatus("warning", "No route found avoiding specified systems");
+	} else {
+		console.warn("Route lookup unavailable:", err);
+		setRouteStatus("warning", "Route lookup unavailable — manual entry enabled");
+	}
+	setManualJumpVisibility(true);
+}
+
 function handleRouteInputChange() {
 	cancelPendingRouteLookup();
 
@@ -573,20 +595,14 @@ function handleRouteInputChange() {
 	const destination = destinationInput?.value?.trim() || "";
 
 	if (!origin || !destination) {
-		lastRouteResult = null;
-		updateTheraBadge(null);
-		updateRouteJumpsSummary(0, 0);
-		setRouteStatus("", "");
+		clearRouteResults("", "");
 		return;
 	}
 
 	if (origin.toLowerCase() === destination.toLowerCase()) {
-		lastRouteResult = null;
-		updateTheraBadge(null);
+		clearRouteResults("", "");
 		highsecJumpsInput.value = "0";
 		dangerousJumpsInput.value = "0";
-		updateRouteJumpsSummary(0, 0);
-		setRouteStatus("", "");
 		updateAll();
 		return;
 	}
@@ -621,19 +637,7 @@ function handleRouteInputChange() {
 			setRouteStatus("", "");
 			applyRouteSelection();
 		} catch (err) {
-			if (controller.signal.aborted || err.name === "AbortError") {
-				return;
-			}
-			lastRouteResult = null;
-			updateTheraBadge(null);
-			if (err instanceof RouteNotFoundError || err.code === "NO_ROUTE") {
-				setRouteStatus("warning", "No route found avoiding specified systems");
-				setManualJumpVisibility(true);
-			} else {
-				console.warn("Route lookup unavailable:", err);
-				setRouteStatus("warning", "Route lookup unavailable — manual entry enabled");
-				setManualJumpVisibility(true);
-			}
+			handleRouteLookupError(err, controller);
 		} finally {
 			if (routeAbortController === controller) {
 				routeAbortController = null;
