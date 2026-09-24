@@ -686,6 +686,37 @@ async function executeEsiFallbackRoute(
  *   totalJumps: number
  * }>}
  */
+function createTrivialZeroJumpRoute(origin, destination) {
+	const directInfo = {
+		name: "direct",
+		jumps: 0,
+		highSecJumps: 0,
+		dangerousJumps: 0,
+		systems: [{ name: origin, security: 1.0 }],
+	};
+	return {
+		summary: {
+			start: origin,
+			end: destination,
+			pref: "shortest",
+			directJumps: 0,
+			theraJumps: 0,
+			recommended: "direct",
+		},
+		routes: {
+			direct: [{ name: origin, security: 1.0 }],
+		},
+		direct: directInfo,
+		thera: null,
+		hasTheraShortcut: false,
+		routeUsed: "direct",
+		systems: directInfo.systems,
+		highSecJumps: 0,
+		dangerousJumps: 0,
+		totalJumps: 0,
+	};
+}
+
 export async function fetchEveRoute(origin, destination, options = {}) {
 	if (
 		typeof origin !== "string" ||
@@ -701,34 +732,7 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 
 	// Identical systems require 0 jumps without a network request
 	if (trimmedOrigin.toLowerCase() === trimmedDestination.toLowerCase()) {
-		const directInfo = {
-			name: "direct",
-			jumps: 0,
-			highSecJumps: 0,
-			dangerousJumps: 0,
-			systems: [{ name: trimmedOrigin, security: 1.0 }],
-		};
-		return {
-			summary: {
-				start: trimmedOrigin,
-				end: trimmedDestination,
-				pref: "shortest",
-				directJumps: 0,
-				theraJumps: 0,
-				recommended: "direct",
-			},
-			routes: {
-				direct: [{ name: trimmedOrigin, security: 1.0 }],
-			},
-			direct: directInfo,
-			thera: null,
-			hasTheraShortcut: false,
-			routeUsed: "direct",
-			systems: directInfo.systems,
-			highSecJumps: 0,
-			dangerousJumps: 0,
-			totalJumps: 0,
-		};
+		return createTrivialZeroJumpRoute(trimmedOrigin, trimmedDestination);
 	}
 
 	const url = buildRouteUrl(trimmedOrigin, trimmedDestination, options);
