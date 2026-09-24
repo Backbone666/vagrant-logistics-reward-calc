@@ -74,26 +74,26 @@ export function getCanonicalSystemMap() {
 	return cachedCanonicalMap;
 }
 
-export function isKnownSystem(name, systems) {
-	if (!name || typeof name !== "string") {
-		return false;
+function lookupInCollection(clean, collection) {
+	if (collection instanceof Set || collection instanceof Map) {
+		return collection.has(clean);
 	}
+	if (Array.isArray(collection)) {
+		return collection.some((s) => typeof s === "string" && s.toLowerCase() === clean);
+	}
+	return false;
+}
+
+export function isKnownSystem(name, systems) {
+	if (!name || typeof name !== "string") return false;
 	const clean = name.trim().toLowerCase();
 	if (!clean) return false;
 
-	if (systems instanceof Set || systems instanceof Map) {
-		return systems.has(clean);
+	if (!systems || systems === cachedSystems) {
+		return cachedCanonicalMap ? cachedCanonicalMap.has(clean) : false;
 	}
 
-	if (cachedCanonicalMap && (systems === cachedSystems || !systems)) {
-		return cachedCanonicalMap.has(clean);
-	}
-
-	if (!Array.isArray(systems)) {
-		return false;
-	}
-
-	return systems.some((s) => typeof s === "string" && s.toLowerCase() === clean);
+	return lookupInCollection(clean, systems);
 }
 
 /**
