@@ -546,34 +546,43 @@ async function unwrapProxyEnvelope(proxyResponse, gateway) {
  * @param {object} [options]
  * @returns {Promise<Response>}
  */
+function resolveProxyGateways(options = {}) {
+	if (options.corsProxyGateways) {
+		return options.corsProxyGateways;
+	}
+	if (options.corsProxyGateway !== undefined) {
+		return options.corsProxyGateway ? [options.corsProxyGateway] : [];
+	}
+	return DEFAULT_CORS_PROXY_GATEWAYS;
+}
+
+async function attemptDirectFetch(targetUrl, fetchFn, signal, proxyGateways) {
+	try {
+		const response = await fetchFn(targetUrl, { signal });
+		if (response.ok) {
+			return response;
+		}
+		if (![408, 429, 502, 503, 504].includes(response.status) || proxyGateways.length === 0) {
+			return response;
+		}
+	} catch (err) {
+		if (err.name === "AbortError" && signal?.aborted) {
+			throw err;
+		}
+	}
+	return null;
+}
+
 export async function fetchWithCorsFallback(targetUrl, options = {}) {
 	const signal = options.signal;
 	const fetchFn = options.fetch || globalThis.fetch;
-	let proxyGateways;
-	if (options.corsProxyGateways) {
-		proxyGateways = options.corsProxyGateways;
-	} else if (options.corsProxyGateway !== undefined) {
-		proxyGateways = options.corsProxyGateway ? [options.corsProxyGateway] : [];
-	} else {
-		proxyGateways = DEFAULT_CORS_PROXY_GATEWAYS;
-	}
+	const proxyGateways = resolveProxyGateways(options);
 	const proxyTimeoutMs = options.proxyTimeoutMs || DEFAULT_PROXY_TIMEOUT_MS;
 
-	const shouldAttemptDirect = isDirectFetchAllowed(targetUrl, options);
-
-	if (shouldAttemptDirect) {
-		try {
-			const response = await fetchFn(targetUrl, { signal });
-			if (response.ok) {
-				return response;
-			}
-			if (![408, 429, 502, 503, 504].includes(response.status) || proxyGateways.length === 0) {
-				return response;
-			}
-		} catch (err) {
-			if (err.name === "AbortError" && signal?.aborted) {
-				throw err;
-			}
+	if (isDirectFetchAllowed(targetUrl, options)) {
+		const directResponse = await attemptDirectFetch(targetUrl, fetchFn, signal, proxyGateways);
+		if (directResponse) {
+			return directResponse;
 		}
 	}
 
