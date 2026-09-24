@@ -240,6 +240,64 @@ function createErrorResult(message) {
 	};
 }
 
+function dispatchServiceReward({
+	serviceClass,
+	config,
+	parsedHighsecJumps,
+	parsedDangerousJumps,
+	parsedCollateral,
+}) {
+	const hsConfig = config.highsec_services || {};
+	const dangerousConfig = config.dangerous_space_services || {};
+
+	switch (serviceClass) {
+		case "highsec_services.blockade_runner_dst":
+			return calcHighsecReward({
+				service: hsConfig.blockade_runner_dst || {},
+				parsedHighsecJumps,
+				parsedCollateral,
+				serviceClass,
+			});
+		case "highsec_services.freighter_standard":
+			return calcHighsecReward({
+				service: hsConfig.freighter_standard || {},
+				parsedHighsecJumps,
+				parsedCollateral,
+				serviceClass,
+			});
+		case "dangerous_space_services.blockade_runner_stargate":
+			return calcStargateRouteReward({
+				service: dangerousConfig.blockade_runner_stargate || {},
+				parsedHighsecJumps,
+				parsedDangerousJumps,
+				parsedCollateral,
+				serviceClass,
+				maxCollateral: 5_000_000_000,
+				collateralRules: config.dangerous_collateral_rules,
+			});
+		case "dangerous_space_services.scouted_dst_stargate":
+			return calcStargateRouteReward({
+				service: dangerousConfig.scouted_dst_stargate || {},
+				parsedHighsecJumps,
+				parsedDangerousJumps,
+				parsedCollateral,
+				serviceClass,
+				maxCollateral: 5_000_000_000,
+				collateralRules: config.dangerous_collateral_rules,
+			});
+		case "dangerous_space_services.jump_freighter_standard":
+			return calcJumpFreighterReward({
+				dangerousConfig,
+				parsedDangerousJumps,
+				parsedCollateral,
+				serviceClass,
+				collateralRules: config.dangerous_collateral_rules,
+			});
+		default:
+			return createErrorResult("Unknown service class classification");
+	}
+}
+
 export function calcRewardDetails(options, configOpt) {
 	const {
 		volume,
@@ -287,65 +345,13 @@ export function calcRewardDetails(options, configOpt) {
 		);
 	}
 
-	// Extract config groups
-	const hsConfig = config.highsec_services || {};
-	const dangerousConfig = config.dangerous_space_services || {};
-
-	if (serviceClass === "highsec_services.blockade_runner_dst") {
-		return calcHighsecReward({
-			service: hsConfig.blockade_runner_dst || {},
-			parsedHighsecJumps,
-			parsedCollateral,
-			serviceClass,
-		});
-	}
-
-	if (serviceClass === "highsec_services.freighter_standard") {
-		return calcHighsecReward({
-			service: hsConfig.freighter_standard || {},
-			parsedHighsecJumps,
-			parsedCollateral,
-			serviceClass,
-		});
-	}
-
-	if (serviceClass === "dangerous_space_services.blockade_runner_stargate") {
-		const service = dangerousConfig.blockade_runner_stargate || {};
-		return calcStargateRouteReward({
-			service,
-			parsedHighsecJumps,
-			parsedDangerousJumps,
-			parsedCollateral,
-			serviceClass,
-			maxCollateral: 5_000_000_000,
-			collateralRules: config.dangerous_collateral_rules,
-		});
-	}
-
-	if (serviceClass === "dangerous_space_services.scouted_dst_stargate") {
-		const service = dangerousConfig.scouted_dst_stargate || {};
-		return calcStargateRouteReward({
-			service,
-			parsedHighsecJumps,
-			parsedDangerousJumps,
-			parsedCollateral,
-			serviceClass,
-			maxCollateral: 5_000_000_000,
-			collateralRules: config.dangerous_collateral_rules,
-		});
-	}
-
-	if (serviceClass === "dangerous_space_services.jump_freighter_standard") {
-		return calcJumpFreighterReward({
-			dangerousConfig,
-			parsedDangerousJumps,
-			parsedCollateral,
-			serviceClass,
-			collateralRules: config.dangerous_collateral_rules,
-		});
-	}
-
-	return createErrorResult("Unknown service class classification");
+	return dispatchServiceReward({
+		serviceClass,
+		config,
+		parsedHighsecJumps,
+		parsedDangerousJumps,
+		parsedCollateral,
+	});
 }
 
 export function calcReward(options, config) {
