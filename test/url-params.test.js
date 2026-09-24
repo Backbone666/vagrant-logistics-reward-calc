@@ -22,6 +22,19 @@ test("url-params: syncUrlParams maps safeRoute to sr=1 when enabled and omits wh
 	);
 });
 
+test("url-params: buildUrlParamEntries maps and sanitizes parameters cleanly", () => {
+	assert.match(
+		appJs,
+		/export function buildUrlParamEntries\(options\)/,
+		"app.js must export buildUrlParamEntries helper",
+	);
+	assert.match(
+		appJs,
+		/const strip = \(val\) => \(val \? String\(val\)\.replaceAll\([",']\,[",'], [",'][",']\) : [",'][",']\)/,
+		"buildUrlParamEntries must use modern replaceAll for comma stripping",
+	);
+});
+
 test("url-params: initParamsFromUrl deserializes sr=1 to safeRouteCheckbox.checked", () => {
 	assert.match(
 		appJs,

@@ -210,19 +210,25 @@ const formatNumber = (val, allowDecimal = true) => {
 	return numberFormatter.format(cleaned);
 };
 
-function syncUrlParams(options) {
-	const url = new URL(window.location);
-	const params = {
-		c: options.collateral.replace(/,/g, ""),
-		hj: options.highsecJumps.replace(/,/g, ""),
-		dj: options.dangerousJumps.replace(/,/g, ""),
-		v: options.volume.replace(/,/g, ""),
+export function buildUrlParamEntries(options) {
+	const strip = (val) => (val ? String(val).replaceAll(",", "") : "");
+	const isBr = isBlockadeRunnerVolume(options.volume);
+	return {
+		c: strip(options.collateral),
+		hj: strip(options.highsecJumps),
+		dj: strip(options.dangerousJumps),
+		v: strip(options.volume),
 		sr: options.safeRoute ? "1" : "",
 		jf: options.forceJF ? "1" : "",
-		th: isBlockadeRunnerVolume(options.volume) ? (options.thera ? "1" : "0") : "",
+		th: isBr ? (options.thera ? "1" : "0") : "",
 		from: options.origin || "",
 		to: options.destination || "",
 	};
+}
+
+function syncUrlParams(options) {
+	const url = new URL(window.location);
+	const params = buildUrlParamEntries(options);
 
 	for (const [key, val] of Object.entries(params)) {
 		if (val) {
