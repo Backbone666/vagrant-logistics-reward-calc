@@ -171,6 +171,10 @@ export class RouteUnavailableError extends Error {
  * @param {Array<{ security?: number | string }>} routeSystems
  * @returns {{ highSecJumps: number, dangerousJumps: number }}
  */
+function isHighSecSystemNode(system) {
+	return Number(system?.security ?? 0) >= HIGH_SEC_SECURITY_THRESHOLD;
+}
+
 export function classifyJumps(routeSystems) {
 	if (!Array.isArray(routeSystems) || routeSystems.length <= 1) {
 		return { highSecJumps: 0, dangerousJumps: 0 };
@@ -180,9 +184,7 @@ export function classifyJumps(routeSystems) {
 	let dangerousJumps = 0;
 
 	for (let i = 1; i < routeSystems.length; i++) {
-		const system = routeSystems[i];
-		const sec = Number(system?.security ?? 0);
-		if (sec >= HIGH_SEC_SECURITY_THRESHOLD) {
+		if (isHighSecSystemNode(routeSystems[i])) {
 			highSecJumps++;
 		} else {
 			dangerousJumps++;
