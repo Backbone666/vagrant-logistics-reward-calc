@@ -46,24 +46,25 @@ test("typography: minimum font size floor is at least 0.8125rem (13px)", () => {
 	);
 });
 
-test("typography: header subtitle h2 clamp never drops below 0.8125rem", () => {
-	// Match clamp declarations on h2
-	const clampMatches = styleCss.match(/clamp\(\s*([0-9.]+)(rem|px)[^)]+\)/g) || [];
-	const h2ClampMinViolations = [];
+function findClampViolations(cssText, minRem = 0.8125, minPx = 13) {
+	const clampMatches = cssText.match(/clamp\(\s*([0-9.]+)(rem|px)[^)]+\)/g) || [];
+	const violations = [];
 
 	for (const clamp of clampMatches) {
-		const minMatch = clamp.match(/clamp\(\s*([0-9.]+)(rem|px)/);
-		if (minMatch) {
-			const val = Number.parseFloat(minMatch[1]);
-			const unit = minMatch[2];
-			if (unit === "rem" && val < 0.8125) {
-				h2ClampMinViolations.push(clamp);
-			} else if (unit === "px" && val < 13) {
-				h2ClampMinViolations.push(clamp);
-			}
+		const match = clamp.match(/clamp\(\s*([0-9.]+)(rem|px)/);
+		if (!match) continue;
+		const val = Number.parseFloat(match[1]);
+		const unit = match[2];
+		if ((unit === "rem" && val < minRem) || (unit === "px" && val < minPx)) {
+			violations.push(clamp);
 		}
 	}
 
+	return violations;
+}
+
+test("typography: header subtitle h2 clamp never drops below 0.8125rem", () => {
+	const h2ClampMinViolations = findClampViolations(styleCss, 0.8125, 13);
 	assert.deepEqual(
 		h2ClampMinViolations,
 		[],
