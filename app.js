@@ -312,19 +312,18 @@ function syncSafeRouteLock(volume) {
 	applySafeRouteLockState(safeRouteCheckbox, isOverJfVolume);
 }
 
+function shouldTriggerVolumeRouteLookup(wasDisabled, isDisabled) {
+	if (wasDisabled || !isDisabled) return false;
+	const hasEndpoints = Boolean(originInput?.value?.trim() && destinationInput?.value?.trim());
+	return hasEndpoints && typeof checkAndTriggerRouteLookup === "function";
+}
+
 function handleVolumeChange(volumeValue) {
-	const wasOverJf = safeRouteCheckbox?.disabled;
+	const wasDisabled = Boolean(safeRouteCheckbox?.disabled);
 	syncSafeRouteLock(volumeValue);
-	const isNowOverJf = safeRouteCheckbox?.disabled;
-	const origin = originInput?.value?.trim() || "";
-	const dest = destinationInput?.value?.trim() || "";
-	if (
-		!wasOverJf &&
-		isNowOverJf &&
-		origin &&
-		dest &&
-		typeof checkAndTriggerRouteLookup === "function"
-	) {
+	const isDisabled = Boolean(safeRouteCheckbox?.disabled);
+
+	if (shouldTriggerVolumeRouteLookup(wasDisabled, isDisabled)) {
 		checkAndTriggerRouteLookup();
 	} else if (lastRouteResult) {
 		applyRouteSelection();
