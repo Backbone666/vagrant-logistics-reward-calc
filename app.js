@@ -910,11 +910,10 @@ clearBtn.addEventListener("click", () => {
 
 // Initialize inputs from URL params
 function clampInputVal(rawVal, min, max, allowDecimal = false) {
-	if (rawVal === null || rawVal === undefined || rawVal === "") return "";
+	if (rawVal == null || rawVal === "") return "";
 	const num = parseNum(rawVal);
-	if (Number.isNaN(num) || num < min) return formatNumber(min, allowDecimal);
-	if (num > max) return formatNumber(max, allowDecimal);
-	return formatNumber(rawVal, allowDecimal);
+	const clamped = Math.min(Math.max(num, min), max);
+	return formatNumber(clamped, allowDecimal);
 }
 
 function initParamsFromUrl() {

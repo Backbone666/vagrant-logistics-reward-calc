@@ -1,7 +1,8 @@
 export const parseNum = (val) => {
 	if (typeof val === "number") return Number.isNaN(val) ? 0 : val;
-	if (!val) return 0;
-	return parseFloat(val.toString().replace(/,/g, "")) || 0;
+	if (val == null || val === "") return 0;
+	const parsed = parseFloat(String(val).replaceAll(",", ""));
+	return Number.isNaN(parsed) ? 0 : parsed;
 };
 
 export function classifyService({ volume, routeSecurity, dangerousJumps, forceJF }) {
