@@ -38,15 +38,12 @@ async function fetchSystemWithRetry(id, retries = 3) {
 	}
 }
 
-async function main() {
-	const kspaceIds = await fetchKspaceSystemIds({ includeZarzakh: false });
-	console.log(`Scanning security status for ${kspaceIds.length} K-space systems...`);
-
+export async function scanHighsecSystemIds(systemIds, batchSize = BATCH_CONCURRENCY) {
 	const highSecSystemIds = [];
 	let completed = 0;
 
-	for (let i = 0; i < kspaceIds.length; i += BATCH_CONCURRENCY) {
-		const chunk = kspaceIds.slice(i, i + BATCH_CONCURRENCY);
+	for (let i = 0; i < systemIds.length; i += batchSize) {
+		const chunk = systemIds.slice(i, i + batchSize);
 		const systems = await Promise.all(chunk.map((id) => fetchSystemWithRetry(id)));
 		for (const sys of systems) {
 			if (
@@ -58,18 +55,27 @@ async function main() {
 			}
 		}
 		completed += chunk.length;
-		if (completed % 600 === 0 || completed === kspaceIds.length) {
+		if (completed % 600 === 0 || completed === systemIds.length) {
 			console.log(
-				`Progress: ${completed}/${kspaceIds.length} checked (${highSecSystemIds.length} highsec found)...`,
+				`Progress: ${completed}/${systemIds.length} checked (${highSecSystemIds.length} highsec found)...`,
 			);
 		}
 	}
 
-	highSecSystemIds.sort((a, b) => a - b);
+	return highSecSystemIds.sort((a, b) => a - b);
+}
 
-	fs.mkdirSync(path.dirname(OUTPUT_FILE), { recursive: true });
-	fs.writeFileSync(OUTPUT_FILE, JSON.stringify(highSecSystemIds), "utf8");
-	const fileSize = fs.statSync(OUTPUT_FILE).size;
+export function writeHighsecDataFile(filePath, ids) {
+	fs.mkdirSync(path.dirname(filePath), { recursive: true });
+	fs.writeFileSync(filePath, JSON.stringify(ids), "utf8");
+	return fs.statSync(filePath).size;
+}
+
+async function main() {
+	const kspaceIds = await fetchKspaceSystemIds({ includeZarzakh: false });
+	console.log(`Scanning security status for ${kspaceIds.length} K-space systems...`);
+	const highSecSystemIds = await scanHighsecSystemIds(kspaceIds);
+	const fileSize = writeHighsecDataFile(OUTPUT_FILE, highSecSystemIds);
 	console.log(
 		`Successfully wrote ${highSecSystemIds.length} highsec system IDs to ${OUTPUT_FILE} (${fileSize} bytes)`,
 	);
