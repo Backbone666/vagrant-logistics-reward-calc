@@ -526,15 +526,17 @@ function updateTheraBadge(selection) {
 	const theraJumps = lastRouteResult.thera.totalJumps;
 	const directJumps = lastRouteResult.direct?.totalJumps ?? 0;
 	const isUsingThera = selection.routeUsed === "thera";
+	const wormholeSvg =
+		'<svg class="btn-icon icon-wormhole" aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>';
 
 	if (isUsingThera) {
 		theraToggleBtn.className = "btn-thera-toggle thera-active";
-		theraToggleBtn.textContent = `⚡ Via Thera (${theraJumps} jumps)`;
+		theraToggleBtn.innerHTML = `${wormholeSvg}<span>Via Thera (${theraJumps}J)</span>`;
 		theraToggleBtn.title = `Thera wormhole shortcut active (${theraJumps} jumps vs ${directJumps} stargate jumps). Click to switch to direct stargate route.`;
 		theraToggleBtn.setAttribute("aria-pressed", "true");
 	} else {
 		theraToggleBtn.className = "btn-thera-toggle thera-available";
-		theraToggleBtn.textContent = `🌀 Use Thera (${theraJumps} jumps)`;
+		theraToggleBtn.innerHTML = `${wormholeSvg}<span>Thera (${theraJumps}J)</span>`;
 		theraToggleBtn.title = `Thera wormhole shortcut available (${theraJumps} jumps vs ${directJumps} stargate jumps). Click to enable Thera shortcut route.`;
 		theraToggleBtn.setAttribute("aria-pressed", "false");
 	}
