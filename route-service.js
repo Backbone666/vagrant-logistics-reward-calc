@@ -202,6 +202,25 @@ export function classifyJumps(routeSystems) {
  * @param {object} [options]
  * @returns {string}
  */
+function normalizeAvoidList(avoid, origin, destination) {
+	const originClean = origin.trim().toLowerCase();
+	const destClean = destination.trim().toLowerCase();
+
+	const items = Array.isArray(avoid)
+		? avoid
+		: typeof avoid === "string" && avoid.trim()
+			? avoid
+					.split(",")
+					.map((s) => s.trim())
+					.filter(Boolean)
+			: [];
+
+	return items.filter((name) => {
+		const lower = name.toLowerCase();
+		return lower !== originClean && lower !== destClean;
+	});
+}
+
 export function buildRouteUrl(origin, destination, options = {}) {
 	const baseUrl = options.baseUrl || EVE_ROUTE_BASE_URL;
 	const avoid = options.avoid ?? MANDATORY_AVOID_LIST;
@@ -212,21 +231,7 @@ export function buildRouteUrl(origin, destination, options = {}) {
 	url.searchParams.set("end", destination.trim());
 	url.searchParams.set("pref", pref);
 
-	const originClean = origin.trim().toLowerCase();
-	const destClean = destination.trim().toLowerCase();
-	let avoidList = [];
-	if (Array.isArray(avoid) && avoid.length > 0) {
-		avoidList = avoid;
-	} else if (typeof avoid === "string" && avoid.trim()) {
-		avoidList = avoid
-			.split(",")
-			.map((s) => s.trim())
-			.filter(Boolean);
-	}
-
-	const filteredAvoid = avoidList.filter(
-		(name) => name.toLowerCase() !== originClean && name.toLowerCase() !== destClean,
-	);
+	const filteredAvoid = normalizeAvoidList(avoid, origin, destination);
 	if (filteredAvoid.length > 0) {
 		url.searchParams.set("avoid", filteredAvoid.join(","));
 	}
