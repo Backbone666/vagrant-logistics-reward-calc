@@ -30,7 +30,7 @@ test("url-params: buildUrlParamEntries maps and sanitizes parameters cleanly", (
 	);
 	assert.match(
 		appJs,
-		/const strip = \(val\) => \(val \? String\(val\)\.replaceAll\([",']\,[",'], [",'][",']\) : [",'][",']\)/,
+		/const strip = \(val\) => \(val \? String\(val\)\.replaceAll\([",'],[",'], [",'][",']\) : [",'][",']\)/,
 		"buildUrlParamEntries must use modern replaceAll for comma stripping",
 	);
 });
