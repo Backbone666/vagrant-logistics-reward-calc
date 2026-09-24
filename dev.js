@@ -18,7 +18,7 @@ const MIME_TYPES = {
 	".woff2": "font/woff2",
 };
 
-export function resolveSafeFilePath(urlPath, rootDir) {
+function resolveSafeFilePath(urlPath, rootDir) {
 	const cleanPath = urlPath.split("?")[0];
 	const target = cleanPath === "/" ? "index.html" : cleanPath.replace(/^\/+/, "");
 	const filePath = path.resolve(rootDir, target);
@@ -27,7 +27,7 @@ export function resolveSafeFilePath(urlPath, rootDir) {
 	return filePath;
 }
 
-export function serveStaticFile(res, filePath) {
+function serveStaticFile(res, filePath) {
 	const ext = path.extname(filePath);
 	const contentType = MIME_TYPES[ext] || "application/octet-stream";
 
