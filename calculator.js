@@ -190,6 +190,18 @@ function calcHighsecReward({ service, parsedHighsecJumps, parsedCollateral, serv
 	});
 }
 
+function resolveJumpFreighterCollateralParams(service, parsedCollateral, collateralRules) {
+	const maxCollateral = service.max_collateral_isk || 50_000_000_000;
+	if (parsedCollateral > maxCollateral) {
+		return { isRedirect: true, collateralFee: 0 };
+	}
+	const rules = collateralRules?.jump_freighter || DEFAULT_COLLATERAL_RULES.jump_freighter;
+	return {
+		isRedirect: false,
+		collateralFee: calcCollateralSurcharge(parsedCollateral, rules),
+	};
+}
+
 function calcJumpFreighterReward({
 	dangerousConfig,
 	parsedDangerousJumps,
@@ -198,23 +210,13 @@ function calcJumpFreighterReward({
 	collateralRules,
 }) {
 	const service = dangerousConfig.jump_freighter_standard || {};
-	const jfBase = service.base_rate_isk || 0;
-	const cynoFee = service.cyno_jump_fee_isk || 0;
-
-	let isRedirect = false;
-	if (parsedCollateral > (service.max_collateral_isk || 50_000_000_000)) {
-		isRedirect = true;
-	}
-
-	const baseFee = jfBase;
-	const distanceFee = parsedDangerousJumps * cynoFee;
-
-	let collateralFee = 0;
-	if (!isRedirect) {
-		const rules = collateralRules?.jump_freighter || DEFAULT_COLLATERAL_RULES.jump_freighter;
-		collateralFee = calcCollateralSurcharge(parsedCollateral, rules);
-	}
-
+	const baseFee = service.base_rate_isk || 0;
+	const distanceFee = parsedDangerousJumps * (service.cyno_jump_fee_isk || 0);
+	const { isRedirect, collateralFee } = resolveJumpFreighterCollateralParams(
+		service,
+		parsedCollateral,
+		collateralRules,
+	);
 	const total = baseFee + distanceFee + collateralFee;
 
 	return createRewardResult({
