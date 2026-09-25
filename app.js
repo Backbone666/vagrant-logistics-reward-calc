@@ -768,6 +768,20 @@ miniCopyBtns.forEach((btn) => {
 	});
 });
 
+function formatInputWithCursorPreservation(input, isDecimalAllowed) {
+	if (!input) return;
+	const start = input.selectionStart;
+	const end = input.selectionEnd;
+	const oldLen = input.value.length;
+
+	input.value = formatNumber(input.value, isDecimalAllowed);
+
+	const delta = input.value.length - oldLen;
+	if (typeof input.setSelectionRange === "function" && start !== null && end !== null) {
+		input.setSelectionRange(start + delta, end + delta);
+	}
+}
+
 // Live formatting as user types
 toFormatNumberInputs.forEach((input) => {
 	input.addEventListener("input", (e) => {
@@ -778,17 +792,8 @@ toFormatNumberInputs.forEach((input) => {
 			updateRouteJumpsSummary(highsecJumpsInput.value, dangerousJumpsInput.value);
 		}
 
-		const start = e.target.selectionStart;
-		const end = e.target.selectionEnd;
-		const oldLen = e.target.value.length;
-
 		const isDecimalAllowed = e.target.id === "collateral" || e.target.id === "volume";
-		e.target.value = formatNumber(e.target.value, isDecimalAllowed);
-
-		const newLen = e.target.value.length;
-		const delta = newLen - oldLen;
-
-		e.target.setSelectionRange(start + delta, end + delta);
+		formatInputWithCursorPreservation(e.target, isDecimalAllowed);
 
 		if (e.target === volumeInput) {
 			handleVolumeChange(e.target.value);
