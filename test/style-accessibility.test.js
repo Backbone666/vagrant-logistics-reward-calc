@@ -219,6 +219,18 @@ test("seo-aeo: index.html defines valid JSON-LD schema with synchronized FAQPage
 		"2026-09-25",
 		"dateModified must reflect current release date",
 	);
+
+	const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../package.json"), "utf-8"));
+	assert.equal(
+		webAppEntity.softwareVersion,
+		pkg.version,
+		"softwareVersion in JSON-LD must match package.json version",
+	);
+	assert.match(
+		indexHtml,
+		new RegExp(`<script type="module" src="app\\.js\\?v=${pkg.version}">`),
+		"Entry script query string must match package.json version",
+	);
 });
 
 test("seo-aeo: visible FAQ questions match JSON-LD FAQPage question names", () => {
