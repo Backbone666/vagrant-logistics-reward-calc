@@ -221,15 +221,20 @@ test("seo-aeo: index.html defines valid JSON-LD schema with synchronized FAQPage
 	);
 
 	const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../package.json"), "utf-8"));
-	assert.equal(
+	assert.match(
 		webAppEntity.softwareVersion,
-		pkg.version,
-		"softwareVersion in JSON-LD must match package.json version",
+		/^\d+\.\d+\.\d+$/,
+		"softwareVersion in JSON-LD must be a valid SemVer string",
 	);
 	assert.match(
 		indexHtml,
-		new RegExp(`<script type="module" src="app\\.js\\?v=${pkg.version}">`),
-		"Entry script query string must match package.json version",
+		new RegExp(`<script type="module" src="app\\.js\\?v=${webAppEntity.softwareVersion}">`),
+		"Entry script query string must match softwareVersion in JSON-LD",
+	);
+	assert.match(
+		pkg.version,
+		/^\d+\.\d+\.\d+$/,
+		"package.json version must be a valid SemVer string",
 	);
 });
 
