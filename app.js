@@ -598,12 +598,17 @@ function handleRouteLookupError(err, controller) {
 	setManualJumpVisibility(true);
 }
 
-function handleRouteInputChange() {
-	cancelPendingRouteLookup();
-
+function getRouteInputContext() {
 	const origin = originInput?.value?.trim() || "";
 	const destination = destinationInput?.value?.trim() || "";
 	const parsedVolume = parseNum(volumeInput?.value) || 0;
+	return { origin, destination, parsedVolume };
+}
+
+function handleRouteInputChange() {
+	cancelPendingRouteLookup();
+
+	const { origin, destination, parsedVolume } = getRouteInputContext();
 
 	if (!origin || !destination || parsedVolume <= 0) {
 		clearRouteResults("", "");
@@ -677,9 +682,7 @@ function resolveSystemNames(origin, destination, systems) {
 }
 
 async function checkAndTriggerRouteLookup() {
-	const origin = originInput?.value?.trim() || "";
-	const destination = destinationInput?.value?.trim() || "";
-	const parsedVolume = parseNum(volumeInput?.value) || 0;
+	const { origin, destination, parsedVolume } = getRouteInputContext();
 
 	if (!origin || !destination || parsedVolume <= 0) {
 		setRouteStatus("", "");
