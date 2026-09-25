@@ -427,6 +427,22 @@ const scheduleFrame =
 let renderRafId = null;
 let lastDetails = null;
 
+function resolveDisplayReward(details) {
+	if (details.error) return 0;
+	if (details.isRedirect) return details.redirectTarget;
+	return details.finalTotal;
+}
+
+function scheduleRenderPass(renderFn) {
+	if (renderRafId && typeof cancelAnimationFrame === "function") {
+		cancelAnimationFrame(renderRafId);
+	}
+	renderRafId = scheduleFrame(() => {
+		renderRafId = null;
+		renderFn();
+	});
+}
+
 function updateAll() {
 	if (!config) return;
 
@@ -438,19 +454,11 @@ function updateAll() {
 	const details = calcRewardDetails({ ...options, highsecJumps: hsJumps, dangerousJumps, config });
 	lastDetails = details;
 
-	const reward = details.error
-		? 0
-		: details.isRedirect
-			? details.redirectTarget
-			: details.finalTotal;
+	const reward = resolveDisplayReward(details);
 	currentReward = reward;
 	const rawJumps = hsJumps + dangerousJumps || 1;
 
-	if (renderRafId && typeof cancelAnimationFrame === "function") {
-		cancelAnimationFrame(renderRafId);
-	}
-	renderRafId = scheduleFrame(() => {
-		renderRafId = null;
+	scheduleRenderPass(() => {
 		renderBreakdown(details);
 		syncPresets(options.volume);
 		renderReward(reward, rawJumps);
