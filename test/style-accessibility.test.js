@@ -48,16 +48,17 @@ test("typography: minimum font size floor is at least 0.8125rem (13px)", () => {
 	);
 });
 
+function isClampBelowFloor(val, unit, minRem, minPx) {
+	return (unit === "rem" && val < minRem) || (unit === "px" && val < minPx);
+}
+
 function findClampViolations(cssText, minRem = 0.8125, minPx = 13) {
 	const clampMatches = cssText.match(/clamp\(\s*([0-9.]+)(rem|px)[^)]+\)/g) || [];
 	const violations = [];
 
 	for (const clamp of clampMatches) {
 		const match = clamp.match(/clamp\(\s*([0-9.]+)(rem|px)/);
-		if (!match) continue;
-		const val = Number.parseFloat(match[1]);
-		const unit = match[2];
-		if ((unit === "rem" && val < minRem) || (unit === "px" && val < minPx)) {
+		if (match && isClampBelowFloor(Number.parseFloat(match[1]), match[2], minRem, minPx)) {
 			violations.push(clamp);
 		}
 	}
