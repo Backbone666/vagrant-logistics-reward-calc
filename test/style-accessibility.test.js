@@ -253,3 +253,12 @@ test("theming: dead dangerous route css custom properties are pruned", () => {
 		"Unreferenced token --warning-glow must be pruned from style.css",
 	);
 });
+
+test("typography: legacy uncompressed otf font is not tracked or served", () => {
+	const devJsPath = path.resolve(__dirname, "../dev.js");
+	const devJs = fs.readFileSync(devJsPath, "utf-8");
+	assert.doesNotMatch(devJs, /"\.otf"/, "dev.js must not register obsolete .otf MIME mapping");
+
+	const otfPath = path.resolve(__dirname, "../evesansneue-regular.otf");
+	assert.equal(fs.existsSync(otfPath), false, "evesansneue-regular.otf must be deleted from repo");
+});

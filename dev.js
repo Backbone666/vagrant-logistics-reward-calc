@@ -14,7 +14,6 @@ const MIME_TYPES = {
 	".js": "text/javascript",
 	".json": "application/json",
 	".webp": "image/webp",
-	".otf": "font/otf",
 	".woff2": "font/woff2",
 };
 
