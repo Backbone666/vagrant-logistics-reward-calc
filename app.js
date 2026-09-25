@@ -857,6 +857,51 @@ copyBtn.addEventListener("click", async () => {
 	}
 });
 
+function buildQuoteExportText({
+	volume,
+	collateral,
+	highsecJumps,
+	dangerousJumps,
+	origin,
+	destination,
+	safeRoute,
+	isUsingThera,
+	details,
+	url,
+}) {
+	const detailsText = details?.isRedirect
+		? `Redirect to: ${details.redirectTarget}`
+		: `${formatNumber(details?.finalTotal ?? 0)} ISK`;
+
+	const viaTheraTag = isUsingThera ? " [via Thera]" : "";
+	const jumpsText = `${highsecJumps || 0} HighSec / ${dangerousJumps || 0} Dangerous Jumps`;
+	const routeLabel =
+		origin && destination
+			? `Route: ${origin} → ${destination}${viaTheraTag} (${jumpsText})`
+			: `Route: ${jumpsText}`;
+
+	const templateLines = [
+		"Vagrant Logistics Courier Quote",
+		"------------------------------",
+		`Volume: ${volume || 0} m³`,
+		`Collateral: ${collateral || 0} ISK`,
+		routeLabel,
+		`Routing: ${safeRoute ? "Safe Route (Prefer Highsec)" : "Shortest Route"}`,
+		`Time to Accept: ${isUsingThera ? "1 Day" : "3 Days"}`,
+		`Time to Complete: ${isUsingThera ? "1 Day" : "3 Days"}`,
+		`Estimated Reward: ${detailsText}`,
+		`Link: ${url}`,
+	];
+
+	if (isUsingThera) {
+		templateLines.push(
+			"Notice: Wormhole routes depend on active Thera connections. Issue contract promptly.",
+		);
+	}
+
+	return templateLines.join("\n");
+}
+
 copyQuoteBtn.addEventListener("click", async () => {
 	const details = lastDetails;
 	if (!details || details.error) return;
@@ -867,13 +912,6 @@ copyQuoteBtn.addEventListener("click", async () => {
 	}
 	syncUrlParams(getFormInputs());
 
-	let detailsText = "";
-	if (details.isRedirect) {
-		detailsText = `Redirect to: ${details.redirectTarget}`;
-	} else {
-		detailsText = `${formatNumber(details.finalTotal)} ISK`;
-	}
-
 	const originVal = originInput?.value?.trim();
 	const destVal = destinationInput?.value?.trim();
 	const selection = lastRouteResult
@@ -882,32 +920,19 @@ copyQuoteBtn.addEventListener("click", async () => {
 			})
 		: null;
 	const isUsingThera = selection?.routeUsed === "thera";
-	const viaTheraTag = isUsingThera ? " [via Thera]" : "";
-	const routeLabel =
-		originVal && destVal
-			? `Route: ${originVal} → ${destVal}${viaTheraTag} (${highsecJumpsInput.value || 0} HighSec / ${dangerousJumpsInput.value || 0} Dangerous Jumps)`
-			: `Route: ${highsecJumpsInput.value || 0} HighSec / ${dangerousJumpsInput.value || 0} Dangerous Jumps`;
 
-	const templateLines = [
-		"Vagrant Logistics Courier Quote",
-		"------------------------------",
-		`Volume: ${volumeInput.value || 0} m³`,
-		`Collateral: ${collateralInput.value || 0} ISK`,
-		routeLabel,
-		`Routing: ${safeRouteCheckbox?.checked ? "Safe Route (Prefer Highsec)" : "Shortest Route"}`,
-		`Time to Accept: ${isUsingThera ? "1 Day" : "3 Days"}`,
-		`Time to Complete: ${isUsingThera ? "1 Day" : "3 Days"}`,
-		`Estimated Reward: ${detailsText}`,
-		`Link: ${window.location.href}`,
-	];
-
-	if (isUsingThera) {
-		templateLines.push(
-			"Notice: Wormhole routes depend on active Thera connections. Issue contract promptly.",
-		);
-	}
-
-	const template = templateLines.join("\n");
+	const template = buildQuoteExportText({
+		volume: volumeInput.value,
+		collateral: collateralInput.value,
+		highsecJumps: highsecJumpsInput.value,
+		dangerousJumps: dangerousJumpsInput.value,
+		origin: originVal,
+		destination: destVal,
+		safeRoute: Boolean(safeRouteCheckbox?.checked),
+		isUsingThera,
+		details,
+		url: window.location.href,
+	});
 
 	const success = await copyTextToClipboard(template);
 	triggerCopyFeedback(copyQuoteBtn, success, "Quote Copied!");
