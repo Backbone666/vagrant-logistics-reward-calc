@@ -78,3 +78,34 @@ test("url-params: FALLBACK_CONFIG includes routing engine and avoidance systems"
 		"FALLBACK_CONFIG must prune obsolete operational_modifiers",
 	);
 });
+
+test("volume-gating: route lookup is gated on positive cargo volume", () => {
+	assert.match(
+		appJs,
+		/checkAndTriggerRouteLookup[\s\S]*?parsedVolume\s*<=\s*0/,
+		"checkAndTriggerRouteLookup must check parsedVolume <= 0 before proceeding",
+	);
+	assert.match(
+		appJs,
+		/handleRouteInputChange[\s\S]*?parsedVolume\s*<=\s*0/,
+		"handleRouteInputChange must check parsedVolume <= 0 before proceeding",
+	);
+	assert.match(
+		appJs,
+		/!lastRouteResult\s*&&\s*hasEndpoints\s*&&\s*parsedVol\s*>\s*0/,
+		"handleVolumeChange must initiate route lookup when endpoints exist and volume > 0",
+	);
+});
+
+test("theming: dangerous route styling hooks are pruned from app.js", () => {
+	assert.doesNotMatch(
+		appJs,
+		/route-dangerous/,
+		"app.js must not manipulate or toggle .route-dangerous",
+	);
+	assert.doesNotMatch(
+		appJs,
+		/has-dangerous/,
+		"app.js must not manipulate or toggle .has-dangerous",
+	);
+});

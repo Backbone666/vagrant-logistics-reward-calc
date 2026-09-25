@@ -53,7 +53,6 @@ const bdDistance = document.getElementById("bd_distance");
 const bdCollateral = document.getElementById("bd_collateral");
 const bdSecurity = document.getElementById("bd_security");
 const configWarning = document.getElementById("config-warning");
-const calcCard = document.querySelector(".calculator-card");
 const presetBtns = document.querySelectorAll(".preset-btn");
 const miniCopyBtns = document.querySelectorAll(".btn-mini-copy");
 const reqTimeToAccept = document.getElementById("req_time_to_accept");
@@ -267,17 +266,14 @@ function updateRouteJumpsSummary(highSecJumps, dangerousJumps) {
 	if (hs === 0 && dang === 0 && !origin && !dest) {
 		routeJumpsSummary.classList.add("hidden");
 		routeJumpsSummary.textContent = "";
-		routeJumpsSummary.classList.remove("has-dangerous");
 		return;
 	}
 
 	const total = hs + dang;
 	if (dang > 0) {
 		routeJumpsSummary.textContent = `${total} Jumps (${hs} HS / ${dang} Dangerous)`;
-		routeJumpsSummary.classList.add("has-dangerous");
 	} else {
 		routeJumpsSummary.textContent = `${total} Jumps (${total} HighSec)`;
-		routeJumpsSummary.classList.remove("has-dangerous");
 	}
 	routeJumpsSummary.classList.remove("hidden");
 }
@@ -324,8 +320,13 @@ function handleVolumeChange(volumeValue) {
 	const wasDisabled = Boolean(safeRouteCheckbox?.disabled);
 	syncSafeRouteLock(volumeValue);
 	const isDisabled = Boolean(safeRouteCheckbox?.disabled);
+	const hasEndpoints = Boolean(originInput?.value?.trim() && destinationInput?.value?.trim());
+	const parsedVol = parseNum(volumeValue) || 0;
 
-	if (shouldTriggerVolumeRouteLookup(wasDisabled, isDisabled)) {
+	if (
+		shouldTriggerVolumeRouteLookup(wasDisabled, isDisabled) ||
+		(!lastRouteResult && hasEndpoints && parsedVol > 0)
+	) {
 		checkAndTriggerRouteLookup();
 	} else if (lastRouteResult) {
 		applyRouteSelection();
@@ -434,7 +435,6 @@ function updateAll() {
 
 	const hsJumps = parseNum(options.highsecJumps);
 	const dangerousJumps = parseNum(options.dangerousJumps);
-	const isDangerous = dangerousJumps > 0 || options.forceJF;
 	const details = calcRewardDetails({ ...options, highsecJumps: hsJumps, dangerousJumps, config });
 	lastDetails = details;
 
@@ -451,9 +451,6 @@ function updateAll() {
 	}
 	renderRafId = scheduleFrame(() => {
 		renderRafId = null;
-		if (calcCard) {
-			calcCard.classList.toggle("route-dangerous", isDangerous);
-		}
 		renderBreakdown(details);
 		syncPresets(options.volume);
 		renderReward(reward, rawJumps);
@@ -606,8 +603,9 @@ function handleRouteInputChange() {
 
 	const origin = originInput?.value?.trim() || "";
 	const destination = destinationInput?.value?.trim() || "";
+	const parsedVolume = parseNum(volumeInput?.value) || 0;
 
-	if (!origin || !destination) {
+	if (!origin || !destination || parsedVolume <= 0) {
 		clearRouteResults("", "");
 		return;
 	}
@@ -681,8 +679,9 @@ function resolveSystemNames(origin, destination, systems) {
 async function checkAndTriggerRouteLookup() {
 	const origin = originInput?.value?.trim() || "";
 	const destination = destinationInput?.value?.trim() || "";
+	const parsedVolume = parseNum(volumeInput?.value) || 0;
 
-	if (!origin || !destination) {
+	if (!origin || !destination || parsedVolume <= 0) {
 		setRouteStatus("", "");
 		return;
 	}
