@@ -129,6 +129,15 @@ export async function loadSystemsData(dataUrl = "data/systems.json") {
 	return systemsFetchPromise;
 }
 
+export function resolveSelectedSystemOnEnter(currentMatches, activeIndex, inputValue) {
+	if (!Array.isArray(currentMatches) || currentMatches.length === 0) return null;
+	if (activeIndex >= 0 && activeIndex < currentMatches.length) {
+		return currentMatches[activeIndex];
+	}
+	const query = (inputValue || "").trim().toLowerCase();
+	return currentMatches.find((m) => m.toLowerCase() === query) || null;
+}
+
 /**
  * Attach accessible autocomplete combobox behavior to an input.
  *
@@ -248,18 +257,12 @@ export function attachSystemAutocomplete(inputEl, listEl, options = {}) {
 			const prev = activeIndex - 1 < 0 ? currentMatches.length - 1 : activeIndex - 1;
 			highlightOption(prev);
 		} else if (e.key === "Enter") {
-			if (activeIndex >= 0 && activeIndex < currentMatches.length) {
+			const selection = resolveSelectedSystemOnEnter(currentMatches, activeIndex, inputEl.value);
+			if (selection) {
 				e.preventDefault();
-				selectOption(currentMatches[activeIndex]);
+				selectOption(selection);
 			} else {
-				const query = inputEl.value.trim().toLowerCase();
-				const exactMatch = currentMatches.find((m) => m.toLowerCase() === query);
-				if (exactMatch) {
-					e.preventDefault();
-					selectOption(exactMatch);
-				} else {
-					closeDropdown();
-				}
+				closeDropdown();
 			}
 		} else if (e.key === "Escape") {
 			e.preventDefault();

@@ -7,6 +7,7 @@ import {
 	getCanonicalSystemMap,
 	isKnownSystem,
 	loadSystemsData,
+	resolveSelectedSystemOnEnter,
 } from "../system-autocomplete.js";
 
 const SAMPLE_SYSTEMS = [
@@ -408,4 +409,12 @@ test("isKnownSystem: utilizes cachedCanonicalMap when called without second argu
 	} finally {
 		globalThis.fetch = originalFetch;
 	}
+});
+
+test("resolveSelectedSystemOnEnter: resolves activeIndex selection or exact typed match", () => {
+	const matches = ["Jita", "Amarr", "Dodixie"];
+	assert.equal(resolveSelectedSystemOnEnter(matches, 1, "anything"), "Amarr");
+	assert.equal(resolveSelectedSystemOnEnter(matches, -1, "amarr"), "Amarr");
+	assert.equal(resolveSelectedSystemOnEnter(matches, -1, "jit"), null);
+	assert.equal(resolveSelectedSystemOnEnter([], -1, "jita"), null);
 });
