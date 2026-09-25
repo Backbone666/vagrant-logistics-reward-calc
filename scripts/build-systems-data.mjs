@@ -33,7 +33,9 @@ async function main() {
 	console.log(`Successfully wrote ${names.length} system names to ${OUTPUT_FILE}`);
 }
 
-main().catch((err) => {
-	console.error("Error building systems data:", err);
-	process.exit(1);
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+	main().catch((err) => {
+		console.error("Error building systems data:", err);
+		process.exit(1);
+	});
+}

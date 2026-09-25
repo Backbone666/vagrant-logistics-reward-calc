@@ -38,7 +38,7 @@ async function fetchSystemWithRetry(id, retries = 3) {
 	}
 }
 
-export async function scanHighsecSystemIds(systemIds, batchSize = BATCH_CONCURRENCY) {
+async function scanHighsecSystemIds(systemIds, batchSize = BATCH_CONCURRENCY) {
 	const highSecSystemIds = [];
 	let completed = 0;
 
@@ -65,7 +65,7 @@ export async function scanHighsecSystemIds(systemIds, batchSize = BATCH_CONCURRE
 	return highSecSystemIds.sort((a, b) => a - b);
 }
 
-export function writeHighsecDataFile(filePath, ids) {
+function writeHighsecDataFile(filePath, ids) {
 	fs.mkdirSync(path.dirname(filePath), { recursive: true });
 	fs.writeFileSync(filePath, JSON.stringify(ids), "utf8");
 	return fs.statSync(filePath).size;
@@ -81,7 +81,9 @@ async function main() {
 	);
 }
 
-main().catch((err) => {
-	console.error("Error building highsec systems data:", err);
-	process.exit(1);
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+	main().catch((err) => {
+		console.error("Error building highsec systems data:", err);
+		process.exit(1);
+	});
+}
