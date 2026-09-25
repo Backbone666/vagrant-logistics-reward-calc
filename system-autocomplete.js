@@ -84,13 +84,17 @@ function lookupInCollection(clean, collection) {
 	return false;
 }
 
+function isDefaultCachedSystem(clean) {
+	return Boolean(cachedCanonicalMap?.has(clean));
+}
+
 export function isKnownSystem(name, systems) {
-	if (!name || typeof name !== "string") return false;
+	if (typeof name !== "string") return false;
 	const clean = name.trim().toLowerCase();
 	if (!clean) return false;
 
 	if (!systems || systems === cachedSystems) {
-		return cachedCanonicalMap ? cachedCanonicalMap.has(clean) : false;
+		return isDefaultCachedSystem(clean);
 	}
 
 	return lookupInCollection(clean, systems);
