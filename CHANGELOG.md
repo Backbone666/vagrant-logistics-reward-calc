@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.1](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.8.0...v1.8.1) (2026-09-25)
+
+
+### Performance Improvements
+
+* **calc:** streamline parseNum with Number.isFinite check ([6b4a29d](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/6b4a29dfba51312f701ea7927d61f0685b1384b7))
+
 ## [1.8.0](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.7.0...v1.8.0) (2026-09-25)
 
 
