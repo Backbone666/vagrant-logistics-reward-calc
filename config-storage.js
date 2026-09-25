@@ -16,6 +16,16 @@ export function saveCachedConfig(rateConfig, storage = globalThis.localStorage) 
 	}
 }
 
+function safeRemoveItem(storage, key) {
+	try {
+		if (typeof storage?.removeItem === "function") {
+			storage.removeItem(key);
+		}
+	} catch {
+		// Ignore storage quota or access errors during purge
+	}
+}
+
 export function loadCachedConfig(storage = globalThis.localStorage, now = Date.now()) {
 	if (!storage || typeof storage.getItem !== "function") return null;
 	try {
@@ -31,13 +41,13 @@ export function loadCachedConfig(storage = globalThis.localStorage, now = Date.n
 		}
 
 		if (payload.version !== CONFIG_CACHE_VERSION) {
-			if (typeof storage.removeItem === "function") storage.removeItem(CONFIG_STORAGE_KEY);
+			safeRemoveItem(storage, CONFIG_STORAGE_KEY);
 			return null;
 		}
 
 		const age = now - (payload.timestamp || 0);
 		if (age > CONFIG_CACHE_TTL_MS || age < 0) {
-			if (typeof storage.removeItem === "function") storage.removeItem(CONFIG_STORAGE_KEY);
+			safeRemoveItem(storage, CONFIG_STORAGE_KEY);
 			return null;
 		}
 
