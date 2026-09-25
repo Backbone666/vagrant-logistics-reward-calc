@@ -22,23 +22,25 @@ test("typography: brand fonts Cinzel and EveSansNeue remain registered and assig
 	);
 });
 
-test("typography: minimum font size floor is at least 0.8125rem (13px)", () => {
-	// Match font-size declarations like: font-size: 0.75rem; or font-size: 11px;
+function findFontSizeViolations(cssText, minRem = 0.8125, minPx = 13) {
 	const fontSizeRegex = /font-size:\s*([0-9.]+)(rem|px)/g;
-	let match = fontSizeRegex.exec(styleCss);
 	const violations = [];
+	let match = fontSizeRegex.exec(cssText);
 
 	while (match !== null) {
 		const val = Number.parseFloat(match[1]);
 		const unit = match[2];
-		if (unit === "rem" && val < 0.8125) {
-			violations.push(`${match[0]} (< 0.8125rem)`);
-		} else if (unit === "px" && val < 13) {
-			violations.push(`${match[0]} (< 13px)`);
+		if ((unit === "rem" && val < minRem) || (unit === "px" && val < minPx)) {
+			violations.push(`${match[0]} (< ${unit === "rem" ? `${minRem}rem` : `${minPx}px`})`);
 		}
-		match = fontSizeRegex.exec(styleCss);
+		match = fontSizeRegex.exec(cssText);
 	}
 
+	return violations;
+}
+
+test("typography: minimum font size floor is at least 0.8125rem (13px)", () => {
+	const violations = findFontSizeViolations(styleCss);
 	assert.deepEqual(
 		violations,
 		[],
