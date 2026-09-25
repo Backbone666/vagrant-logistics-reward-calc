@@ -679,9 +679,9 @@ function handleRouteInputChange() {
 	}, ROUTE_DEBOUNCE_MS);
 }
 
-function applyCanonicalSystemName(inputEl, rawName, canonicalMap) {
-	if (!inputEl || !rawName || !canonicalMap) return;
-	const canonical = canonicalMap.get(rawName.toLowerCase());
+function applyCanonicalSystemName(inputEl, canonicalMap) {
+	if (!inputEl || !canonicalMap) return;
+	const canonical = canonicalMap.get(inputEl.value.trim().toLowerCase());
 	if (canonical && inputEl.value !== canonical) {
 		inputEl.value = canonical;
 	}
@@ -693,8 +693,8 @@ function resolveSystemNames(origin, destination, systems) {
 		return false;
 	}
 	const canonicalMap = getCanonicalSystemMap();
-	applyCanonicalSystemName(originInput, origin, canonicalMap);
-	applyCanonicalSystemName(destinationInput, destination, canonicalMap);
+	applyCanonicalSystemName(originInput, canonicalMap);
+	applyCanonicalSystemName(destinationInput, canonicalMap);
 	return true;
 }
 
