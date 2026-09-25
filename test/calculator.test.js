@@ -756,3 +756,11 @@ test("calcRewardDetails: handles empty or non-array collateral rules gracefully"
 	});
 	assert.equal(nonArrayRulesResult.collateralFee, 0);
 });
+
+test("calcRewardDetails: collateral surcharge handles custom rules and empty brackets", () => {
+	const result = calcRewardDetails(
+		{ volume: 5000, collateral: 2_000_000_000, highsecJumps: 5 },
+		{ highsec_collateral_rules: [] },
+	);
+	assert.equal(result.collateralFee, 0, "Empty collateral rules must yield 0 collateral fee");
+});

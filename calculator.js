@@ -65,10 +65,10 @@ const DEFAULT_COLLATERAL_RULES = Object.freeze({
 });
 
 function calcCollateralSurcharge(parsedCollateral, rules) {
-	if (!Array.isArray(rules) || rules.length === 0) return 0;
-	const bracket =
-		rules.find((b) => parsedCollateral <= b.max_collateral_isk) || rules[rules.length - 1];
-	return parsedCollateral * (bracket?.rate ?? 0);
+	const lastBracket = Array.isArray(rules) ? rules[rules.length - 1] : null;
+	if (!lastBracket) return 0;
+	const bracket = rules.find((b) => parsedCollateral <= b.max_collateral_isk) || lastBracket;
+	return parsedCollateral * (bracket.rate ?? 0);
 }
 
 function createRewardResult({
