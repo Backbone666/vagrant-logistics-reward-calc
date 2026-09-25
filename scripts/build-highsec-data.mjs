@@ -25,6 +25,8 @@ export async function fetchKspaceSystemIds({ includeZarzakh = false } = {}) {
 	);
 }
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 async function fetchSystemWithRetry(id, retries = 3) {
 	for (let attempt = 0; attempt < retries; attempt++) {
 		try {
@@ -33,7 +35,7 @@ async function fetchSystemWithRetry(id, retries = 3) {
 			return await res.json();
 		} catch (err) {
 			if (attempt === retries - 1) throw err;
-			await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)));
+			await delay(300 * (attempt + 1));
 		}
 	}
 }
