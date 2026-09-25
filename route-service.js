@@ -387,6 +387,22 @@ export async function resolveSystemIdsBatch(systemNames, options = {}) {
 	return resolved;
 }
 
+export function classifyEsiRouteJumps(routeIds, highSecSet) {
+	if (!Array.isArray(routeIds) || routeIds.length <= 1 || !highSecSet) {
+		return { highSecJumps: 0, dangerousJumps: 0, totalJumps: 0 };
+	}
+	let highSecJumps = 0;
+	let dangerousJumps = 0;
+	for (let i = 1; i < routeIds.length; i++) {
+		if (highSecSet.has(routeIds[i])) {
+			highSecJumps++;
+		} else {
+			dangerousJumps++;
+		}
+	}
+	return { highSecJumps, dangerousJumps, totalJumps: highSecJumps + dangerousJumps };
+}
+
 /**
  * Calculate route directly using CCP ESI and classify jumps using the highsec ID set.
  *
@@ -450,21 +466,7 @@ export async function fetchEsiRoute(origin, destination, options = {}) {
 			? new Set(options.highSecSystems)
 			: await loadHighSecSystems(options.highSecDataUrl, options));
 
-	let highSecJumps = 0;
-	let dangerousJumps = 0;
-
-	// Synchronous O(1) jump classification:
-	// System at index 0 is origin (not a jump)
-	for (let i = 1; i < routeIds.length; i++) {
-		const id = routeIds[i];
-		if (highSecSet.has(id)) {
-			highSecJumps++;
-		} else {
-			dangerousJumps++;
-		}
-	}
-
-	const totalJumps = highSecJumps + dangerousJumps;
+	const { highSecJumps, dangerousJumps, totalJumps } = classifyEsiRouteJumps(routeIds, highSecSet);
 	const systemsArray = routeIds.map((id, idx) => ({
 		id,
 		name: idx === 0 ? trimmedOrigin : idx === routeIds.length - 1 ? trimmedDestination : String(id),

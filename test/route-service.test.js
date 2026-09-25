@@ -4,6 +4,7 @@ import {
 	BLOCKADE_RUNNER_MAX_VOLUME,
 	buildProxiedUrl,
 	buildRouteUrl,
+	classifyEsiRouteJumps,
 	classifyJumps,
 	DEFAULT_CORS_PROXY_GATEWAY,
 	DEFAULT_CORS_PROXY_GATEWAYS,
@@ -1447,4 +1448,23 @@ test("resolveRoutePreference: resolves safest and shortest defaults cleanly", ()
 	assert.equal(resolveRoutePreference({ safeRoute: true }), "safest");
 	assert.equal(resolveRoutePreference({ pref: "safest", safeRoute: false }), "safest");
 	assert.equal(resolveRoutePreference({ pref: "insecure" }), "insecure");
+});
+
+test("classifyEsiRouteJumps: classifies route system ids against highsec set", () => {
+	const highSecSet = new Set([30000142, 30000144]);
+	assert.deepEqual(classifyEsiRouteJumps([], highSecSet), {
+		highSecJumps: 0,
+		dangerousJumps: 0,
+		totalJumps: 0,
+	});
+	assert.deepEqual(classifyEsiRouteJumps([30000142], highSecSet), {
+		highSecJumps: 0,
+		dangerousJumps: 0,
+		totalJumps: 0,
+	});
+	assert.deepEqual(classifyEsiRouteJumps([30000142, 30000144, 30001000], highSecSet), {
+		highSecJumps: 1,
+		dangerousJumps: 1,
+		totalJumps: 2,
+	});
 });
