@@ -22,6 +22,7 @@ import {
 	loadHighSecSystems,
 	MANDATORY_AVOID_LIST,
 	MAX_SYSTEM_NAME_LENGTH,
+	partitionCachedSystemNames,
 	RouteNotFoundError,
 	RouteUnavailableError,
 	resolveAvoidList,
@@ -1486,4 +1487,11 @@ test("createWrappedProxyResponse: creates synthetic response with json payload",
 	assert.equal(res.status, 200);
 	const data = await res.json();
 	assert.equal(data.test, true);
+});
+
+test("partitionCachedSystemNames: partitions known cached names from unknown names", () => {
+	const mockCache = new Map([["jita", 30000142]]);
+	const { resolved, unresolved } = partitionCachedSystemNames(["Jita", "UnknownSystem"], mockCache);
+	assert.equal(resolved.get("Jita"), 30000142);
+	assert.deepEqual(unresolved, ["UnknownSystem"]);
 });

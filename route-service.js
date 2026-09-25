@@ -333,6 +333,25 @@ export async function loadHighSecSystems(dataUrl = "data/highsec-systems.json", 
 	return highSecFetchPromise;
 }
 
+export function partitionCachedSystemNames(systemNames, cache = SYSTEM_ID_CACHE) {
+	const resolved = new Map();
+	const unresolved = [];
+
+	if (!Array.isArray(systemNames)) return { resolved, unresolved };
+
+	for (const name of systemNames) {
+		if (!name || typeof name !== "string") continue;
+		const clean = name.trim().toLowerCase();
+		if (cache.has(clean)) {
+			resolved.set(name, cache.get(clean));
+		} else {
+			unresolved.push(name.trim());
+		}
+	}
+
+	return { resolved, unresolved };
+}
+
 /**
  * Batch resolve system names to IDs via cache and CCP ESI.
  *
@@ -343,18 +362,7 @@ export async function loadHighSecSystems(dataUrl = "data/highsec-systems.json", 
 export async function resolveSystemIdsBatch(systemNames, options = {}) {
 	const fetchFn = options.fetch || globalThis.fetch;
 	const signal = options.signal;
-	const resolved = new Map();
-	const unresolved = [];
-
-	for (const name of systemNames) {
-		if (!name || typeof name !== "string") continue;
-		const clean = name.trim().toLowerCase();
-		if (SYSTEM_ID_CACHE.has(clean)) {
-			resolved.set(name, SYSTEM_ID_CACHE.get(clean));
-		} else {
-			unresolved.push(name.trim());
-		}
-	}
+	const { resolved, unresolved } = partitionCachedSystemNames(systemNames);
 
 	if (unresolved.length > 0) {
 		const res = await fetchFn("https://esi.evetech.net/latest/universe/ids/", {
