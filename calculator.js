@@ -1,8 +1,7 @@
 export const parseNum = (val) => {
-	if (typeof val === "number") return Number.isNaN(val) ? 0 : val;
 	if (val == null || val === "") return 0;
-	const parsed = parseFloat(String(val).replaceAll(",", ""));
-	return Number.isNaN(parsed) ? 0 : parsed;
+	const parsed = typeof val === "number" ? val : parseFloat(String(val).replaceAll(",", ""));
+	return Number.isFinite(parsed) ? parsed : 0;
 };
 
 function classifyHighsecService(parsedVolume) {
