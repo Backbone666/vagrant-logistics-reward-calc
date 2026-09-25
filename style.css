@@ -44,9 +44,6 @@
 		monospace;
 	--font-numeric: var(--font-body);
 
-	/* Backwards-compatible alias for existing selectors */
-	--font-display: var(--font-heading);
-
 	/* Modular Typography Scale (WCAG 2.2 Accessible Floor: 13px / 0.8125rem) */
 	--text-2xs: 0.8125rem;
 	--text-xs: 0.8125rem;
