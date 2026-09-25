@@ -22,6 +22,7 @@ import {
 	RouteNotFoundError,
 	RouteUnavailableError,
 	resolveAvoidList,
+	resolveRoutePreference,
 	resolveSystemIdsBatch,
 	selectRouteForVolume,
 	TRADE_HUB_IDS,
@@ -1439,4 +1440,11 @@ test("selectRouteForVolume: respects enableThera option for Blockade Runner", ()
 	const dstResult = selectRouteForVolume(mockResult, 62500, { enableThera: true });
 	assert.equal(dstResult.routeUsed, "direct");
 	assert.equal(dstResult.selectedRoute.totalJumps, 24);
+});
+
+test("resolveRoutePreference: resolves safest and shortest defaults cleanly", () => {
+	assert.equal(resolveRoutePreference(), "shortest");
+	assert.equal(resolveRoutePreference({ safeRoute: true }), "safest");
+	assert.equal(resolveRoutePreference({ pref: "safest", safeRoute: false }), "safest");
+	assert.equal(resolveRoutePreference({ pref: "insecure" }), "insecure");
 });
