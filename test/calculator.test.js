@@ -779,3 +779,19 @@ test("calcRewardDetails: jump freighter respects custom service object configura
 	assert.equal(result.distanceFee, 80_000_000);
 	assert.equal(result.serviceName, "Custom Jump Freighter");
 });
+
+test("calcRewardDetails: error messages for volume limits match exact security branch thresholds", () => {
+	const highsecOverflow = calcRewardDetails(
+		{ volume: 1_200_000, collateral: 1_000_000, highsecJumps: 2 },
+		config,
+	);
+	assert.ok(highsecOverflow.error);
+	assert.match(highsecOverflow.message, /Max volume is 1,125,000 m³/);
+
+	const dangerousOverflow = calcRewardDetails(
+		{ volume: 400_000, collateral: 1_000_000, dangerousJumps: 2 },
+		config,
+	);
+	assert.ok(dangerousOverflow.error);
+	assert.match(dangerousOverflow.message, /Max volume is 360,000 m³/);
+});

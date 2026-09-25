@@ -297,6 +297,11 @@ function dispatchServiceReward({
 	}
 }
 
+function resolveVolumeExceededMessage(routeSecurity) {
+	const maxVol = routeSecurity === "highsec" ? "1,125,000" : "360,000";
+	return `Cargo volume exceeds maximum limits. Please split the cargo into multiple contracts. Max volume is ${maxVol} m³.`;
+}
+
 export function calcRewardDetails(options, configOpt) {
 	const {
 		volume,
@@ -338,10 +343,7 @@ export function calcRewardDetails(options, configOpt) {
 	});
 
 	if (serviceClass === "volume_limit_exceeded") {
-		const maxVol = routeSecurity === "highsec" ? "1,125,000" : "360,000";
-		return createErrorResult(
-			`Cargo volume exceeds maximum limits. Please split the cargo into multiple contracts. Max volume is ${maxVol} m³.`,
-		);
+		return createErrorResult(resolveVolumeExceededMessage(routeSecurity));
 	}
 
 	return dispatchServiceReward({
