@@ -530,6 +530,22 @@ function isDirectFetchAllowed(targetUrl, options = {}) {
 	}
 }
 
+export function createWrappedProxyResponse(contents, status) {
+	if (typeof Response === "function") {
+		return new Response(contents, {
+			status,
+			statusText: "OK",
+			headers: { "Content-Type": "application/json" },
+		});
+	}
+	return {
+		ok: true,
+		status,
+		json: async () => JSON.parse(contents),
+		text: async () => contents,
+	};
+}
+
 async function unwrapProxyEnvelope(proxyResponse, gateway) {
 	if (!gateway.includes("/get?")) return proxyResponse;
 	try {
@@ -538,19 +554,7 @@ async function unwrapProxyEnvelope(proxyResponse, gateway) {
 		if (wrapper && typeof wrapper === "object" && typeof wrapper.contents === "string") {
 			const status = wrapper.status?.http_code || 200;
 			if (status >= 200 && status < 300) {
-				if (typeof Response === "function") {
-					return new Response(wrapper.contents, {
-						status,
-						statusText: "OK",
-						headers: { "Content-Type": "application/json" },
-					});
-				}
-				return {
-					ok: true,
-					status,
-					json: async () => JSON.parse(wrapper.contents),
-					text: async () => wrapper.contents,
-				};
+				return createWrappedProxyResponse(wrapper.contents, status);
 			}
 			throw new Error(`Wrapped upstream proxy returned HTTP ${status}`);
 		}

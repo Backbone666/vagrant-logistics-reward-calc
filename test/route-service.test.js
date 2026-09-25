@@ -7,6 +7,7 @@ import {
 	buildRouteUrl,
 	classifyEsiRouteJumps,
 	classifyJumps,
+	createWrappedProxyResponse,
 	DEFAULT_CORS_PROXY_GATEWAY,
 	DEFAULT_CORS_PROXY_GATEWAYS,
 	DEFAULT_MANDATORY_AVOID_LIST,
@@ -1478,4 +1479,11 @@ test("buildEsiRouteSystems: maps waypoint IDs to origin, destination, and interm
 	assert.equal(systems[1].name, "30000144");
 	assert.equal(systems[1].security, 0.0);
 	assert.equal(systems[2].name, "Amarr");
+});
+
+test("createWrappedProxyResponse: creates synthetic response with json payload", async () => {
+	const res = createWrappedProxyResponse('{"test": true}', 200);
+	assert.equal(res.status, 200);
+	const data = await res.json();
+	assert.equal(data.test, true);
 });
