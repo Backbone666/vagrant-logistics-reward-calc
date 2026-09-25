@@ -844,10 +844,15 @@ presetBtns.forEach((btn) => {
 	});
 });
 
+function canToggleTheraRoute(routeResult, volumeVal) {
+	return Boolean(
+		routeResult?.hasTheraShortcut && routeResult?.thera && isBlockadeRunnerVolume(volumeVal),
+	);
+}
+
 if (theraToggleBtn) {
 	theraToggleBtn.addEventListener("click", () => {
-		if (!lastRouteResult?.hasTheraShortcut || !lastRouteResult?.thera) return;
-		if (!isBlockadeRunnerVolume(volumeInput?.value)) return;
+		if (!canToggleTheraRoute(lastRouteResult, volumeInput?.value)) return;
 
 		isTheraToggleActive = !isTheraToggleActive;
 		applyRouteSelection();
