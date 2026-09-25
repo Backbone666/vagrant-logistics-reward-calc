@@ -567,6 +567,13 @@ function updateContractDurationRequirements(isTheraActive) {
 	if (reqTimeToComplete) reqTimeToComplete.textContent = durationText;
 }
 
+function applySelectedRouteValues(selectedRoute) {
+	if (!selectedRoute) return;
+	highsecJumpsInput.value = formatNumber(selectedRoute.highSecJumps, false);
+	dangerousJumpsInput.value = formatNumber(selectedRoute.dangerousJumps, false);
+	updateRouteJumpsSummary(selectedRoute.highSecJumps, selectedRoute.dangerousJumps);
+}
+
 function applyRouteSelection() {
 	if (!lastRouteResult) return;
 	const isBr = isBlockadeRunnerVolume(volumeInput?.value);
@@ -575,15 +582,9 @@ function applyRouteSelection() {
 	});
 	if (!selection.selectedRoute) return;
 
-	const isUsingThera = selection.routeUsed === "thera";
-	updateContractDurationRequirements(isUsingThera);
-	highsecJumpsInput.value = formatNumber(selection.selectedRoute.highSecJumps, false);
-	dangerousJumpsInput.value = formatNumber(selection.selectedRoute.dangerousJumps, false);
+	updateContractDurationRequirements(selection.routeUsed === "thera");
+	applySelectedRouteValues(selection.selectedRoute);
 	updateTheraBadge(selection);
-	updateRouteJumpsSummary(
-		selection.selectedRoute.highSecJumps,
-		selection.selectedRoute.dangerousJumps,
-	);
 	updateAll();
 }
 
