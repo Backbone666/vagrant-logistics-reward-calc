@@ -697,16 +697,7 @@ async function checkAndTriggerRouteLookup() {
 	handleRouteInputChange();
 }
 
-async function copyTextToClipboard(text) {
-	if (navigator.clipboard?.writeText) {
-		try {
-			await navigator.clipboard.writeText(text);
-			return true;
-		} catch (e) {
-			console.warn("navigator.clipboard.writeText failed, attempting fallback:", e);
-		}
-	}
-
+function copyViaExecCommandFallback(text) {
 	try {
 		const textArea = document.createElement("textarea");
 		textArea.value = text;
@@ -724,6 +715,18 @@ async function copyTextToClipboard(text) {
 		console.error("Fallback clipboard copy failed:", fallbackErr);
 		return false;
 	}
+}
+
+async function copyTextToClipboard(text) {
+	if (navigator.clipboard?.writeText) {
+		try {
+			await navigator.clipboard.writeText(text);
+			return true;
+		} catch (e) {
+			console.warn("navigator.clipboard.writeText failed, attempting fallback:", e);
+		}
+	}
+	return copyViaExecCommandFallback(text);
 }
 
 function triggerCopyFeedback(btn, success, successText, duration = 2000) {
