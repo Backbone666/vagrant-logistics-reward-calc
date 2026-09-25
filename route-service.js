@@ -387,6 +387,21 @@ export async function resolveSystemIdsBatch(systemNames, options = {}) {
 	return resolved;
 }
 
+export function buildEsiRouteSystems(routeIds, origin, destination, highSecSet) {
+	if (!Array.isArray(routeIds)) return [];
+	const lastIdx = routeIds.length - 1;
+	return routeIds.map((id, idx) => {
+		let name = String(id);
+		if (idx === 0) name = origin;
+		else if (idx === lastIdx) name = destination;
+		return {
+			id,
+			name,
+			security: highSecSet?.has(id) ? 1.0 : 0.0,
+		};
+	});
+}
+
 export function classifyEsiRouteJumps(routeIds, highSecSet) {
 	if (!Array.isArray(routeIds) || routeIds.length <= 1 || !highSecSet) {
 		return { highSecJumps: 0, dangerousJumps: 0, totalJumps: 0 };
@@ -467,11 +482,12 @@ export async function fetchEsiRoute(origin, destination, options = {}) {
 			: await loadHighSecSystems(options.highSecDataUrl, options));
 
 	const { highSecJumps, dangerousJumps, totalJumps } = classifyEsiRouteJumps(routeIds, highSecSet);
-	const systemsArray = routeIds.map((id, idx) => ({
-		id,
-		name: idx === 0 ? trimmedOrigin : idx === routeIds.length - 1 ? trimmedDestination : String(id),
-		security: highSecSet.has(id) ? 1.0 : 0.0,
-	}));
+	const systemsArray = buildEsiRouteSystems(
+		routeIds,
+		trimmedOrigin,
+		trimmedDestination,
+		highSecSet,
+	);
 
 	const directInfo = {
 		systems: systemsArray,

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
 	BLOCKADE_RUNNER_MAX_VOLUME,
+	buildEsiRouteSystems,
 	buildProxiedUrl,
 	buildRouteUrl,
 	classifyEsiRouteJumps,
@@ -1467,4 +1468,14 @@ test("classifyEsiRouteJumps: classifies route system ids against highsec set", (
 		dangerousJumps: 1,
 		totalJumps: 2,
 	});
+});
+
+test("buildEsiRouteSystems: maps waypoint IDs to origin, destination, and intermediate system names", () => {
+	const highSecSet = new Set([30000142]);
+	const systems = buildEsiRouteSystems([30000142, 30000144, 30002187], "Jita", "Amarr", highSecSet);
+	assert.equal(systems[0].name, "Jita");
+	assert.equal(systems[0].security, 1.0);
+	assert.equal(systems[1].name, "30000144");
+	assert.equal(systems[1].security, 0.0);
+	assert.equal(systems[2].name, "Amarr");
 });
