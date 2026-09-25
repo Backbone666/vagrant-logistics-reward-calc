@@ -418,3 +418,9 @@ test("resolveSelectedSystemOnEnter: resolves activeIndex selection or exact type
 	assert.equal(resolveSelectedSystemOnEnter(matches, -1, "jit"), null);
 	assert.equal(resolveSelectedSystemOnEnter([], -1, "jita"), null);
 });
+
+test("isKnownSystem: handles whitespace, empty strings, and non-string inputs cleanly", () => {
+	assert.equal(isKnownSystem("   "), false);
+	assert.equal(isKnownSystem(null), false);
+	assert.equal(isKnownSystem(12345), false);
+});

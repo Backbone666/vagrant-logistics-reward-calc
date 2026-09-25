@@ -93,11 +93,9 @@ export function isKnownSystem(name, systems) {
 	const clean = name.trim().toLowerCase();
 	if (!clean) return false;
 
-	if (!systems || systems === cachedSystems) {
-		return isDefaultCachedSystem(clean);
-	}
-
-	return lookupInCollection(clean, systems);
+	return !systems || systems === cachedSystems
+		? isDefaultCachedSystem(clean)
+		: lookupInCollection(clean, systems);
 }
 
 /**
