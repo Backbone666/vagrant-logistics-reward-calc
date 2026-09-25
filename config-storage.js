@@ -26,6 +26,11 @@ function safeRemoveItem(storage, key) {
 	}
 }
 
+export function isCacheExpired(payload, now = Date.now()) {
+	const age = now - (payload?.timestamp || 0);
+	return age > CONFIG_CACHE_TTL_MS || age < 0;
+}
+
 export function loadCachedConfig(storage = globalThis.localStorage, now = Date.now()) {
 	if (!storage || typeof storage.getItem !== "function") return null;
 	try {
@@ -40,13 +45,7 @@ export function loadCachedConfig(storage = globalThis.localStorage, now = Date.n
 			return payload;
 		}
 
-		if (payload.version !== CONFIG_CACHE_VERSION) {
-			safeRemoveItem(storage, CONFIG_STORAGE_KEY);
-			return null;
-		}
-
-		const age = now - (payload.timestamp || 0);
-		if (age > CONFIG_CACHE_TTL_MS || age < 0) {
+		if (payload.version !== CONFIG_CACHE_VERSION || isCacheExpired(payload, now)) {
 			safeRemoveItem(storage, CONFIG_STORAGE_KEY);
 			return null;
 		}

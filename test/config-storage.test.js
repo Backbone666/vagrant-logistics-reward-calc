@@ -4,6 +4,7 @@ import {
 	CONFIG_CACHE_TTL_MS,
 	CONFIG_CACHE_VERSION,
 	CONFIG_STORAGE_KEY,
+	isCacheExpired,
 	loadCachedConfig,
 	saveCachedConfig,
 } from "../config-storage.js";
@@ -83,4 +84,12 @@ test("config-storage: handles corrupted JSON or storage exceptions gracefully", 
 	};
 	assert.doesNotThrow(() => saveCachedConfig({ a: 1 }, throwingStorage));
 	assert.doesNotThrow(() => assert.equal(loadCachedConfig(throwingStorage), null));
+});
+
+test("config-storage: isCacheExpired detects TTL expiration and future clock skew", () => {
+	const now = 1_000_000_000;
+	assert.equal(isCacheExpired({ timestamp: now - 1000 }, now), false);
+	assert.equal(isCacheExpired({ timestamp: now - 8 * 86_400_000 }, now), true);
+	assert.equal(isCacheExpired({ timestamp: now + 5000 }, now), true);
+	assert.equal(isCacheExpired(null, now), true);
 });
