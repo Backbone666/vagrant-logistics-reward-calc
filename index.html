@@ -95,7 +95,7 @@
             "applicationCategory": "UtilityApplication",
             "operatingSystem": "Web",
             "softwareVersion": "1.5.0",
-            "dateModified": "2026-09-21",
+            "dateModified": "2026-09-25",
             "browserRequirements": "Requires JavaScript. Requires HTML5.",
             "offers": {
               "@type": "Offer",
@@ -128,6 +128,30 @@
             "mainEntity": [
               {
                 "@type": "Question",
+                "name": "What are the contract duration and expiration requirements?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Standard stargate courier contracts require 3 Days to Accept and 3 Days to Complete. Contracts opting into a Thera wormhole shortcut strictly require 1 Day to Accept and 1 Day to Complete to guarantee delivery before wormhole connections collapse (reference: https://wiki.eveuniversity.org/Thera)."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How does Thera wormhole shortcut routing work?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Thera routing provides optional wormhole shortcuts exclusively for Blockade Runners (cargo volume up to 12,500 m³). It is disabled by default. When an active wormhole route significantly reduces jump distance across New Eden, an interactive 'Via Thera' toggle button appears next to the route summary, allowing you to opt into the wormhole path."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Why must I enter cargo volume before planning a route?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Automated route planning requires cargo volume because route qualification depends directly on your ship class. Cargo volume determines whether wormhole mass limits permit a Thera shortcut, whether subcapital lowsec stargates can be traversed, and whether highsec-only safe routing must be locked for super-freighters."
+                }
+              },
+              {
+                "@type": "Question",
                 "name": "What are the collateral limits for courier contracts?",
                 "acceptedAnswer": {
                   "@type": "Answer",
@@ -139,12 +163,12 @@
                 "name": "Which EVE Online regions does Vagrant Logistics serve?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Vagrant Logistics primarily serves the Domain (reference: https://evemaps.dotlan.net/map/Domain) and Providence (reference: https://evemaps.dotlan.net/map/Providence) regions, including the Amarr trade hub. We also handle routes to and from Jita, Dodixie, Rens, and Hek."
+                  "text": "Vagrant Logistics primarily serves the Domain (reference: https://evemaps.dotlan.net/map/Domain) and Providence (reference: https://evemaps.dotlan.net/map/Providence) regions, connecting the Amarr imperial trade hub with regional citadels, along with high-volume routes to Jita, Dodixie, Rens, and Hek."
                 }
               },
               {
                 "@type": "Question",
-                "name": "What ship classes does Vagrant Logistics use for hauling?",
+                "name": "What ship classes are available for hauling?",
                 "acceptedAnswer": {
                   "@type": "Answer",
                   "text": "We operate Blockade Runners (up to 12,500 m³; reference: https://wiki.eveuniversity.org/Blockade_Runners), Deep Space Transports (up to 62,500 m³; reference: https://wiki.eveuniversity.org/Deep_Space_Transports), Freighters and Bowheads (up to 1,125,000 m³; reference: https://wiki.eveuniversity.org/Freighters), and Jump Freighters (up to 360,000 m³; reference: https://wiki.eveuniversity.org/Jump_Freighters) for dangerous low-sec and null-sec routes."
@@ -152,26 +176,18 @@
               },
               {
                 "@type": "Question",
-                "name": "How do I set up a courier contract with Vagrant Logistics?",
+                "name": "How are courier contract rewards calculated?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Use the Courier Calculator to get your reward quote, then create an in-game courier contract to 'Vagrant Logistics' with a 3-day acceptance window and 3-day completion window. Detailed steps for creating courier contracts can be found in the EVE University Wiki guide (reference: https://wiki.eveuniversity.org/Contracts#Courier)."
+                  "text": "Quotes combine a transparent base service fee, per-jump distance rates (differentiated by Highsec vs Dangerous space security status), and a graduated collateral risk surcharge for contracts exceeding 1 Billion ISK."
                 }
               },
               {
                 "@type": "Question",
-                "name": "How are courier contract rewards calculated in EVE Online?",
+                "name": "Which high-risk solar systems are automatically avoided?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Courier rewards are calculated using a transparent tiered formula: a base service fee, a distance jump rate evaluated per stargate or cyno jump, and a graduated collateral risk fee (0.3% for 1B–3B ISK, 0.5% for >3B ISK). Highsec contracts use fixed per-jump rates with collateral multipliers, while Lowsec/Nullsec routes incorporate risk-weighted jump fees."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "Which dangerous solar systems does the calculator avoid?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "The routing engine automatically routes around high-risk choke points and smartbomb camps, enforcing mandatory avoidance of Zarzakh, Ahbazon, Rancer, Hagilur, Siseide, Tama, and Aunenen."
+                  "text": "All automated route calculations enforce mandatory avoidance of high-risk choke points and smartbomb camps: Zarzakh, Ahbazon, Rancer, Hagilur, Siseide, Tama, and Aunenen."
                 }
               }
             ]
@@ -471,6 +487,24 @@
         <h3 id="faq-title" class="faq-heading">Frequently Asked Questions</h3>
         <div class="faq-grid">
           <details class="faq-item">
+            <summary class="faq-question">What are the contract duration and expiration requirements?</summary>
+            <div class="faq-answer">
+              <p>Standard stargate courier contracts require <strong>3 Days to Accept</strong> and <strong>3 Days to Complete</strong>. When opting into a <strong>Thera wormhole shortcut</strong>, contracts must strictly specify <strong>1 Day to Accept</strong> and <strong>1 Day to Complete</strong> to guarantee delivery before wormhole connections collapse (<a href="https://wiki.eveuniversity.org/Thera" target="_blank" rel="noopener noreferrer">Thera Wormhole Mechanics</a>).</p>
+            </div>
+          </details>
+          <details class="faq-item">
+            <summary class="faq-question">How does Thera wormhole shortcut routing work?</summary>
+            <div class="faq-answer">
+              <p>Thera routing provides optional wormhole shortcuts exclusively for Blockade Runners (cargo volume up to 12,500 m³). It is turned off by default. When an active wormhole route significantly reduces jump distance across New Eden, an interactive <strong>"Via Thera"</strong> toggle button appears next to the route summary, allowing you to opt into the wormhole path.</p>
+            </div>
+          </details>
+          <details class="faq-item">
+            <summary class="faq-question">Why must I enter cargo volume before planning a route?</summary>
+            <div class="faq-answer">
+              <p>Automated route planning requires cargo volume because route qualification depends directly on your ship class. Cargo volume determines whether wormhole mass limits permit a Thera shortcut, whether subcapital lowsec stargates can be traversed, and whether highsec-only safe routing must be locked for super-freighters.</p>
+            </div>
+          </details>
+          <details class="faq-item">
             <summary class="faq-question">What are the collateral limits for courier contracts?</summary>
             <div class="faq-answer">
               <p>Standard subcapital collateral limit is 5 Billion ISK across all Blockade Runner, Deep Space Transport, and Freighter services. Jump Freighter contracts support up to 50 Billion ISK collateral. High-value contracts exceeding standard thresholds are routed to Risako Hirano for manual quote review.</p>
@@ -479,25 +513,25 @@
           <details class="faq-item">
             <summary class="faq-question">Which EVE Online regions does Vagrant Logistics serve?</summary>
             <div class="faq-answer">
-              <p>We primarily operate across Domain and Providence, connecting the Amarr imperial trade hub with regional citadels, along with high-volume routes to Jita, Dodixie, Rens, and Hek.</p>
+              <p>We primarily operate across Domain and Providence, connecting the Amarr imperial trade hub with regional citadels, along with high-volume routes to Jita, Dodixie, Rens, and Hek (<a href="https://evemaps.dotlan.net/map/Domain" target="_blank" rel="noopener noreferrer">Dotlan Domain</a> / <a href="https://evemaps.dotlan.net/map/Providence" target="_blank" rel="noopener noreferrer">Providence</a>).</p>
             </div>
           </details>
           <details class="faq-item">
             <summary class="faq-question">What ship classes are available for hauling?</summary>
             <div class="faq-answer">
-              <p>We operate Blockade Runners (up to 12,500 m³), Deep Space Transports (up to 62,500 m³), Freighters &amp; Bowheads (up to 1,125,000 m³), and Jump Freighters (up to 360,000 m³) for dangerous lowsec/nullsec routes.</p>
+              <p>We operate Blockade Runners (up to 12,500 m³), Deep Space Transports (up to 62,500 m³), Freighters &amp; Bowheads (up to 1,125,000 m³), and Jump Freighters (up to 360,000 m³) for dangerous lowsec/nullsec routes (<a href="https://wiki.eveuniversity.org/Hauling" target="_blank" rel="noopener noreferrer">EVE University Hauling Guide</a>).</p>
             </div>
           </details>
           <details class="faq-item">
-            <summary class="faq-question">How are rewards calculated?</summary>
+            <summary class="faq-question">How are courier contract rewards calculated?</summary>
             <div class="faq-answer">
-              <p>Quotes combine a base fee, per-jump distance rates (differentiated by Highsec vs Dangerous security status), and a graduated collateral risk surcharge for contracts over 1 Billion ISK.</p>
+              <p>Quotes combine a transparent base service fee, per-jump distance rates (differentiated by Highsec vs Dangerous space security status), and a graduated collateral risk surcharge for contracts exceeding 1 Billion ISK.</p>
             </div>
           </details>
           <details class="faq-item">
-            <summary class="faq-question">Which high-risk systems are automatically avoided?</summary>
+            <summary class="faq-question">Which high-risk solar systems are automatically avoided?</summary>
             <div class="faq-answer">
-              <p>All automated route calculations enforce avoidance of Zarzakh, Ahbazon, Rancer, Hagilur, Siseide, Tama, and Aunenen to ensure cargo security.</p>
+              <p>All automated route calculations enforce mandatory avoidance of high-risk choke points and smartbomb camps: Zarzakh, Ahbazon, Rancer, Hagilur, Siseide, Tama, and Aunenen.</p>
             </div>
           </details>
         </div>

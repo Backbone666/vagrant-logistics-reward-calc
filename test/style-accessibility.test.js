@@ -174,3 +174,67 @@ test("a11y: #thera_toggle is a semantic button with accessible focus and target 
 		".btn-thera-toggle:focus-visible must provide clear box-shadow focus indicator",
 	);
 });
+
+test("seo-aeo: index.html defines valid JSON-LD schema with synchronized FAQPage", () => {
+	const indexHtmlPath = path.resolve(__dirname, "../index.html");
+	const indexHtml = fs.readFileSync(indexHtmlPath, "utf-8");
+
+	const jsonLdMatch = indexHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/s);
+	assert.ok(jsonLdMatch, "index.html must include a JSON-LD script tag");
+
+	let schema;
+	assert.doesNotThrow(() => {
+		schema = JSON.parse(jsonLdMatch[1]);
+	}, "JSON-LD content must parse cleanly without syntax errors");
+
+	assert.equal(schema["@context"], "https://schema.org");
+	assert.ok(Array.isArray(schema["@graph"]), "JSON-LD schema must use @graph structure");
+
+	const faqEntity = schema["@graph"].find((item) => item["@type"] === "FAQPage");
+	assert.ok(faqEntity, "JSON-LD @graph must contain an FAQPage entity");
+	assert.ok(Array.isArray(faqEntity.mainEntity), "FAQPage must define mainEntity array");
+	assert.equal(
+		faqEntity.mainEntity.length,
+		8,
+		"FAQPage must contain exactly 8 structured Q&A pairs",
+	);
+
+	const theraDurationFaq = faqEntity.mainEntity.find(
+		(q) => q.name === "What are the contract duration and expiration requirements?",
+	);
+	assert.ok(theraDurationFaq, "FAQPage schema must include contract duration requirements");
+	assert.match(
+		theraDurationFaq.acceptedAnswer.text,
+		/1 Day to Accept and 1 Day to Complete/,
+		"Accepted answer must state 1-day requirements for Thera contracts",
+	);
+
+	const webAppEntity = schema["@graph"].find((item) => item["@type"] === "WebApplication");
+	assert.ok(webAppEntity, "JSON-LD @graph must contain a WebApplication entity");
+	assert.equal(
+		webAppEntity.dateModified,
+		"2026-09-25",
+		"dateModified must reflect current release date",
+	);
+});
+
+test("seo-aeo: visible FAQ questions match JSON-LD FAQPage question names", () => {
+	const indexHtmlPath = path.resolve(__dirname, "../index.html");
+	const indexHtml = fs.readFileSync(indexHtmlPath, "utf-8");
+
+	const jsonLdMatch = indexHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/s);
+	const schema = JSON.parse(jsonLdMatch[1]);
+	const faqEntity = schema["@graph"].find((item) => item["@type"] === "FAQPage");
+
+	const visibleQuestions = [
+		...indexHtml.matchAll(/<summary class="faq-question">([^<]+)<\/summary>/g),
+	].map((m) => m[1].trim());
+
+	assert.equal(visibleQuestions.length, 8, "There must be 8 visible FAQ questions in index.html");
+	for (const q of faqEntity.mainEntity) {
+		assert.ok(
+			visibleQuestions.includes(q.name),
+			`Visible FAQs must include JSON-LD question: "${q.name}"`,
+		);
+	}
+});
