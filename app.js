@@ -465,6 +465,11 @@ function updateAll() {
 	});
 }
 
+function renderRouteLoadingStatus(statusEl, message) {
+	statusEl.classList.add("loading");
+	statusEl.innerHTML = `<span class="route-spinner" aria-hidden="true"></span><span>${message}</span>`;
+}
+
 function setRouteStatus(type, message) {
 	if (!routeStatus) return;
 	routeStatus.className = "route-status";
@@ -473,8 +478,7 @@ function setRouteStatus(type, message) {
 		return;
 	}
 	if (type === "loading") {
-		routeStatus.classList.add("loading");
-		routeStatus.innerHTML = `<span class="route-spinner" aria-hidden="true"></span><span>${message}</span>`;
+		renderRouteLoadingStatus(routeStatus, message);
 	} else {
 		if (type) routeStatus.classList.add(type);
 		routeStatus.textContent = message;
@@ -591,18 +595,22 @@ function clearRouteResults(statusType = "", statusMsg = "") {
 	setRouteStatus(statusType, statusMsg);
 }
 
+function resolveRouteErrorMessage(err) {
+	if (err instanceof RouteNotFoundError || err?.code === "NO_ROUTE") {
+		return "No route found avoiding specified systems";
+	}
+	console.warn("Route lookup unavailable:", err);
+	return "Route lookup unavailable — manual entry enabled";
+}
+
 function handleRouteLookupError(err, controller) {
 	if (controller.signal.aborted || err.name === "AbortError") {
 		return;
 	}
 	lastRouteResult = null;
 	updateTheraBadge(null);
-	if (err instanceof RouteNotFoundError || err.code === "NO_ROUTE") {
-		setRouteStatus("warning", "No route found avoiding specified systems");
-	} else {
-		console.warn("Route lookup unavailable:", err);
-		setRouteStatus("warning", "Route lookup unavailable — manual entry enabled");
-	}
+	const statusMessage = resolveRouteErrorMessage(err);
+	setRouteStatus("warning", statusMessage);
 	setManualJumpVisibility(true);
 }
 
