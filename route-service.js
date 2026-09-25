@@ -717,6 +717,28 @@ function createTrivialZeroJumpRoute(origin, destination) {
 	};
 }
 
+async function handleEveRouteResponseError(response, runEsiFallback) {
+	let errBody = null;
+	try {
+		errBody = await response.json();
+	} catch {
+		// Non-JSON response
+	}
+
+	const errMsg = String(errBody?.error ?? errBody?.message ?? "").toLowerCase();
+	if (
+		(response.status === 400 || response.status === 404) &&
+		(errMsg.includes("invalid system") ||
+			errMsg.includes("not found") ||
+			errMsg.includes("unknown system") ||
+			errMsg.includes("no route"))
+	) {
+		throw new RouteNotFoundError("No route found avoiding specified systems");
+	}
+
+	return await runEsiFallback(new Error(`HTTP ${response.status}: ${JSON.stringify(errBody)}`));
+}
+
 export async function fetchEveRoute(origin, destination, options = {}) {
 	if (
 		typeof origin !== "string" ||
@@ -801,25 +823,7 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 		}
 
 		if (!response.ok) {
-			let errBody = null;
-			try {
-				errBody = await response.json();
-			} catch {
-				// Non-JSON response
-			}
-
-			const errMsg = String(errBody?.error ?? errBody?.message ?? "").toLowerCase();
-			if (
-				(response.status === 400 || response.status === 404) &&
-				(errMsg.includes("invalid system") ||
-					errMsg.includes("not found") ||
-					errMsg.includes("unknown system") ||
-					errMsg.includes("no route"))
-			) {
-				throw new RouteNotFoundError("No route found avoiding specified systems");
-			}
-
-			return await runEsiFallback(new Error(`HTTP ${response.status}: ${JSON.stringify(errBody)}`));
+			return await handleEveRouteResponseError(response, runEsiFallback);
 		}
 
 		let data;
