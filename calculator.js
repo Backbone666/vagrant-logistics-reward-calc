@@ -202,17 +202,17 @@ function resolveJumpFreighterCollateralParams(service, parsedCollateral, collate
 }
 
 function calcJumpFreighterReward({
-	dangerousConfig,
+	service,
 	parsedDangerousJumps,
 	parsedCollateral,
 	serviceClass,
 	collateralRules,
 }) {
-	const service = dangerousConfig.jump_freighter_standard || {};
-	const baseFee = service.base_rate_isk || 0;
-	const distanceFee = parsedDangerousJumps * (service.cyno_jump_fee_isk || 0);
+	const jfService = service || {};
+	const baseFee = jfService.base_rate_isk || 0;
+	const distanceFee = parsedDangerousJumps * (jfService.cyno_jump_fee_isk || 0);
 	const { isRedirect, collateralFee } = resolveJumpFreighterCollateralParams(
-		service,
+		jfService,
 		parsedCollateral,
 		collateralRules,
 	);
@@ -226,7 +226,7 @@ function calcJumpFreighterReward({
 		distanceFee,
 		collateralFee,
 		serviceClass,
-		hullClass: service.hull_class,
+		hullClass: jfService.hull_class,
 	});
 }
 function createErrorResult(message) {
@@ -286,7 +286,7 @@ function dispatchServiceReward({
 			});
 		case "dangerous_space_services.jump_freighter_standard":
 			return calcJumpFreighterReward({
-				dangerousConfig,
+				service: dangerousConfig.jump_freighter_standard || {},
 				parsedDangerousJumps,
 				parsedCollateral,
 				serviceClass,

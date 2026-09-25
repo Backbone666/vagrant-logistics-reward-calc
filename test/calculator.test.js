@@ -764,3 +764,18 @@ test("calcRewardDetails: collateral surcharge handles custom rules and empty bra
 	);
 	assert.equal(result.collateralFee, 0, "Empty collateral rules must yield 0 collateral fee");
 });
+
+test("calcRewardDetails: jump freighter respects custom service object configuration", () => {
+	const customService = {
+		base_rate_isk: 200_000_000,
+		cyno_jump_fee_isk: 40_000_000,
+		hull_class: "Custom Jump Freighter",
+	};
+	const result = calcRewardDetails(
+		{ volume: 300000, collateral: 1_000_000_000, dangerousJumps: 2 },
+		{ dangerous_space_services: { jump_freighter_standard: customService } },
+	);
+	assert.equal(result.baseFee, 200_000_000);
+	assert.equal(result.distanceFee, 80_000_000);
+	assert.equal(result.serviceName, "Custom Jump Freighter");
+});
