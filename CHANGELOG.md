@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.8.0](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.7.0...v1.8.0) (2026-09-25)
+
+
+### Features
+
+* **app:** gate route planning on volume input and unify imperial gold theme ([c848ae0](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/c848ae0978e41f2f24d6fcb42f5ae19e9785d58b))
+* **thera:** default thera route to off and set 1-day contract duration when active ([8871fbb](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/8871fbb605e3cb439451cc33fe65566f6f456d6e))
+
+
+### Bug Fixes
+
+* **test:** unescape comma in url-params regex assertion ([997321d](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/997321dac9165dce66a4efffa99443d49cb77885))
+
 ## [1.7.0](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.6.0...v1.7.0) (2026-09-24)
 
 
