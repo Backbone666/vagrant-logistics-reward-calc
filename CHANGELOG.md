@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.3](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.8.2...v1.8.3) (2026-09-25)
+
+
+### Bug Fixes
+
+* **test:** decouple strict lockstep version assertion in accessibility test ([30f9319](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/30f93196dc6d524a0d792e99216721cfe94d586a))
+
 ## [1.8.2](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.8.1...v1.8.2) (2026-09-25)
 
 
