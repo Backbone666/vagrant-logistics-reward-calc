@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.8.2](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.8.1...v1.8.2) (2026-09-25)
+
+
+### Bug Fixes
+
+* align software version metadata with package release ([66081ad](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/66081addeb502af875a061111ca8a2972bdf1936))
+
+
+### Performance Improvements
+
+* streamline collateral surcharge bracket resolution ([7494ac2](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/7494ac23a445c3dc2251c5ec68f816214e74f1c2))
+* streamline isKnownSystem lookup logic ([23bf632](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/23bf6322b8986906a022147beb8e2c9e7ed93974))
+
 ## [1.8.1](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.8.0...v1.8.1) (2026-09-25)
 
 
