@@ -101,6 +101,12 @@ function createRewardResult({
 	};
 }
 
+function resolveStargateCollateralFee(serviceClass, parsedCollateral, collateralRules) {
+	const rulesKey = serviceClass?.includes("blockade_runner") ? "blockade_runner" : "scouted_dst";
+	const rules = collateralRules?.[rulesKey] || DEFAULT_COLLATERAL_RULES[rulesKey];
+	return calcCollateralSurcharge(parsedCollateral, rules);
+}
+
 function calcStargateRouteReward({
 	service,
 	parsedHighsecJumps,
@@ -110,23 +116,17 @@ function calcStargateRouteReward({
 	maxCollateral,
 	collateralRules,
 }) {
-	let isRedirect = false;
-	if (parsedCollateral > (service.max_collateral_isk || maxCollateral || 5_000_000_000)) {
-		isRedirect = true;
-	}
+	const maxAllowed = service.max_collateral_isk || maxCollateral || 5_000_000_000;
+	const isRedirect = parsedCollateral > maxAllowed;
 
 	const baseRate = service.base_rate_isk || 0;
 	const dangerousJumpRate = service.base_rate_per_jump_dangerous || 0;
 	const hsJumpRate = service.base_rate_per_jump_highsec || 0;
 
 	const distanceFee = parsedDangerousJumps * dangerousJumpRate + parsedHighsecJumps * hsJumpRate;
-
-	let collateralFee = 0;
-	if (!isRedirect) {
-		const rulesKey = serviceClass?.includes("blockade_runner") ? "blockade_runner" : "scouted_dst";
-		const rules = collateralRules?.[rulesKey] || DEFAULT_COLLATERAL_RULES[rulesKey];
-		collateralFee = calcCollateralSurcharge(parsedCollateral, rules);
-	}
+	const collateralFee = isRedirect
+		? 0
+		: resolveStargateCollateralFee(serviceClass, parsedCollateral, collateralRules);
 
 	const total = baseRate + distanceFee + collateralFee;
 
