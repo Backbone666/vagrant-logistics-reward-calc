@@ -22,6 +22,14 @@ test("url-params: syncUrlParams maps safeRoute to sr=1 when enabled and omits wh
 	);
 });
 
+test("url-params: buildUrlParamEntries maps th=1 only when isBr and options.thera", () => {
+	assert.match(
+		appJs,
+		/th:\s*isBr\s*&&\s*options\.thera\s*\?\s*["']1["']\s*:\s*["']["']/,
+		"buildUrlParamEntries must serialize th as '1' only when isBr and options.thera, and '' when false",
+	);
+});
+
 test("url-params: buildUrlParamEntries maps and sanitizes parameters cleanly", () => {
 	assert.match(
 		appJs,
@@ -35,11 +43,16 @@ test("url-params: buildUrlParamEntries maps and sanitizes parameters cleanly", (
 	);
 });
 
-test("url-params: initParamsFromUrl deserializes sr=1 to safeRouteCheckbox.checked", () => {
+test("url-params: initParamsFromUrl deserializes sr=1 and th=1 cleanly", () => {
 	assert.match(
 		appJs,
 		/safeRouteCheckbox\.checked\s*=\s*urlParams\.get\(["']sr["']\)\s*===\s*["']1["']/,
 		"initParamsFromUrl must check urlParams.get('sr') === '1'",
+	);
+	assert.match(
+		appJs,
+		/isTheraToggleActive\s*=\s*urlParams\.get\(["']th["']\)\s*===\s*["']1["']/,
+		"initParamsFromUrl must check urlParams.get('th') === '1'",
 	);
 });
 

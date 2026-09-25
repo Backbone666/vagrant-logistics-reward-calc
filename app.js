@@ -32,7 +32,7 @@ const routeJumpsSummary = document.getElementById("route-jumps-summary");
 const theraToggleBtn =
 	document.getElementById("thera_toggle") || document.getElementById("thera-badge");
 
-let isTheraToggleActive = true;
+let isTheraToggleActive = false;
 
 function isBlockadeRunnerVolume(volStr) {
 	if (!volStr) return false;
@@ -56,6 +56,8 @@ const configWarning = document.getElementById("config-warning");
 const calcCard = document.querySelector(".calculator-card");
 const presetBtns = document.querySelectorAll(".preset-btn");
 const miniCopyBtns = document.querySelectorAll(".btn-mini-copy");
+const reqTimeToAccept = document.getElementById("req_time_to_accept");
+const reqTimeToComplete = document.getElementById("req_time_to_complete");
 const toFormatNumberInputs = document.querySelectorAll(".to_format_number");
 const toChangeElements = document.querySelectorAll(".to_change");
 
@@ -220,7 +222,7 @@ export function buildUrlParamEntries(options) {
 		v: strip(options.volume),
 		sr: options.safeRoute ? "1" : "",
 		jf: options.forceJF ? "1" : "",
-		th: isBr ? (options.thera ? "1" : "0") : "",
+		th: isBr && options.thera ? "1" : "",
 		from: options.origin || "",
 		to: options.destination || "",
 	};
@@ -550,6 +552,12 @@ function updateTheraBadge(selection) {
 	}
 }
 
+function updateContractDurationRequirements(isTheraActive) {
+	const durationText = isTheraActive ? "1 Day" : "3 Days";
+	if (reqTimeToAccept) reqTimeToAccept.textContent = durationText;
+	if (reqTimeToComplete) reqTimeToComplete.textContent = durationText;
+}
+
 function applyRouteSelection() {
 	if (!lastRouteResult) return;
 	const isBr = isBlockadeRunnerVolume(volumeInput?.value);
@@ -558,6 +566,8 @@ function applyRouteSelection() {
 	});
 	if (!selection.selectedRoute) return;
 
+	const isUsingThera = selection.routeUsed === "thera";
+	updateContractDurationRequirements(isUsingThera);
 	highsecJumpsInput.value = formatNumber(selection.selectedRoute.highSecJumps, false);
 	dangerousJumpsInput.value = formatNumber(selection.selectedRoute.dangerousJumps, false);
 	updateTheraBadge(selection);
@@ -570,6 +580,7 @@ function applyRouteSelection() {
 
 function clearRouteResults(statusType = "", statusMsg = "") {
 	lastRouteResult = null;
+	updateContractDurationRequirements(false);
 	updateTheraBadge(null);
 	updateRouteJumpsSummary(0, 0);
 	setRouteStatus(statusType, statusMsg);
@@ -860,25 +871,38 @@ copyQuoteBtn.addEventListener("click", async () => {
 
 	const originVal = originInput?.value?.trim();
 	const destVal = destinationInput?.value?.trim();
-	const viaTheraTag =
-		lastRouteResult?.routeUsed === "thera" && isBlockadeRunnerVolume(volumeInput?.value)
-			? " [via Thera]"
-			: "";
+	const selection = lastRouteResult
+		? selectRouteForVolume(lastRouteResult, volumeInput?.value, {
+				enableThera: isBlockadeRunnerVolume(volumeInput?.value) && isTheraToggleActive,
+			})
+		: null;
+	const isUsingThera = selection?.routeUsed === "thera";
+	const viaTheraTag = isUsingThera ? " [via Thera]" : "";
 	const routeLabel =
 		originVal && destVal
 			? `Route: ${originVal} → ${destVal}${viaTheraTag} (${highsecJumpsInput.value || 0} HighSec / ${dangerousJumpsInput.value || 0} Dangerous Jumps)`
 			: `Route: ${highsecJumpsInput.value || 0} HighSec / ${dangerousJumpsInput.value || 0} Dangerous Jumps`;
 
-	const template = [
+	const templateLines = [
 		"Vagrant Logistics Courier Quote",
 		"------------------------------",
 		`Volume: ${volumeInput.value || 0} m³`,
 		`Collateral: ${collateralInput.value || 0} ISK`,
 		routeLabel,
 		`Routing: ${safeRouteCheckbox?.checked ? "Safe Route (Prefer Highsec)" : "Shortest Route"}`,
+		`Time to Accept: ${isUsingThera ? "1 Day" : "3 Days"}`,
+		`Time to Complete: ${isUsingThera ? "1 Day" : "3 Days"}`,
 		`Estimated Reward: ${detailsText}`,
 		`Link: ${window.location.href}`,
-	].join("\n");
+	];
+
+	if (isUsingThera) {
+		templateLines.push(
+			"Notice: Wormhole routes depend on active Thera connections. Issue contract promptly.",
+		);
+	}
+
+	const template = templateLines.join("\n");
 
 	const success = await copyTextToClipboard(template);
 	triggerCopyFeedback(copyQuoteBtn, success, "Quote Copied!");
@@ -898,6 +922,8 @@ if (safeRouteCheckbox) {
 clearBtn.addEventListener("click", () => {
 	cancelPendingRouteLookup();
 	lastRouteResult = null;
+	isTheraToggleActive = false;
+	updateContractDurationRequirements(false);
 	updateTheraBadge(null);
 	updateRouteJumpsSummary(0, 0);
 	if (originInput) originInput.value = "";
@@ -960,11 +986,7 @@ function initParamsFromUrl() {
 		syncSafeRouteLock(volumeInput?.value);
 		if (urlParams.get("jf") === "1") forceJfCheckbox.checked = true;
 
-		if (urlParams.get("th") === "0") {
-			isTheraToggleActive = false;
-		} else if (urlParams.get("th") === "1") {
-			isTheraToggleActive = true;
-		}
+		isTheraToggleActive = urlParams.get("th") === "1";
 
 		if (urlParams.has("from") && originInput) {
 			originInput.value = urlParams.get("from").trim().slice(0, 50);

@@ -1281,17 +1281,23 @@ test("selectRouteForVolume: selects Thera for Blockade Runner (<= 12.5k) and Dir
 		thera: { highSecJumps: 20, dangerousJumps: 2, totalJumps: 22 },
 	};
 
-	// Volume <= 12500 (Blockade Runner) -> selects Thera
-	const brSelection = selectRouteForVolume(mockResult, 10000);
+	// Volume <= 12500 (Blockade Runner) with enableThera: true -> selects Thera
+	const brSelection = selectRouteForVolume(mockResult, 10000, { enableThera: true });
 	assert.equal(brSelection.routeUsed, "thera");
 	assert.equal(brSelection.isBlockadeRunner, true);
 	assert.equal(brSelection.hasTheraShortcut, true);
 	assert.equal(brSelection.selectedRoute.totalJumps, 22);
 
-	// Boundary: exact 12,500 m³ -> selects Thera
-	const exactBr = selectRouteForVolume(mockResult, "12,500");
+	// Boundary: exact 12,500 m³ with enableThera: true -> selects Thera
+	const exactBr = selectRouteForVolume(mockResult, "12,500", { enableThera: true });
 	assert.equal(exactBr.routeUsed, "thera");
 	assert.equal(exactBr.selectedRoute.totalJumps, 22);
+
+	// Default without options -> selects Direct stargate (Thera off by default)
+	const defaultBr = selectRouteForVolume(mockResult, 10000);
+	assert.equal(defaultBr.routeUsed, "direct");
+	assert.equal(defaultBr.isBlockadeRunner, true);
+	assert.equal(defaultBr.selectedRoute.totalJumps, 24);
 
 	// Volume 0 -> strictly selects Direct stargate (requires positive volume for BR)
 	const zeroVol = selectRouteForVolume(mockResult, 0);
@@ -1368,13 +1374,26 @@ test("fetchEveRoute: returns both direct and thera with correct volume selection
 		json: async () => mockResponse,
 	});
 
-	// Blockade Runner volume (<= 12,500) uses Thera
-	const brResult = await fetchEveRoute("Jita", "Amarr", { fetch: mockFetch, volume: 10000 });
+	// Blockade Runner volume (<= 12,500) with enableThera: true uses Thera
+	const brResult = await fetchEveRoute("Jita", "Amarr", {
+		fetch: mockFetch,
+		volume: 10000,
+		enableThera: true,
+	});
 	assert.equal(brResult.routeUsed, "thera");
 	assert.equal(brResult.hasTheraShortcut, true);
 	assert.equal(brResult.totalJumps, 1);
 	assert.equal(brResult.direct.totalJumps, 2);
 	assert.equal(brResult.thera.totalJumps, 1);
+
+	// Blockade Runner volume (<= 12,500) defaults to Direct stargates when enableThera is omitted
+	const brDefaultResult = await fetchEveRoute("Jita", "Amarr", {
+		fetch: mockFetch,
+		volume: 10000,
+	});
+	assert.equal(brDefaultResult.routeUsed, "direct");
+	assert.equal(brDefaultResult.hasTheraShortcut, true);
+	assert.equal(brDefaultResult.totalJumps, 2);
 
 	// Bulk volume (> 12,500) strictly uses Direct stargates
 	const bulkResult = await fetchEveRoute("Jita", "Amarr", { fetch: mockFetch, volume: 62500 });
@@ -1405,6 +1424,11 @@ test("selectRouteForVolume: respects enableThera option for Blockade Runner", ()
 	const theraDisabled = selectRouteForVolume(mockResult, 10000, { enableThera: false });
 	assert.equal(theraDisabled.routeUsed, "direct");
 	assert.equal(theraDisabled.selectedRoute.totalJumps, 24);
+
+	// Default (omitted options) -> strictly selects Direct stargate (off by default)
+	const theraOmitted = selectRouteForVolume(mockResult, 10000);
+	assert.equal(theraOmitted.routeUsed, "direct");
+	assert.equal(theraOmitted.selectedRoute.totalJumps, 24);
 
 	// Zero volume -> strictly selects Direct stargate
 	const zeroVol = selectRouteForVolume(mockResult, 0, { enableThera: true });

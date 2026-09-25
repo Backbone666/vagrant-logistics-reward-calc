@@ -84,7 +84,7 @@ export function selectRouteForVolume(routeResult, volume, options = {}) {
 		typeof volume === "number" ? volume : parseFloat(String(volume || 0).replace(/,/g, "")) || 0;
 	// Blockade Runner requires positive cargo volume up to 12,500 m³
 	const isBlockadeRunner = parsedVolume > 0 && parsedVolume <= BLOCKADE_RUNNER_MAX_VOLUME;
-	const enableThera = options.enableThera !== false;
+	const enableThera = Boolean(options.enableThera);
 
 	const useThera =
 		isBlockadeRunner && hasTheraShortcut && Boolean(routeResult.thera) && enableThera;
@@ -870,6 +870,7 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 		const routeSelection = selectRouteForVolume(
 			{ direct: directInfo, thera: theraInfo, hasTheraShortcut },
 			options.volume,
+			options,
 		);
 
 		const selectedRoute = routeSelection.selectedRoute || directInfo;
