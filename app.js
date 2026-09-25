@@ -965,29 +965,29 @@ if (safeRouteCheckbox) {
 	});
 }
 
-clearBtn.addEventListener("click", () => {
-	cancelPendingRouteLookup();
-	lastRouteResult = null;
-	isTheraToggleActive = false;
-	updateContractDurationRequirements(false);
-	updateTheraBadge(null);
-	updateRouteJumpsSummary(0, 0);
+function resetCalculatorFormState() {
 	if (originInput) originInput.value = "";
 	if (destinationInput) destinationInput.value = "";
-	setRouteStatus("", "");
+	if (collateralInput) collateralInput.value = "";
+	if (highsecJumpsInput) highsecJumpsInput.value = "";
+	if (dangerousJumpsInput) dangerousJumpsInput.value = "";
+	if (volumeInput) volumeInput.value = "";
+	if (forceJfCheckbox) forceJfCheckbox.checked = false;
 
-	collateralInput.value = "";
-	highsecJumpsInput.value = "";
-	dangerousJumpsInput.value = "";
-	volumeInput.value = "";
 	if (safeRouteCheckbox) {
 		safeRouteCheckbox.checked = false;
 		safeRouteCheckbox.disabled = false;
 		safeRouteCheckbox.parentElement?.classList.remove("locked");
 		safeRouteCheckbox.removeAttribute("title");
 	}
-	forceJfCheckbox.checked = false;
 	setManualJumpVisibility(false);
+}
+
+clearBtn.addEventListener("click", () => {
+	cancelPendingRouteLookup();
+	clearRouteResults("", "");
+	isTheraToggleActive = false;
+	resetCalculatorFormState();
 	updateAll();
 	if (syncUrlTimeout) {
 		clearTimeout(syncUrlTimeout);
