@@ -240,3 +240,16 @@ test("seo-aeo: visible FAQ questions match JSON-LD FAQPage question names", () =
 		);
 	}
 });
+
+test("theming: dead dangerous route css custom properties are pruned", () => {
+	assert.doesNotMatch(
+		styleCss,
+		/--warning-amber:/,
+		"Unreferenced token --warning-amber must be pruned from style.css",
+	);
+	assert.doesNotMatch(
+		styleCss,
+		/--warning-glow:/,
+		"Unreferenced token --warning-glow must be pruned from style.css",
+	);
+});

@@ -17,10 +17,6 @@
 	--card-bg: hsla(0, 10%, 5%, 0.75);
 	--glass-border: hsla(45, 70%, 55%, 0.3);
 
-	/* Warning / Dangerous route theme variables */
-	--warning-amber: hsl(28, 90%, 55%);
-	--warning-glow: hsla(28, 90%, 55%, 0.25);
-
 	/* UI Tokens */
 	--text-primary: #ede7d9;
 	--text-secondary: hsl(43, 40%, 85%); /* Increased brightness for WCAG AA contrast */
