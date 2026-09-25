@@ -739,6 +739,46 @@ async function handleEveRouteResponseError(response, runEsiFallback) {
 	return await runEsiFallback(new Error(`HTTP ${response.status}: ${JSON.stringify(errBody)}`));
 }
 
+function buildRoutePathInfo(systems) {
+	if (!Array.isArray(systems) || systems.length === 0) return null;
+	const classification = classifyJumps(systems);
+	return {
+		systems,
+		highSecJumps: classification.highSecJumps,
+		dangerousJumps: classification.dangerousJumps,
+		totalJumps: classification.highSecJumps + classification.dangerousJumps,
+	};
+}
+
+function assembleEveRouteResult(data, options = {}) {
+	const directInfo = buildRoutePathInfo(data?.routes?.direct);
+	const theraInfo = buildRoutePathInfo(data?.routes?.thera);
+	const hasTheraShortcut = Boolean(
+		theraInfo && directInfo && theraInfo.totalJumps < directInfo.totalJumps,
+	);
+
+	const routeSelection = selectRouteForVolume(
+		{ direct: directInfo, thera: theraInfo, hasTheraShortcut },
+		options.volume,
+		options,
+	);
+
+	const selectedRoute = routeSelection.selectedRoute || directInfo;
+
+	return {
+		summary: data.summary,
+		routes: data.routes,
+		direct: directInfo,
+		thera: theraInfo,
+		hasTheraShortcut,
+		routeUsed: routeSelection.routeUsed,
+		systems: selectedRoute.systems,
+		highSecJumps: selectedRoute.highSecJumps,
+		dangerousJumps: selectedRoute.dangerousJumps,
+		totalJumps: selectedRoute.totalJumps,
+	};
+}
+
 export async function fetchEveRoute(origin, destination, options = {}) {
 	if (
 		typeof origin !== "string" ||
@@ -844,53 +884,7 @@ export async function fetchEveRoute(origin, destination, options = {}) {
 			return await runEsiFallback(new Error("Malformed route payload from EVE TT"));
 		}
 
-		const directClass = classifyJumps(directSystems);
-		const directTotal = directClass.highSecJumps + directClass.dangerousJumps;
-		const directInfo = {
-			systems: directSystems,
-			highSecJumps: directClass.highSecJumps,
-			dangerousJumps: directClass.dangerousJumps,
-			totalJumps: directTotal,
-		};
-
-		const theraSystems = data?.routes?.thera;
-		let theraInfo = null;
-		let hasTheraShortcut = false;
-
-		if (Array.isArray(theraSystems) && theraSystems.length > 0) {
-			const theraClass = classifyJumps(theraSystems);
-			const theraTotal = theraClass.highSecJumps + theraClass.dangerousJumps;
-			theraInfo = {
-				systems: theraSystems,
-				highSecJumps: theraClass.highSecJumps,
-				dangerousJumps: theraClass.dangerousJumps,
-				totalJumps: theraTotal,
-			};
-			if (theraTotal < directTotal) {
-				hasTheraShortcut = true;
-			}
-		}
-
-		const routeSelection = selectRouteForVolume(
-			{ direct: directInfo, thera: theraInfo, hasTheraShortcut },
-			options.volume,
-			options,
-		);
-
-		const selectedRoute = routeSelection.selectedRoute || directInfo;
-
-		return {
-			summary: data.summary,
-			routes: data.routes,
-			direct: directInfo,
-			thera: theraInfo,
-			hasTheraShortcut,
-			routeUsed: routeSelection.routeUsed,
-			systems: selectedRoute.systems,
-			highSecJumps: selectedRoute.highSecJumps,
-			dangerousJumps: selectedRoute.dangerousJumps,
-			totalJumps: selectedRoute.totalJumps,
-		};
+		return assembleEveRouteResult(data, options);
 	} finally {
 		cleanup();
 	}
