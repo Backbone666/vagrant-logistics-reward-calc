@@ -216,8 +216,26 @@ test("seo-aeo: index.html defines valid JSON-LD schema with synchronized FAQPage
 	assert.ok(webAppEntity, "JSON-LD @graph must contain a WebApplication entity");
 	assert.equal(
 		webAppEntity.dateModified,
-		"2026-09-25",
+		"2026-09-27",
 		"dateModified must reflect current release date",
+	);
+
+	const serviceEntity = schema["@graph"].find((item) => item["@type"] === "Service");
+	assert.ok(serviceEntity, "JSON-LD @graph must contain a Service entity");
+	assert.ok(
+		serviceEntity.areaServed.includes("Catch (EVE Online Region)"),
+		"Service.areaServed must include Catch (EVE Online Region)",
+	);
+
+	const orgEntity = schema["@graph"].find((item) => item["@type"] === "Organization");
+	assert.ok(orgEntity, "JSON-LD @graph must contain an Organization entity");
+	assert.ok(
+		orgEntity.sameAs.some((uri) => uri.includes("evewho.com")),
+		"Organization.sameAs must include evewho.com citation",
+	);
+	assert.ok(
+		orgEntity.parentOrganization?.url,
+		"parentOrganization must include official alliance URL",
 	);
 
 	const pkg = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../package.json"), "utf-8"));

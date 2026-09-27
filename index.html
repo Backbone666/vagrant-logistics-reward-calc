@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
-    <title>EVE Online Courier Calculator — Vagrant Logistics | Domain &amp; Providence</title>
+    <title>EVE Online Courier Calculator — Vagrant Logistics | Domain, Providence &amp; Catch</title>
     <link
       rel="icon"
       type="image/png"
@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="style.css" />
     <meta
       name="description"
-      content="Instant courier reward calculator for EVE Online haulers. Accurate rates for Freighter, DST, Blockade Runner, and Jump Freighter across Domain and Amarr."
+      content="Instant courier reward calculator for EVE Online haulers. Accurate rates for Freighter, DST, Blockade Runner, and Jump Freighter across Domain, Providence, and Catch."
     />
     <meta
       property="og:title"
@@ -36,7 +36,7 @@
     />
     <meta
       property="og:description"
-      content="Instant reward quotes for courier contracts across Domain, Providence, and major trade hubs. Freighter, DST, Blockade Runner, and Jump Freighter pricing."
+      content="Instant reward quotes for courier contracts across Domain, Providence, Catch, and major trade hubs. Freighter, DST, Blockade Runner, and Jump Freighter pricing."
     />
     <meta
       property="og:image"
@@ -60,7 +60,7 @@
     />
     <meta
       name="twitter:description"
-      content="Instant reward quotes for courier contracts across Domain, Providence, and major trade hubs."
+      content="Instant reward quotes for courier contracts across Domain, Providence, Catch, and major trade hubs."
     />
     <meta
       name="twitter:image"
@@ -81,11 +81,17 @@
             "logo": "https://images.evetech.net/corporations/98403600/logo",
             "sameAs": [
               "https://evemaps.dotlan.net/corp/Vagrant_Logistics",
-              "https://zkillboard.com/corporation/98403600/"
+              "https://zkillboard.com/corporation/98403600/",
+              "https://evewho.com/corporation/98403600"
             ],
             "parentOrganization": {
               "@type": "Organization",
-              "name": "The Charter"
+              "name": "The Charter",
+              "url": "https://evemaps.dotlan.net/alliance/The_Charter",
+              "sameAs": [
+                "https://zkillboard.com/alliance/99011546/",
+                "https://evewho.com/alliance/99011546"
+              ]
             }
           },
           {
@@ -94,15 +100,15 @@
             "url": "https://vglgi.backb0ne.cloud",
             "applicationCategory": "UtilityApplication",
             "operatingSystem": "Web",
-            "softwareVersion": "1.8.2",
-            "dateModified": "2026-09-25",
+            "softwareVersion": "1.8.3",
+            "dateModified": "2026-09-27",
             "browserRequirements": "Requires JavaScript. Requires HTML5.",
             "offers": {
               "@type": "Offer",
               "price": "0",
               "priceCurrency": "USD"
             },
-            "description": "Calculate courier contract rewards for EVE Online hauling services across Domain, Providence, and major trade hubs."
+            "description": "Calculate courier contract rewards for EVE Online hauling services across Domain, Providence, Catch, and major trade hubs."
           },
           {
             "@type": "Service",
@@ -114,6 +120,7 @@
             "areaServed": [
               "Domain (EVE Online Region)",
               "Providence (EVE Online Region)",
+              "Catch (EVE Online Region)",
               "Amarr Trade Hub",
               "Jita Trade Hub",
               "Dodixie Trade Hub",
@@ -163,7 +170,7 @@
                 "name": "Which EVE Online regions does Vagrant Logistics serve?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Vagrant Logistics primarily serves the Domain (reference: https://evemaps.dotlan.net/map/Domain) and Providence (reference: https://evemaps.dotlan.net/map/Providence) regions, connecting the Amarr imperial trade hub with regional citadels, along with high-volume routes to Jita, Dodixie, Rens, and Hek."
+                  "text": "Vagrant Logistics primarily serves the Domain (reference: https://evemaps.dotlan.net/map/Domain), Providence (reference: https://evemaps.dotlan.net/map/Providence), and Catch (reference: https://evemaps.dotlan.net/map/Catch) regions, connecting the Amarr imperial trade hub with regional citadels, along with high-volume routes to Jita, Dodixie, Rens, and Hek."
                 }
               },
               {
@@ -210,10 +217,10 @@
           class="logo"
         />
         <h1>Vagrant Logistics</h1>
-        <h2>Courier Calculator — Domain &amp; Providence</h2>
+        <h2>Courier Calculator — Domain, Providence &amp; Catch</h2>
         <p class="sr-only">
           Vagrant Logistics is a professional EVE Online courier and freight
-          service operating across the Domain and Providence regions. We offer
+          service operating across the Domain, Providence, and Catch regions. We offer
           Blockade Runner, Deep Space Transport, Freighter, and Jump Freighter
           hauling with routes connecting Amarr, Jita, Dodixie, Rens, and Hek
           trade hubs. Use this calculator to get an instant reward quote for
@@ -513,7 +520,7 @@
           <details class="faq-item">
             <summary class="faq-question">Which EVE Online regions does Vagrant Logistics serve?</summary>
             <div class="faq-answer">
-              <p>We primarily operate across Domain and Providence, connecting the Amarr imperial trade hub with regional citadels, along with high-volume routes to Jita, Dodixie, Rens, and Hek (<a href="https://evemaps.dotlan.net/map/Domain" target="_blank" rel="noopener noreferrer">Dotlan Domain</a> / <a href="https://evemaps.dotlan.net/map/Providence" target="_blank" rel="noopener noreferrer">Providence</a>).</p>
+              <p>We primarily operate across Domain, Providence, and Catch, connecting the Amarr imperial trade hub with regional citadels, along with high-volume routes to Jita, Dodixie, Rens, and Hek (<a href="https://evemaps.dotlan.net/map/Domain" target="_blank" rel="noopener noreferrer">Dotlan Domain</a> / <a href="https://evemaps.dotlan.net/map/Providence" target="_blank" rel="noopener noreferrer">Providence</a> / <a href="https://evemaps.dotlan.net/map/Catch" target="_blank" rel="noopener noreferrer">Catch</a>).</p>
             </div>
           </details>
           <details class="faq-item">
@@ -572,6 +579,6 @@
       </footer>
     </div>
 
-    <script type="module" src="app.js?v=1.8.2"></script>
+    <script type="module" src="app.js?v=1.8.3"></script>
   </body>
 </html>
