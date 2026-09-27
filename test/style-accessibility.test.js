@@ -349,3 +349,21 @@ test("typography: headings declare balanced text-wrap and tightened tracking", (
 		".faq-question must declare text-wrap: pretty for readable multiline wrapping",
 	);
 });
+
+test("theming: input elements declare tinted placeholder and laser-etched focus glow", () => {
+	assert.match(
+		styleCss,
+		/input\[type="text"\]::placeholder\s*\{[^}]*color:\s*hsl\(43,\s*20%,\s*55%\)/s,
+		"input[type='text']::placeholder must declare warm tinted neutral color",
+	);
+	assert.match(
+		styleCss,
+		/input\[type="text"\]:focus\s*\{[^}]*outline-offset:\s*1px;/s,
+		"input[type='text']:focus must specify 1px outline offset for crisp contrast",
+	);
+	assert.match(
+		styleCss,
+		/\.input-group:focus-within label\s*\{[^}]*text-shadow:[^}]*var\(--primary-gold-glow\)/s,
+		".input-group:focus-within label must declare subtle glow text-shadow",
+	);
+});

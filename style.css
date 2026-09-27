@@ -624,7 +624,8 @@ label {
 
 .input-group:focus-within label {
 	color: var(--bright-gold);
-	transform: translateX(5px);
+	transform: translateX(4px);
+	text-shadow: 0 0 8px var(--primary-gold-glow);
 }
 
 input[type="text"] {
@@ -642,13 +643,18 @@ input[type="text"] {
 	-webkit-appearance: none;
 }
 
+input[type="text"]::placeholder {
+	color: hsl(43, 20%, 55%);
+	opacity: 0.8;
+}
+
 input[type="text"]:focus {
-	outline: 2px solid var(--primary-gold);
-	outline-offset: 2px;
+	outline: 2px solid var(--bright-gold);
+	outline-offset: 1px;
 	background: rgba(255, 255, 255, 0.05);
-	border-color: var(--primary-gold);
+	border-color: var(--bright-gold);
 	box-shadow:
-		0 0 20px var(--primary-gold-glow),
+		0 0 16px var(--primary-gold-glow),
 		inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
