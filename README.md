@@ -75,7 +75,7 @@ The application is built on a **zero-framework, zero-runtime-dependency** paradi
 - **`system-autocomplete.js`**: Zero-latency in-memory prefix and substring search across all New Eden solar systems with keyboard navigation (`ArrowUp`/`ArrowDown`/`Enter`/`Escape`).
 - **`config-storage.js`**: LocalStorage caching and cache invalidation wrapper for dynamic rate card configurations.
 - **`rate_card_config.json`**: Authoritative pricing configuration defining base rates, jump fees, collateral multipliers, and mandatory system avoidance lists.
-- **`data/systems.json`**: Compiled dictionary of 8,400+ New Eden solar systems for instant client-side autocomplete.
+- **`data/systems.json`**: Compiled dictionary of 2,125 serviced New Eden solar systems (High-Sec, Low-Sec, Providence, and Catch) for instant client-side autocomplete.
 - **`data/highsec-systems.json`**: Compact integer set (~1,240 systems, ~11 KB) of High-Sec solar system IDs (`security >= 0.45`) for hot-path jump security classification without async node queries.
 - **`scripts/build-systems-data.mjs`**: Utility script to fetch and compile system names from CCP ESI universe endpoints into `data/systems.json`.
 - **`scripts/build-highsec-data.mjs`**: Utility script to scan and compile High-Sec system IDs from CCP ESI into `data/highsec-systems.json`.

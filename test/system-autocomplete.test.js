@@ -1,5 +1,12 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
+import {
+	filterServicedSystems,
+	verifyServicedSystemsIntegrity,
+} from "../scripts/build-systems-data.mjs";
 import {
 	attachSystemAutocomplete,
 	buildCanonicalSystemMap,
@@ -423,4 +430,90 @@ test("isKnownSystem: handles whitespace, empty strings, and non-string inputs cl
 	assert.equal(isKnownSystem("   "), false);
 	assert.equal(isKnownSystem(null), false);
 	assert.equal(isKnownSystem(12345), false);
+});
+
+test("filterServicedSystems: accurately filters systems by security status and region membership", () => {
+	const provCatchSet = new Set([30003715, 30001201]); // KBP7-G, GE-8JV
+	const mockSystems = [
+		{ system_id: 30000142, name: "Jita", security_status: 0.94 }, // Highsec
+		{ system_id: 30002813, name: "Tama", security_status: 0.28 }, // Lowsec
+		{ system_id: 30003715, name: "KBP7-G", security_status: -0.2 }, // Providence (serviced nullsec)
+		{ system_id: 30001201, name: "GE-8JV", security_status: -0.1 }, // Catch (serviced nullsec)
+		{ system_id: 30004759, name: "1DQ1-A", security_status: -0.5 }, // Delve (unserviced nullsec)
+		{ system_id: 30100000, name: "Zarzakh", security_status: -1.0 }, // Yasna Zakh (unserviced)
+		null, // Graceful null handling
+		{ system_id: 99999999, name: "Corrupted" }, // Missing security status
+	];
+
+	const filtered = filterServicedSystems(mockSystems, provCatchSet);
+	const names = filtered.map((s) => s.name);
+
+	assert.deepEqual(names, ["Jita", "Tama", "KBP7-G", "GE-8JV"]);
+});
+
+test("verifyServicedSystemsIntegrity: validates anchor membership and size bounds", () => {
+	const validSample = [
+		"Jita",
+		"Amarr",
+		"Tama",
+		"Rancer",
+		"KBP7-G",
+		"GE-8JV",
+		...Array(2119).fill("DummySystem"),
+	];
+	assert.equal(verifyServicedSystemsIntegrity(validSample), true);
+
+	// Missing anchor throws
+	assert.throws(
+		() => verifyServicedSystemsIntegrity(["Amarr", "Tama", ...Array(2120).fill("Dummy")]),
+		/missing/,
+	);
+
+	// Forbidden unserviced system throws
+	assert.throws(
+		() =>
+			verifyServicedSystemsIntegrity([
+				"Jita",
+				"Amarr",
+				"Tama",
+				"Rancer",
+				"KBP7-G",
+				"GE-8JV",
+				"1DQ1-A",
+				...Array(2118).fill("Dummy"),
+			]),
+		/unserviced system/,
+	);
+});
+
+test("dataset: data/systems.json restricts nullsec systems strictly to Providence and Catch", () => {
+	const __filename = fileURLToPath(import.meta.url);
+	const __dirname = path.dirname(__filename);
+	const systemsPath = path.resolve(__dirname, "..", "data", "systems.json");
+	const systems = JSON.parse(fs.readFileSync(systemsPath, "utf8"));
+
+	assert.ok(Array.isArray(systems));
+	assert.ok(
+		systems.length >= 2100 && systems.length <= 2200,
+		`Expected ~2,125 systems, got ${systems.length}`,
+	);
+
+	// Highsec & Lowsec
+	assert.ok(systems.includes("Jita"), "Must include Jita");
+	assert.ok(systems.includes("Amarr"), "Must include Amarr");
+	assert.ok(systems.includes("Tama"), "Must include Tama");
+	assert.ok(systems.includes("Rancer"), "Must include Rancer");
+
+	// Serviced Nullsec (Providence & Catch)
+	assert.ok(systems.includes("KBP7-G"), "Must include Providence system KBP7-G");
+	assert.ok(systems.includes("F-YH5B"), "Must include Providence system F-YH5B");
+	assert.ok(systems.includes("GE-8JV"), "Must include Catch system GE-8JV");
+	assert.ok(systems.includes("V-3YG7"), "Must include Catch system V-3YG7");
+
+	// Unserviced Nullsec
+	assert.equal(systems.includes("1DQ1-A"), false, "Must exclude Delve system 1DQ1-A");
+	assert.equal(systems.includes("O-OPOX"), false, "Must exclude Fountain system O-OPOX");
+	assert.equal(systems.includes("R-ARKN"), false, "Must exclude Tribute system R-ARKN");
+	assert.equal(systems.includes("B-R5RB"), false, "Must exclude Immensea system B-R5RB");
+	assert.equal(systems.includes("Zarzakh"), false, "Must exclude Zarzakh");
 });
