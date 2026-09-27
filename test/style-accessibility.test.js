@@ -298,3 +298,26 @@ test("typography: legacy uncompressed otf font is not tracked or served", () => 
 	const otfPath = path.resolve(__dirname, "../evesansneue-regular.otf");
 	assert.equal(fs.existsSync(otfPath), false, "evesansneue-regular.otf must be deleted from repo");
 });
+
+test("theming: interactive buttons define tactile press scaling and card has inner highlight", () => {
+	assert.match(
+		styleCss,
+		/\.calculator-card\s*\{[^}]*box-shadow:[^}]*inset 0 1px 1px 0/s,
+		".calculator-card must declare inset specular highlight for glassmorphism refraction",
+	);
+	assert.match(
+		styleCss,
+		/\.btn-copy:active\s*\{[^}]*scale\(0\.98\)/s,
+		".btn-copy:active must include physical scale(0.98) press feedback",
+	);
+	assert.match(
+		styleCss,
+		/\.btn-clear:active\s*\{[^}]*scale\(0\.98\)/s,
+		".btn-clear:active must include physical scale(0.98) press feedback",
+	);
+	assert.match(
+		styleCss,
+		/\.btn-mini-copy:active\s*\{[^}]*scale\(0\.98\)/s,
+		".btn-mini-copy:active must include physical scale(0.98) press feedback",
+	);
+});
