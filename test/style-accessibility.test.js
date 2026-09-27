@@ -321,3 +321,31 @@ test("theming: interactive buttons define tactile press scaling and card has inn
 		".btn-mini-copy:active must include physical scale(0.98) press feedback",
 	);
 });
+
+test("typography: headings declare balanced text-wrap and tightened tracking", () => {
+	assert.match(
+		styleCss,
+		/h1\s*\{[^}]*letter-spacing:\s*0\.2em;/s,
+		"h1 must declare tightened optical letter-spacing of 0.2em",
+	);
+	assert.match(
+		styleCss,
+		/h1\s*\{[^}]*text-wrap:\s*balance;/s,
+		"h1 must declare text-wrap: balance to prevent orphaned titles",
+	);
+	assert.match(
+		styleCss,
+		/h2\s*\{[^}]*letter-spacing:\s*0\.18em;/s,
+		"h2 must declare optical letter-spacing of 0.18em",
+	);
+	assert.match(
+		styleCss,
+		/h2\s*\{[^}]*text-wrap:\s*balance;/s,
+		"h2 must declare text-wrap: balance",
+	);
+	assert.match(
+		styleCss,
+		/\.faq-question\s*\{[^}]*text-wrap:\s*pretty;/s,
+		".faq-question must declare text-wrap: pretty for readable multiline wrapping",
+	);
+});

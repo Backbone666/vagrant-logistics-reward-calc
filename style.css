@@ -202,8 +202,9 @@ h1 {
 	font-weight: 500;
 	color: white;
 	text-transform: uppercase;
-	letter-spacing: 0.3em;
-	margin-bottom: 0.2rem;
+	letter-spacing: 0.2em;
+	margin-bottom: 0.25rem;
+	text-wrap: balance;
 	filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.8));
 }
 
@@ -211,9 +212,10 @@ h2 {
 	font-family: var(--font-heading);
 	font-size: clamp(0.8125rem, 2.5vw, 0.95rem);
 	color: var(--primary-gold);
-	letter-spacing: 0.25em;
+	letter-spacing: 0.18em;
 	text-transform: uppercase;
 	font-weight: 400;
+	text-wrap: balance;
 }
 
 .calculator-card {
@@ -1157,6 +1159,7 @@ dd.req-value {
 	text-align: left;
 	border-bottom: 1px solid hsla(45, 70%, 55%, 0.15);
 	padding-bottom: 4px;
+	text-wrap: balance;
 }
 
 dl.breakdown-grid {
@@ -1268,6 +1271,7 @@ samp {
 	text-transform: uppercase;
 	margin-bottom: var(--space-sm);
 	text-align: center;
+	text-wrap: balance;
 }
 
 .faq-grid {
@@ -1302,6 +1306,7 @@ samp {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	text-wrap: pretty;
 }
 
 .faq-question::-webkit-details-marker {
