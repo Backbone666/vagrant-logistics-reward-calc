@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.8.4](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.8.3...v1.8.4) (2026-09-28)
+
+
+### Performance Improvements
+
+* **data:** restrict nullsec autocomplete systems to providence and catch ([ef9e8a0](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/ef9e8a087b6303d6f41d205a397a9277be0d7fc4))
+* **seo:** enrich knowledge graph entity schema and align catch region aeo metadata ([5a08657](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/5a086571bd073c8339b50aad65105e6a5af8a9bb))
+* **ui:** elevate button active press states and glass surface refraction ([dbcf522](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/dbcf5222819c85768f872a0501c677f9ed1fa04e))
+* **ui:** polish input focus ring aesthetics and placeholder contrast ([eb09924](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/eb0992495d319e44064ed81fa7df4189269ca6fc))
+* **ui:** refine headline optical spacing and text-wrap balance ([637e271](https://github.com/Backbone666/vagrant-logistics-reward-calc/commit/637e271334c62715625a1c9a683aca7ad4f8efb9))
+
 ## [1.8.3](https://github.com/Backbone666/vagrant-logistics-reward-calc/compare/v1.8.2...v1.8.3) (2026-09-25)
 
 
